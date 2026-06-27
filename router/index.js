@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HocVienView from "../views/HocVienView.vue";
+import HoSoHocVienView from "../views/HoSoHocVienView.vue";
 
 const routes = [
   {
@@ -9,6 +10,10 @@ const routes = [
   {
     path: "/hoc-vien",
     component: HocVienView,
+  },
+  {
+    path: "/ho-so-hoc-vien",
+    component: HoSoHocVienView,
   },
 ];
 
