@@ -13,8 +13,9 @@ import LichHocView from "../views/LichHocView.vue";
 import ThanhToanView from "../views/ThanhToanView.vue";
 import ThiSatHachView from "../views/ThiSatHachView.vue";
 import TraGPLXView from "../views/TraGPLXView.vue";
-
+import LoginView from "../views/LoginView.vue";
 const routes = [
+  { path: "/login", component: LoginView },
   { path: "/", component: DashboardView },
   { path: "/tai-khoan", component: TaiKhoanView },
   { path: "/hoc-vien", component: HocVienView },

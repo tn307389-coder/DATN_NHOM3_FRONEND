@@ -61,8 +61,10 @@
 .menu-item{
     display:block;
     color:white;
-    padding:15px 20px;
+    padding:12px 20px;
     text-decoration:none;
+    font-size:16px;
+    font-weight:500;
 }
 
 .menu-item:hover{
