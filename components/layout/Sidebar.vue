@@ -25,6 +25,24 @@
         </router-link>
       </li>
 
+      <li class="nav-item">
+        <router-link class="nav-link text-white" to="/phong-hoc">
+          Phòng học
+        </router-link>
+      </li>
+
+      <li class="nav-item">
+        <router-link class="nav-link text-white" to="/xe-tap-lai">
+          Xe tập lái
+        </router-link>
+      </li>
+
+      <li class="nav-item">
+        <router-link class="nav-link text-white" to="/thanh-toan">
+          Thanh toán
+        </router-link>
+      </li>
+
     </ul>
 
   </div>
