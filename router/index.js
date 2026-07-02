@@ -14,9 +14,11 @@ import ThanhToanView from "../views/ThanhToanView.vue";
 import ThiSatHachView from "../views/ThiSatHachView.vue";
 import TraGPLXView from "../views/TraGPLXView.vue";
 import LoginView from "../views/LoginView.vue";
+
 const routes = [
   { path: "/login", component: LoginView },
-  { path: "/", component: DashboardView },
+  { path: "/", redirect: "/dashboard" },
+  { path: "/dashboard", component: DashboardView },
   { path: "/tai-khoan", component: TaiKhoanView },
   { path: "/hoc-vien", component: HocVienView },
   { path: "/ho-so-hoc-vien", component: HoSoHocVienView },
@@ -34,6 +36,22 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const isLogin = localStorage.getItem("isLogin");
+
+  if (to.path === "/login") {
+    next();
+    return;
+  }
+
+  if (!isLogin) {
+    next("/login");
+    return;
+  }
+
+  next();
 });
 
 export default router;

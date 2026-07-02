@@ -42,6 +42,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import api from "../services/api";
 
 const router = useRouter();
 
@@ -49,18 +50,29 @@ const username = ref("");
 const password = ref("");
 const error = ref("");
 
-const handleLogin = () => {
+const handleLogin = async () => {
   if (!username.value || !password.value) {
     error.value = "Vui lòng nhập đầy đủ thông tin";
     return;
   }
 
-  // Tạm thời frontend test
-  if (username.value === "admin" && password.value === "123") {
-    localStorage.setItem("isLogin", "true");
-    router.push("/");
-  } else {
-    error.value = "Tên tài khoản hoặc mật khẩu không đúng";
+  try {
+    const res = await api.post("/login", {
+      tendangnhap: username.value,
+      matkhau: password.value,
+    });
+
+    if (res.data.success) {
+  localStorage.setItem("isLogin", "true");
+  localStorage.setItem("user", JSON.stringify(res.data.data));
+
+  router.push("/dashboard");
+} else {
+  error.value = res.data.message;
+}
+  } catch (err) {
+    error.value = "Không thể kết nối server";
+    console.error(err);
   }
 };
 </script>

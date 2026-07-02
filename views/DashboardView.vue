@@ -77,7 +77,7 @@
       <div class="col-md-8">
         <div class="card border-0 shadow-sm">
           <div class="card-body">
-            <h5 class="mb-3">📊 Biểu đồ học viên theo tháng</h5>
+            <h5 class="mb-3">📊 Biểu đồ học viên theo tháng</h5> 
 
             <div class="chart-box">
               <div class="chart-item">
