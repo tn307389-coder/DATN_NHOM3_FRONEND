@@ -2,6 +2,7 @@
   <div class="sidebar bg-dark text-white">
 
     <h4 class="text-center py-3">
+      DRiveHub
       DriveHub
     </h4>
 
@@ -61,6 +62,10 @@
 .menu-item{
     display:block;
     color:white;
+    padding:12px 20px;
+    text-decoration:none;
+    font-size:16px;
+    font-weight:500;
     padding:15px 20px;
     text-decoration:none;
 }

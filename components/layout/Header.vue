@@ -10,6 +10,36 @@
       </div>
 
       <div class="dropdown ms-auto">
+        <a
+          class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+          href="#"
+          data-bs-toggle="dropdown"
+        >
+          <img
+            src="/logo1.jpg"
+            class="rounded-circle me-2"
+            width="38"
+            height="38"
+            alt="Avatar"
+          />
+
+          <strong>{{ user?.hoten || "Admin" }}</strong>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <a class="dropdown-item" href="#">Hồ sơ</a>
+          </li>
+
+          <li><hr class="dropdown-divider" /></li>
+
+          <li>
+            <button class="dropdown-item text-danger" @click="logout">
+              Đăng xuất
+            </button>
+          </li>
+        </ul>
+      </div>
   <a
     class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
     href="#"
@@ -45,3 +75,18 @@
     </div>
   </nav>
 </template>
+
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const user = ref(JSON.parse(localStorage.getItem("user")));
+
+const logout = () => {
+  localStorage.removeItem("isLogin");
+  localStorage.removeItem("user");
+  router.push("/login");
+};
+</script>
