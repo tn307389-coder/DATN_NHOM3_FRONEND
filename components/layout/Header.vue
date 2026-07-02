@@ -40,6 +40,38 @@
           </li>
         </ul>
       </div>
+  <a
+    class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+    href="#"
+    data-bs-toggle="dropdown"
+  >
+    <img
+      src="/logo1.jpg"
+      class="rounded-circle me-2"
+      width="38"
+      height="38"
+      alt="Avatar"
+    />
+
+    <strong>Admin</strong>
+  </a>
+
+      <ul class="dropdown-menu dropdown-menu-end">
+       <li>
+          <a class="dropdown-item" href="#">
+            Hồ sơ
+          </a>
+        </li>
+
+    <li><hr class="dropdown-divider" /></li>
+
+    <li>
+      <a class="dropdown-item text-danger" href="#">
+        Đăng xuất
+      </a>
+    </li>
+  </ul>
+</div>
     </div>
   </nav>
 </template>

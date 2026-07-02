@@ -31,6 +31,20 @@ const routes = [
   { path: "/thanh-toan", component: ThanhToanView },
   { path: "/thi-sat-hach", component: ThiSatHachView },
   { path: "/tra-gplx", component: TraGPLXView },
+
+const routes = [
+  {
+    path: "/",
+    redirect: "/hoc-vien",
+  },
+  {
+    path: "/hoc-vien",
+    component: HocVienView,
+  },
+  {
+    path: "/ho-so-hoc-vien",
+    component: HoSoHocVienView,
+  },
 ];
 
 const router = createRouter({
@@ -54,4 +68,5 @@ router.beforeEach((to, from, next) => {
   next();
 });
 
+export default router;
 export default router;

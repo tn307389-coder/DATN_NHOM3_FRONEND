@@ -3,6 +3,7 @@
 
     <h4 class="text-center py-3">
       DRiveHub
+      DriveHub
     </h4>
 
     <router-link to="/" class="menu-item">
@@ -65,6 +66,8 @@
     text-decoration:none;
     font-size:16px;
     font-weight:500;
+    padding:15px 20px;
+    text-decoration:none;
 }
 
 .menu-item:hover{
