@@ -8,6 +8,7 @@ import GiaoVienView from "../views/GiaoVienView.vue";
 import ChuongTrinhHocView from "../views/ChuongTrinhHocView.vue";
 import PhongHocView from "../views/PhongHocView.vue";
 import XeTapLaiView from "../views/XeTapLaiView.vue";
+import ThanhToanView from "../views/ThanhToanView.vue";
 import PhanCongView from "../views/PhanCongView.vue";
 import LichHocView from "../views/LichHocView.vue";
 import ThanhToanView from "../views/ThanhToanView.vue";
@@ -42,6 +43,24 @@ const routes = [
     component: HocVienView,
   },
   {
+    path: "/giao-vien",
+    component: GiaoVienView,
+  },
+  {
+    path: "/chuong-trinh-hoc",
+    component: ChuongTrinhHocView,
+  },
+  {
+    path: "/phong-hoc",
+    component: PhongHocView,
+  },
+  {
+    path: "/xe-tap-lai",
+    component: XeTapLaiView,
+  },
+  {
+    path: "/thanh-toan",
+    component: ThanhToanView,
     path: "/ho-so-hoc-vien",
     component: HoSoHocVienView,
   },
