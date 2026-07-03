@@ -1,6 +1,4 @@
 <template>
-  <h2>Hồ sơ học viên</h2>
-</template>
   <div class="container-fluid">
     <h2 class="mb-4">Quản lý hồ sơ học viên</h2>
 

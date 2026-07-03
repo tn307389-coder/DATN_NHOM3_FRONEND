@@ -1,8 +1,6 @@
 <template>
   <div class="sidebar bg-dark text-white">
-
     <h4 class="text-center py-3">
-      DRiveHub
       DriveHub
     </h4>
 
@@ -14,6 +12,10 @@
       👨‍🎓 Học viên
     </router-link>
 
+    <router-link to="/ho-so-hoc-vien" class="menu-item">
+      📁 Hồ sơ học viên
+    </router-link>
+
     <router-link to="/giao-vien" class="menu-item">
       👨‍🏫 Giáo viên
     </router-link>
@@ -22,25 +24,6 @@
       📚 Chương trình học
     </router-link>
 
-      <li class="nav-item">
-        <router-link class="nav-link text-white" to="/phong-hoc">
-          Phòng học
-        </router-link>
-      </li>
-
-      <li class="nav-item">
-        <router-link class="nav-link text-white" to="/xe-tap-lai">
-          Xe tập lái
-        </router-link>
-      </li>
-
-      <li class="nav-item">
-        <router-link class="nav-link text-white" to="/thanh-toan">
-          Thanh toán
-        </router-link>
-      </li>
-
-    </ul>
     <router-link to="/phong-hoc" class="menu-item">
       🏫 Phòng học
     </router-link>
@@ -68,32 +51,29 @@
     <router-link to="/tra-gplx" class="menu-item">
       🪪 Trả GPLX
     </router-link>
-
   </div>
 </template>
 
 <style scoped>
-.sidebar{
-    width:260px;
-    min-height:100vh;
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
 }
 
-.menu-item{
-    display:block;
-    color:white;
-    padding:12px 20px;
-    text-decoration:none;
-    font-size:16px;
-    font-weight:500;
-    padding:15px 20px;
-    text-decoration:none;
+.menu-item {
+  display: block;
+  color: white;
+  padding: 15px 20px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
 }
 
-.menu-item:hover{
-    background:#0d6efd;
+.menu-item:hover {
+  background: #0d6efd;
 }
 
-.router-link-active{
-    background:#0d6efd;
+.router-link-active {
+  background: #0d6efd;
 }
 </style>

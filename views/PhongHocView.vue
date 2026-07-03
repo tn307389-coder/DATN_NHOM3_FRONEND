@@ -130,5 +130,3 @@
   font-weight: 600;
 }
 </style>
-  <h2>Phòng học</h2>
-</template>

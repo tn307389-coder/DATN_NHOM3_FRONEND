@@ -130,5 +130,3 @@
   font-weight: 600;
 }
 </style>
-  <h2>Xe tập lái</h2>
-</template>
