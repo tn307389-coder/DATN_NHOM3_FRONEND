@@ -11,7 +11,6 @@ import XeTapLaiView from "../views/XeTapLaiView.vue";
 import ThanhToanView from "../views/ThanhToanView.vue";
 import PhanCongView from "../views/PhanCongView.vue";
 import LichHocView from "../views/LichHocView.vue";
-import ThanhToanView from "../views/ThanhToanView.vue";
 import ThiSatHachView from "../views/ThiSatHachView.vue";
 import TraGPLXView from "../views/TraGPLXView.vue";
 import LoginView from "../views/LoginView.vue";
@@ -32,38 +31,6 @@ const routes = [
   { path: "/thanh-toan", component: ThanhToanView },
   { path: "/thi-sat-hach", component: ThiSatHachView },
   { path: "/tra-gplx", component: TraGPLXView },
-
-const routes = [
-  {
-    path: "/",
-    redirect: "/hoc-vien",
-  },
-  {
-    path: "/hoc-vien",
-    component: HocVienView,
-  },
-  {
-    path: "/giao-vien",
-    component: GiaoVienView,
-  },
-  {
-    path: "/chuong-trinh-hoc",
-    component: ChuongTrinhHocView,
-  },
-  {
-    path: "/phong-hoc",
-    component: PhongHocView,
-  },
-  {
-    path: "/xe-tap-lai",
-    component: XeTapLaiView,
-  },
-  {
-    path: "/thanh-toan",
-    component: ThanhToanView,
-    path: "/ho-so-hoc-vien",
-    component: HoSoHocVienView,
-  },
 ];
 
 const router = createRouter({
@@ -87,5 +54,4 @@ router.beforeEach((to, from, next) => {
   next();
 });
 
-export default router;
 export default router;
