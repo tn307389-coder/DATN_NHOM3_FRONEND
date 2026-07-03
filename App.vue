@@ -1,13 +1,15 @@
 <template>
-  <div class="d-flex">
+  <router-view v-if="$route.path === '/login'" />
+
+  <div v-else class="app-layout">
     <Sidebar />
 
-    <div class="flex-grow-1">
+    <div class="main-content">
       <Header />
 
-      <div class="container-fluid p-4">
+      <main class="content-area">
         <router-view />
-      </div>
+      </main>
 
       <Footer />
     </div>
@@ -19,3 +21,22 @@ import Header from "./components/layout/Header.vue";
 import Sidebar from "./components/layout/Sidebar.vue";
 import Footer from "./components/layout/Footer.vue";
 </script>
+
+<style scoped>
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-area {
+  flex: 1;
+  padding: 25px;
+  background: #f4f6f9;
+}
+</style>
