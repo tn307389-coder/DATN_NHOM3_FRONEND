@@ -1,266 +1,234 @@
 <template>
-  <div class="container-fluid">
-    <h2 class="mb-4">Quản lý hồ sơ học viên</h2>
+  <div>
+    <SimpleTablePage
+      title="Quản lý hồ sơ học viên"
+      subtitle="Danh sách hồ sơ đăng ký của học viên"
+      search-placeholder="Tìm kiếm hồ sơ học viên..."
+      endpoint="/ho-so-hoc-vien"
+      id-key="mahs"
+      :columns="columns"
+      :rows="rows"
+      @reload="loadData"
+      @add="openAdd"
+      @edit="openEdit"
+    />
 
-    <div class="card shadow">
-      <div class="card-body">
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <div class="modal fade" id="hoSoHocVienModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              {{ isEdit ? "Sửa hồ sơ học viên" : "Thêm hồ sơ học viên" }}
+            </h5>
+
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Học viên</label>
+              <select v-model="form.mahv" class="form-select">
+                <option value="">-- Chọn học viên --</option>
+                <option
+                  v-for="hv in hocVienList"
+                  :key="hv.mahv"
+                  :value="hv.mahv"
+                >
+                  {{ hv.hoten }} - {{ hv.cccd }}
+                </option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Ngày đăng ký</label>
               <input
-                type="text"
+                v-model="form.ngaydangky"
+                type="date"
                 class="form-control"
-                placeholder="Tìm kiếm (mã hồ sơ, mã HV, tình trạng...)"
-                v-model="searchQuery"
               />
             </div>
+
+            <div class="mb-3">
+              <label class="form-label">Tình trạng</label>
+              <select v-model="form.tinhtrang" class="form-select">
+                <option value="">-- Chọn tình trạng --</option>
+                <option value="Đang xử lý">Đang xử lý</option>
+                <option value="Đã duyệt">Đã duyệt</option>
+                <option value="Bổ sung hồ sơ">Bổ sung hồ sơ</option>
+                <option value="Từ chối">Từ chối</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Ghi chú</label>
+              <textarea
+                v-model="form.ghichu"
+                class="form-control"
+                rows="3"
+                placeholder="Nhập ghi chú"
+              ></textarea>
+            </div>
           </div>
-          <div class="col-md-8 text-end">
-            <button class="btn btn-primary" @click="openAddModal">
-              <i class="bi bi-plus-lg"></i> Thêm hồ sơ
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              Hủy
+            </button>
+
+            <button class="btn btn-primary" @click="saveData">
+              {{ isEdit ? "Cập nhật" : "Thêm mới" }}
             </button>
           </div>
         </div>
-
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover align-middle mb-0">
-            <thead class="table-dark">
-              <tr>
-                <th>Mã hồ sơ</th>
-                <th>Mã học viên</th>
-                <th>Ngày đăng ký</th>
-                <th>Tình trạng</th>
-                <th>Ghi chú</th>
-                <th style="width:120px">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="filteredList.length === 0">
-                <td colspan="6" class="text-center text-muted py-4">
-                  Không có dữ liệu
-                </td>
-              </tr>
-              <tr v-for="item in filteredList" :key="item.maHoSo">
-                <td>{{ item.maHoSo }}</td>
-                <td>{{ item.maHV }}</td>
-                <td>{{ item.ngayDangKy }}</td>
-                <td>
-                  <span
-                    class="badge"
-                    :class="statusBadgeClass(item.tinhTrang)"
-                  >
-                    {{ item.tinhTrang }}
-                  </span>
-                </td>
-                <td>{{ item.ghiChu }}</td>
-                <td>
-                  <button
-                    class="btn btn-sm btn-warning me-1"
-                    title="Sửa"
-                    @click="openEditModal(item)"
-                  >
-                    <i class="bi bi-pencil-square"></i>
-                  </button>
-                  <button
-                    class="btn btn-sm btn-danger"
-                    title="Xóa"
-                    @click="openDeleteModal(item)"
-                  >
-                    <i class="bi bi-trash3"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
-
-    <div v-if="showFormModal" class="modal d-block" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ isEditing ? 'Sửa hồ sơ' : 'Thêm hồ sơ' }}</h5>
-            <button type="button" class="btn-close" @click="closeFormModal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Mã hồ sơ</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model="form.maHoSo"
-                  :disabled="isEditing"
-                  required
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Mã học viên</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model="form.maHV"
-                  required
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Ngày đăng ký</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  v-model="form.ngayDangKy"
-                  required
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Tình trạng</label>
-                <select class="form-select" v-model="form.tinhTrang">
-                  <option value="">-- Chọn --</option>
-                  <option value="Đang xử lý">Đang xử lý</option>
-                  <option value="Đã duyệt">Đã duyệt</option>
-                  <option value="Từ chối">Từ chối</option>
-                  <option value="Hoàn thành">Hoàn thành</option>
-                </select>
-              </div>
-              <div class="col-12">
-                <label class="form-label">Ghi chú</label>
-                <textarea
-                  class="form-control"
-                  rows="3"
-                  v-model="form.ghiChu"
-                ></textarea>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="closeFormModal">Hủy</button>
-            <button type="button" class="btn btn-primary" @click="save">Lưu</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showFormModal" class="modal-backdrop fade show"></div>
-
-    <div v-if="showDeleteModal" class="modal d-block" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Xác nhận xóa</h5>
-            <button type="button" class="btn-close" @click="closeDeleteModal"></button>
-          </div>
-          <div class="modal-body">
-            <p>Bạn có chắc chắn muốn xóa hồ sơ <strong>{{ deleteTarget?.maHoSo }}</strong>?</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="closeDeleteModal">Hủy</button>
-            <button type="button" class="btn btn-danger" @click="confirmDelete">Xóa</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showDeleteModal" class="modal-backdrop fade show"></div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { onMounted, ref } from "vue";
+import { Modal } from "bootstrap";
+import SimpleTablePage from "../components/common/SimpleTablePage.vue";
+import {
+  getAll,
+  createData,
+  updateData,
+} from "../services/crudService";
 
-const searchQuery = ref("");
-const showFormModal = ref(false);
-const showDeleteModal = ref(false);
-const isEditing = ref(false);
-const deleteTarget = ref(null);
-const editingIndex = ref(-1);
+const columns = [
+  { key: "mahs", label: "Mã hồ sơ" },
+  { key: "hocvien", label: "Học viên" },
+  { key: "cccd", label: "CCCD" },
+  { key: "ngaydangky", label: "Ngày đăng ký" },
+  { key: "tinhtrang", label: "Tình trạng" },
+  { key: "ghichu", label: "Ghi chú" },
+];
+
+const rows = ref([]);
+const hocVienList = ref([]);
+
+const isEdit = ref(false);
 
 const form = ref({
-  maHoSo: "",
-  maHV: "",
-  ngayDangKy: "",
-  tinhTrang: "",
-  ghiChu: "",
+  mahs: null,
+  mahv: "",
+  ngaydangky: "",
+  tinhtrang: "",
+  ghichu: "",
 });
 
-const data = ref([
-  { maHoSo: "HS001", maHV: "HV001", ngayDangKy: "2026-01-10", tinhTrang: "Đang xử lý", ghiChu: "Chờ bổ sung CCCD" },
-  { maHoSo: "HS002", maHV: "HV002", ngayDangKy: "2026-02-15", tinhTrang: "Đã duyệt", ghiChu: "" },
-  { maHoSo: "HS003", maHV: "HV003", ngayDangKy: "2026-03-05", tinhTrang: "Hoàn thành", ghiChu: "Đã cấp GPLX" },
-]);
+const loadData = async () => {
+  try {
+    const res = await getAll("/ho-so-hoc-vien");
 
-const filteredList = computed(() => {
-  const q = searchQuery.value.toLowerCase().trim();
-  if (!q) return data.value;
-  return data.value.filter(
-    (item) =>
-      item.maHoSo.toLowerCase().includes(q) ||
-      item.maHV.toLowerCase().includes(q) ||
-      item.tinhTrang.toLowerCase().includes(q)
-  );
-});
-
-function statusBadgeClass(tinhTrang) {
-  switch (tinhTrang) {
-    case "Đang xử lý": return "bg-warning text-dark";
-    case "Đã duyệt": return "bg-success";
-    case "Từ chối": return "bg-danger";
-    case "Hoàn thành": return "bg-info text-dark";
-    default: return "bg-secondary";
+    rows.value = res.data.map((item) => ({
+      ...item,
+      hocvien: item.hocVien?.hoten || "",
+      cccd: item.hocVien?.cccd || "",
+      mahv: item.hocVien?.mahv || "",
+    }));
+  } catch (error) {
+    console.log(error);
+    alert("Không thể tải dữ liệu hồ sơ học viên");
   }
-}
+};
 
-function resetForm() {
+const loadHocVien = async () => {
+  try {
+    const res = await getAll("/hoc-vien");
+    hocVienList.value = res.data;
+  } catch (error) {
+    console.log(error);
+    alert("Không thể tải dữ liệu học viên");
+  }
+};
+
+const resetForm = () => {
   form.value = {
-    maHoSo: "",
-    maHV: "",
-    ngayDangKy: "",
-    tinhTrang: "",
-    ghiChu: "",
+    mahs: null,
+    mahv: "",
+    ngaydangky: "",
+    tinhtrang: "",
+    ghichu: "",
   };
-}
+};
 
-function openAddModal() {
-  isEditing.value = false;
-  editingIndex.value = -1;
+const openModal = () => {
+  const modalElement = document.getElementById("hoSoHocVienModal");
+  const modal = Modal.getOrCreateInstance(modalElement);
+  modal.show();
+};
+
+const closeModal = () => {
+  const modalElement = document.getElementById("hoSoHocVienModal");
+  const modal = Modal.getOrCreateInstance(modalElement);
+  modal.hide();
+};
+
+const openAdd = () => {
+  isEdit.value = false;
   resetForm();
-  showFormModal.value = true;
-}
+  openModal();
+};
 
-function openEditModal(item) {
-  isEditing.value = true;
-  editingIndex.value = data.value.findIndex((x) => x.maHoSo === item.maHoSo);
-  form.value = { ...item };
-  showFormModal.value = true;
-}
+const openEdit = (row) => {
+  isEdit.value = true;
 
-function closeFormModal() {
-  showFormModal.value = false;
-}
+  form.value = {
+    mahs: row.mahs,
+    mahv: row.mahv,
+    ngaydangky: row.ngaydangky,
+    tinhtrang: row.tinhtrang,
+    ghichu: row.ghichu,
+  };
 
-function save() {
-  if (isEditing.value) {
-    data.value[editingIndex.value] = { ...form.value };
-  } else {
-    data.value.push({ ...form.value });
+  openModal();
+};
+
+const saveData = async () => {
+  if (!form.value.mahv) {
+    alert("Vui lòng chọn học viên");
+    return;
   }
-  closeFormModal();
-}
 
-function openDeleteModal(item) {
-  deleteTarget.value = item;
-  showDeleteModal.value = true;
-}
+  if (!form.value.ngaydangky) {
+    alert("Vui lòng chọn ngày đăng ký");
+    return;
+  }
 
-function closeDeleteModal() {
-  deleteTarget.value = null;
-  showDeleteModal.value = false;
-}
+  try {
+    const data = {
+      mahs: form.value.mahs,
+      hocVien: {
+        mahv: Number(form.value.mahv),
+      },
+      ngaydangky: form.value.ngaydangky,
+      tinhtrang: form.value.tinhtrang,
+      ghichu: form.value.ghichu,
+    };
 
-function confirmDelete() {
-  const idx = data.value.findIndex((x) => x.maHoSo === deleteTarget.value.maHoSo);
-  if (idx !== -1) data.value.splice(idx, 1);
-  closeDeleteModal();
-}
+    if (isEdit.value) {
+      await updateData("/ho-so-hoc-vien", form.value.mahs, data);
+      alert("Cập nhật thành công");
+    } else {
+      await createData("/ho-so-hoc-vien", data);
+      alert("Thêm thành công");
+    }
+
+    closeModal();
+    await loadData();
+  } catch (error) {
+    console.log(error);
+    alert("Lưu thất bại");
+  }
+};
+
+onMounted(async () => {
+  await loadHocVien();
+  await loadData();
+});
 </script>

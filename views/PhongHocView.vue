@@ -1,99 +1,72 @@
 <template>
-  <div class="container-fluid">
-    <h2 class="mb-4">Phòng học</h2>
-    <p class="text-muted">Tổng quan trạng thái phòng học và lịch học.</p>
+  <div>
+    <SimpleTablePage
+      title="Quản lý phòng học"
+      subtitle="Danh sách phòng học của trung tâm"
+      search-placeholder="Tìm kiếm phòng học..."
+      endpoint="/phong-hoc"
+      id-key="maphong"
+      :columns="columns"
+      :rows="rows"
+      @reload="loadData"
+      @add="openAdd"
+      @edit="openEdit"
+    />
 
-    <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <div class="card bg-primary text-white shadow dashboard-card">
-          <div class="card-body">
-            <h5>🏫 Tổng phòng học</h5>
-            <h2>0</h2>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card bg-success text-white shadow dashboard-card">
-          <div class="card-body">
-            <h5>🟢 Phòng đang dùng</h5>
-            <h2>0</h2>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card bg-warning text-white shadow dashboard-card">
-          <div class="card-body">
-            <h5>🛠️ Phòng bảo trì</h5>
-            <h2>0</h2>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card bg-danger text-white shadow dashboard-card">
-          <div class="card-body">
-            <h5>📅 Lịch học</h5>
-            <h2>0</h2>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="modal fade" id="phongHocModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              {{ isEdit ? "Sửa phòng học" : "Thêm phòng học" }}
+            </h5>
 
-    <div class="row g-3 mb-4">
-      <div class="col-md-8">
-        <div class="card border-0 shadow-sm">
-          <div class="card-body">
-            <h5 class="mb-3">📊 Biểu đồ phòng theo tháng</h5>
-            <div class="chart-box">
-              <div class="chart-item">
-                <span>Tháng 1</span>
-                <div class="progress">
-                  <div class="progress-bar bg-primary" style="width: 35%">35%</div>
-                </div>
-              </div>
-              <div class="chart-item">
-                <span>Tháng 2</span>
-                <div class="progress">
-                  <div class="progress-bar bg-success" style="width: 50%">50%</div>
-                </div>
-              </div>
-              <div class="chart-item">
-                <span>Tháng 3</span>
-                <div class="progress">
-                  <div class="progress-bar bg-warning" style="width: 65%">65%</div>
-                </div>
-              </div>
-              <div class="chart-item">
-                <span>Tháng 4</span>
-                <div class="progress">
-                  <div class="progress-bar bg-danger" style="width: 40%">40%</div>
-                </div>
-              </div>
-              <div class="chart-item">
-                <span>Tháng 5</span>
-                <div class="progress">
-                  <div class="progress-bar bg-info" style="width: 75%">75%</div>
-                </div>
-              </div>
-              <div class="chart-item">
-                <span>Tháng 6</span>
-                <div class="progress">
-                  <div class="progress-bar bg-dark" style="width: 90%">90%</div>
-                </div>
-              </div>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Tên phòng</label>
+              <input
+                v-model="form.tenphong"
+                class="form-control"
+                placeholder="Ví dụ: Phòng 101"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Sức chứa</label>
+              <input
+                v-model="form.succhua"
+                type="number"
+                class="form-control"
+                placeholder="Nhập sức chứa"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Trạng thái</label>
+              <select v-model="form.trangthai" class="form-select">
+                <option value="">-- Chọn trạng thái --</option>
+                <option value="Đang sử dụng">Đang sử dụng</option>
+                <option value="Trống">Trống</option>
+                <option value="Bảo trì">Bảo trì</option>
+              </select>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm">
-          <div class="card-body">
-            <h5 class="mb-3">🔔 Thông báo</h5>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">0 phòng trống</li>
-              <li class="list-group-item">0 phòng cần sửa</li>
-              <li class="list-group-item">0 lịch học đổi</li>
-              <li class="list-group-item">0 giáo viên cần hỗ trợ</li>
-            </ul>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              Hủy
+            </button>
+
+            <button class="btn btn-primary" @click="saveData">
+              {{ isEdit ? "Cập nhật" : "Thêm mới" }}
+            </button>
           </div>
         </div>
       </div>
@@ -101,32 +74,106 @@
   </div>
 </template>
 
-<style scoped>
-.dashboard-card {
-  border-radius: 12px;
-  transition: 0.25s;
-}
-.dashboard-card:hover {
-  transform: translateY(-5px);
-}
-.card {
-  border-radius: 12px;
-}
-.chart-box {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.chart-item span {
-  font-weight: 600;
-  display: block;
-  margin-bottom: 6px;
-}
-.progress {
-  height: 24px;
-  border-radius: 10px;
-}
-.progress-bar {
-  font-weight: 600;
-}
-</style>
+<script setup>
+import { onMounted, ref } from "vue";
+import { Modal } from "bootstrap";
+import SimpleTablePage from "../components/common/SimpleTablePage.vue";
+import {
+  getAll,
+  createData,
+  updateData,
+} from "../services/crudService";
+
+const columns = [
+  { key: "maphong", label: "Mã phòng" },
+  { key: "tenphong", label: "Tên phòng" },
+  { key: "succhua", label: "Sức chứa" },
+  { key: "trangthai", label: "Trạng thái" },
+];
+
+const rows = ref([]);
+
+const isEdit = ref(false);
+
+const form = ref({
+  maphong: null,
+  tenphong: "",
+  succhua: "",
+  trangthai: "",
+});
+
+const loadData = async () => {
+  try {
+    const res = await getAll("/phong-hoc");
+    rows.value = res.data;
+  } catch (error) {
+    console.log(error);
+    alert("Không thể tải dữ liệu phòng học");
+  }
+};
+
+const resetForm = () => {
+  form.value = {
+    maphong: null,
+    tenphong: "",
+    succhua: "",
+    trangthai: "",
+  };
+};
+
+const openModal = () => {
+  const modalElement = document.getElementById("phongHocModal");
+  const modal = Modal.getOrCreateInstance(modalElement);
+  modal.show();
+};
+
+const closeModal = () => {
+  const modalElement = document.getElementById("phongHocModal");
+  const modal = Modal.getOrCreateInstance(modalElement);
+  modal.hide();
+};
+
+const openAdd = () => {
+  isEdit.value = false;
+  resetForm();
+  openModal();
+};
+
+const openEdit = (row) => {
+  isEdit.value = true;
+  form.value = { ...row };
+  openModal();
+};
+
+const saveData = async () => {
+  if (!form.value.tenphong) {
+    alert("Vui lòng nhập tên phòng");
+    return;
+  }
+
+  try {
+    const data = {
+      ...form.value,
+      succhua: form.value.succhua ? Number(form.value.succhua) : null,
+    };
+
+    if (isEdit.value) {
+      await updateData("/phong-hoc", form.value.maphong, data);
+      alert("Cập nhật thành công");
+    } else {
+      await createData("/phong-hoc", data);
+      alert("Thêm thành công");
+    }
+
+    closeModal();
+    await loadData();
+  } catch (error) {
+    console.log(error);
+    alert("Lưu thất bại");
+  }
+};
+
+onMounted(() => {
+  loadData();
+});
+</script>

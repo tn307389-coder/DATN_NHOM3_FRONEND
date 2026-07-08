@@ -1,33 +1,47 @@
 <template>
-  <SimpleTablePage
-    title="Nhật ký hệ thống"
-    subtitle="Theo dõi lịch sử thao tác trong hệ thống"
-    search-placeholder="Tìm kiếm hành động..."
-    :columns="columns"
-    :rows="rows"
-  />
+  <div>
+    <SimpleTablePage
+      title="Nhật ký hệ thống"
+      subtitle="Lịch sử thao tác của người dùng"
+      search-placeholder="Tìm kiếm..."
+      endpoint="/nhat-ky-he-thong"
+      id-key="mank"
+      :columns="columns"
+      :rows="rows"
+      @reload="loadData"
+    />
+  </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
+import { getAll } from "../services/crudService";
 
 const columns = [
-  { key: "mank", label: "Mã nhật ký" },
+  { key: "mank", label: "Mã" },
   { key: "taikhoan", label: "Tài khoản" },
   { key: "hanhdong", label: "Hành động" },
-  { key: "bangtacdong", label: "Bảng tác động" },
   { key: "thoigian", label: "Thời gian" },
-  { key: "ghichu", label: "Ghi chú" },
+  { key: "ip", label: "IP" },
 ];
 
-const rows = [
-  {
-    mank: 1,
-    taikhoan: "admin",
-    hanhdong: "Đăng nhập hệ thống",
-    bangtacdong: "taikhoan",
-    thoigian: "2026-07-06 16:30",
-    ghichu: "Admin đăng nhập",
-  },
-];
+const rows = ref([]);
+const loadData = async () => {
+  try {
+    const res = await getAll("/nhat-ky-he-thong");
+
+    rows.value = res.data.map((item) => ({
+      mank: item.mank,
+      taikhoan: item.taiKhoan?.tendangnhap || "",
+      hanhdong: item.hanhdong,
+      thoigian: item.thoigian,
+      ip: item.ip,
+    }));
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+onMounted(loadData);
 </script>
