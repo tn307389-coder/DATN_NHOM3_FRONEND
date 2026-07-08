@@ -1,11 +1,11 @@
 <template>
   <div>
     <SimpleTablePage
-      title="Quản lý xe tập lái"
-      subtitle="Danh sách xe được dùng để tập lái"
-      search-placeholder="Tìm kiếm xe tập lái..."
-      endpoint="/xe-tap-lai"
-      id-key="maxetl"
+      title="Quản lý xe"
+      subtitle="Danh sách xe của trung tâm"
+      search-placeholder="Tìm kiếm xe..."
+      endpoint="/xe"
+      id-key="maxe"
       :columns="columns"
       :rows="rows"
       @reload="loadData"
@@ -13,12 +13,12 @@
       @edit="openEdit"
     />
 
-    <div class="modal fade" id="xeTapLaiModal" tabindex="-1">
+    <div class="modal fade" id="xeModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ isEdit ? "Sửa xe tập lái" : "Thêm xe tập lái" }}
+              {{ isEdit ? "Sửa xe" : "Thêm xe" }}
             </h5>
 
             <button
@@ -30,31 +30,40 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Xe</label>
-              <select v-model="form.maxe" class="form-select">
-                <option value="">-- Chọn xe --</option>
-                <option
-                  v-for="xe in xeList"
-                  :key="xe.maxe"
-                  :value="xe.maxe"
-                >
-                  {{ xe.bienso }} - {{ xe.loaixe }} - {{ xe.hangxe }}
-                </option>
-              </select>
+              <label class="form-label">Biển số</label>
+              <input
+                v-model="form.bienso"
+                class="form-control"
+                placeholder="Ví dụ: 51A-12345"
+              />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Hạng bằng</label>
-              <select v-model="form.hangbang" class="form-select">
-                <option value="">-- Chọn hạng bằng --</option>
-                <option value="A1">A1</option>
-                <option value="A2">A2</option>
-                <option value="B1">B1</option>
-                <option value="B2">B2</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-                <option value="E">E</option>
-              </select>
+              <label class="form-label">Loại xe</label>
+              <input
+                v-model="form.loaixe"
+                class="form-control"
+                placeholder="Ví dụ: Xe số sàn, xe tải"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Hãng xe</label>
+              <input
+                v-model="form.hangxe"
+                class="form-control"
+                placeholder="Ví dụ: Toyota Vios"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Năm sản xuất</label>
+              <input
+                v-model="form.namsanxuat"
+                type="number"
+                class="form-control"
+                placeholder="Ví dụ: 2020"
+              />
             </div>
 
             <div class="mb-3">
@@ -94,47 +103,31 @@ import {
 } from "../services/crudService";
 
 const columns = [
-  { key: "maxetl", label: "Mã xe tập lái" },
+  { key: "maxe", label: "Mã xe" },
   { key: "bienso", label: "Biển số" },
   { key: "loaixe", label: "Loại xe" },
   { key: "hangxe", label: "Hãng xe" },
-  { key: "hangbang", label: "Hạng bằng" },
+  { key: "namsanxuat", label: "Năm sản xuất" },
   { key: "trangthai", label: "Trạng thái" },
 ];
 
 const rows = ref([]);
-const xeList = ref([]);
 
 const isEdit = ref(false);
 
 const form = ref({
-  maxetl: null,
-  maxe: "",
-  hangbang: "",
+  maxe: null,
+  bienso: "",
+  loaixe: "",
+  hangxe: "",
+  namsanxuat: "",
   trangthai: "",
 });
 
 const loadData = async () => {
   try {
-    const res = await getAll("/xe-tap-lai");
-
-    rows.value = res.data.map((item) => ({
-      ...item,
-      bienso: item.xe?.bienso || "",
-      loaixe: item.xe?.loaixe || "",
-      hangxe: item.xe?.hangxe || "",
-      maxe: item.xe?.maxe || "",
-    }));
-  } catch (error) {
-    console.log(error);
-    alert("Không thể tải dữ liệu xe tập lái");
-  }
-};
-
-const loadXe = async () => {
-  try {
     const res = await getAll("/xe");
-    xeList.value = res.data;
+    rows.value = res.data;
   } catch (error) {
     console.log(error);
     alert("Không thể tải dữ liệu xe");
@@ -143,21 +136,23 @@ const loadXe = async () => {
 
 const resetForm = () => {
   form.value = {
-    maxetl: null,
-    maxe: "",
-    hangbang: "",
+    maxe: null,
+    bienso: "",
+    loaixe: "",
+    hangxe: "",
+    namsanxuat: "",
     trangthai: "",
   };
 };
 
 const openModal = () => {
-  const modalElement = document.getElementById("xeTapLaiModal");
+  const modalElement = document.getElementById("xeModal");
   const modal = Modal.getOrCreateInstance(modalElement);
   modal.show();
 };
 
 const closeModal = () => {
-  const modalElement = document.getElementById("xeTapLaiModal");
+  const modalElement = document.getElementById("xeModal");
   const modal = Modal.getOrCreateInstance(modalElement);
   modal.hide();
 };
@@ -170,43 +165,29 @@ const openAdd = () => {
 
 const openEdit = (row) => {
   isEdit.value = true;
-
-  form.value = {
-    maxetl: row.maxetl,
-    maxe: row.maxe,
-    hangbang: row.hangbang,
-    trangthai: row.trangthai,
-  };
-
+  form.value = { ...row };
   openModal();
 };
 
 const saveData = async () => {
-  if (!form.value.maxe) {
-    alert("Vui lòng chọn xe");
-    return;
-  }
-
-  if (!form.value.hangbang) {
-    alert("Vui lòng chọn hạng bằng");
+  if (!form.value.bienso) {
+    alert("Vui lòng nhập biển số xe");
     return;
   }
 
   try {
     const data = {
-      maxetl: form.value.maxetl,
-      xe: {
-        maxe: Number(form.value.maxe),
-      },
-      hangbang: form.value.hangbang,
-      trangthai: form.value.trangthai,
+      ...form.value,
+      namsanxuat: form.value.namsanxuat
+        ? Number(form.value.namsanxuat)
+        : null,
     };
 
     if (isEdit.value) {
-      await updateData("/xe-tap-lai", form.value.maxetl, data);
+      await updateData("/xe", form.value.maxe, data);
       alert("Cập nhật thành công");
     } else {
-      await createData("/xe-tap-lai", data);
+      await createData("/xe", data);
       alert("Thêm thành công");
     }
 
@@ -218,8 +199,7 @@ const saveData = async () => {
   }
 };
 
-onMounted(async () => {
-  await loadXe();
-  await loadData();
+onMounted(() => {
+  loadData();
 });
 </script>

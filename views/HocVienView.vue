@@ -1,302 +1,240 @@
 <template>
-  <div class="container-fluid">
-    <h2 class="mb-4">Quản lý học viên</h2>
+  <div>
+    <SimpleTablePage
+      title="Quản lý học viên"
+      subtitle="Danh sách học viên của trung tâm"
+      search-placeholder="Tìm kiếm học viên..."
+      endpoint="/hoc-vien"
+      id-key="mahv"
+      :columns="columns"
+      :rows="rows"
+      @reload="loadData"
+      @add="openAdd"
+      @edit="openEdit"
+    />
 
-    <div class="card shadow">
-      <div class="card-body">
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-search"></i></span>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Tìm kiếm (mã HV, họ tên, CCCD, SĐT...)"
-                v-model="searchQuery"
-              />
-            </div>
-          </div>
-          <div class="col-md-8 text-end">
-            <button class="btn btn-primary" @click="openAddModal">
-              <i class="bi bi-plus-lg"></i> Thêm học viên
-            </button>
-          </div>
-        </div>
-
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover align-middle mb-0">
-            <thead class="table-dark">
-              <tr>
-                <th>Mã HV</th>
-                <th>Họ tên</th>
-                <th>Ngày sinh</th>
-                <th>Giới tính</th>
-                <th>CCCD</th>
-                <th>SĐT</th>
-                <th>Địa chỉ</th>
-                <th>Ngày đăng ký</th>
-                <th>Mã CT Học</th>
-                <th style="width:120px">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="filteredList.length === 0">
-                <td colspan="10" class="text-center text-muted py-4">
-                  Không có dữ liệu
-                </td>
-              </tr>
-              <tr v-for="item in filteredList" :key="item.maHV">
-                <td>{{ item.maHV }}</td>
-                <td>{{ item.hoTen }}</td>
-                <td>{{ item.ngaySinh }}</td>
-                <td>{{ item.gioiTinh }}</td>
-                <td>{{ item.cccd }}</td>
-                <td>{{ item.sdt }}</td>
-                <td>{{ item.diaChi }}</td>
-                <td>{{ item.ngayDangKy }}</td>
-                <td>{{ item.maCTHoc }}</td>
-                <td>
-                  <button
-                    class="btn btn-sm btn-warning me-1"
-                    title="Sửa"
-                    @click="openEditModal(item)"
-                  >
-                    <i class="bi bi-pencil-square"></i>
-                  </button>
-                  <button
-                    class="btn btn-sm btn-danger"
-                    title="Xóa"
-                    @click="openDeleteModal(item)"
-                  >
-                    <i class="bi bi-trash3"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showFormModal" class="modal d-block" tabindex="-1">
+    <div class="modal fade" id="hocVienModal" tabindex="-1">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ isEditing ? 'Sửa học viên' : 'Thêm học viên' }}</h5>
-            <button type="button" class="btn-close" @click="closeFormModal"></button>
+            <h5 class="modal-title">
+              {{ isEdit ? "Sửa học viên" : "Thêm học viên" }}
+            </h5>
+
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
           </div>
+
           <div class="modal-body">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label">Mã học viên</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model="form.maHV"
-                  :disabled="isEditing"
-                  required
-                />
-              </div>
-              <div class="col-md-8">
+            <div class="row">
+              <div class="col-md-6 mb-3">
                 <label class="form-label">Họ tên</label>
                 <input
-                  type="text"
+                  v-model="form.hoten"
                   class="form-control"
-                  v-model="form.hoTen"
-                  required
+                  placeholder="Nhập họ tên học viên"
                 />
               </div>
-              <div class="col-md-4">
+
+              <div class="col-md-6 mb-3">
                 <label class="form-label">Ngày sinh</label>
                 <input
+                  v-model="form.ngaysinh"
                   type="date"
                   class="form-control"
-                  v-model="form.ngaySinh"
-                  required
                 />
               </div>
-              <div class="col-md-4">
+
+              <div class="col-md-6 mb-3">
                 <label class="form-label">Giới tính</label>
-                <select class="form-select" v-model="form.gioiTinh">
-                  <option value="">-- Chọn --</option>
+                <select v-model="form.gioitinh" class="form-select">
+                  <option value="">-- Chọn giới tính --</option>
                   <option value="Nam">Nam</option>
                   <option value="Nữ">Nữ</option>
-                  <option value="Khác">Khác</option>
                 </select>
               </div>
-              <div class="col-md-4">
+
+              <div class="col-md-6 mb-3">
                 <label class="form-label">CCCD</label>
                 <input
-                  type="text"
-                  class="form-control"
                   v-model="form.cccd"
-                  required
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">SĐT</label>
-                <input
-                  type="text"
                   class="form-control"
-                  v-model="form.sdt"
-                  required
+                  placeholder="Nhập số CCCD"
                 />
               </div>
-              <div class="col-md-8">
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <input
+                  v-model="form.sodienthoai"
+                  class="form-control"
+                  placeholder="Nhập số điện thoại"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Email</label>
+                <input
+                  v-model="form.email"
+                  type="email"
+                  class="form-control"
+                  placeholder="Nhập email"
+                />
+              </div>
+
+              <div class="col-md-12 mb-3">
                 <label class="form-label">Địa chỉ</label>
-                <input
-                  type="text"
+                <textarea
+                  v-model="form.diachi"
                   class="form-control"
-                  v-model="form.diaChi"
-                  required
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Ngày đăng ký</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  v-model="form.ngayDangKy"
-                  required
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Mã chương trình học</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model="form.maCTHoc"
-                  required
-                />
+                  rows="3"
+                  placeholder="Nhập địa chỉ"
+                ></textarea>
               </div>
             </div>
           </div>
+
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="closeFormModal">Hủy</button>
-            <button type="button" class="btn btn-primary" @click="save">Lưu</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              Hủy
+            </button>
+
+            <button class="btn btn-primary" @click="saveData">
+              {{ isEdit ? "Cập nhật" : "Thêm mới" }}
+            </button>
           </div>
         </div>
       </div>
     </div>
-
-    <div v-if="showFormModal" class="modal-backdrop fade show"></div>
-
-    <div v-if="showDeleteModal" class="modal d-block" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Xác nhận xóa</h5>
-            <button type="button" class="btn-close" @click="closeDeleteModal"></button>
-          </div>
-          <div class="modal-body">
-            <p>Bạn có chắc chắn muốn xóa học viên <strong>{{ deleteTarget?.hoTen }}</strong> ({{ deleteTarget?.maHV }})?</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="closeDeleteModal">Hủy</button>
-            <button type="button" class="btn btn-danger" @click="confirmDelete">Xóa</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showDeleteModal" class="modal-backdrop fade show"></div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { onMounted, ref } from "vue";
+import { Modal } from "bootstrap";
+import SimpleTablePage from "../components/common/SimpleTablePage.vue";
+import {
+  getAll,
+  createData,
+  updateData,
+} from "../services/crudService";
 
-const searchQuery = ref("");
-const showFormModal = ref(false);
-const showDeleteModal = ref(false);
-const isEditing = ref(false);
-const deleteTarget = ref(null);
-const editingIndex = ref(-1);
+const columns = [
+  { key: "mahv", label: "Mã HV" },
+  { key: "hoten", label: "Họ tên" },
+  { key: "ngaysinh", label: "Ngày sinh" },
+  { key: "gioitinh", label: "Giới tính" },
+  { key: "cccd", label: "CCCD" },
+  { key: "sodienthoai", label: "Số điện thoại" },
+  { key: "email", label: "Email" },
+  { key: "diachi", label: "Địa chỉ" },
+];
+
+const rows = ref([]);
+
+const isEdit = ref(false);
 
 const form = ref({
-  maHV: "",
-  hoTen: "",
-  ngaySinh: "",
-  gioiTinh: "",
+  mahv: null,
+  hoten: "",
+  ngaysinh: "",
+  gioitinh: "",
   cccd: "",
-  sdt: "",
-  diaChi: "",
-  ngayDangKy: "",
-  maCTHoc: "",
+  sodienthoai: "",
+  email: "",
+  diachi: "",
 });
 
-const data = ref([
-  { maHV: "HV001", hoTen: "Nguyễn Văn An", ngaySinh: "2000-01-15", gioiTinh: "Nam", cccd: "123456789", sdt: "0912345678", diaChi: "Hà Nội", ngayDangKy: "2026-01-10", maCTHoc: "CT001" },
-  { maHV: "HV002", hoTen: "Trần Thị Bình", ngaySinh: "1999-05-20", gioiTinh: "Nữ", cccd: "987654321", sdt: "0987654321", diaChi: "TP. Hồ Chí Minh", ngayDangKy: "2026-02-15", maCTHoc: "CT002" },
-  { maHV: "HV003", hoTen: "Lê Văn Cường", ngaySinh: "2001-08-10", gioiTinh: "Nam", cccd: "456789123", sdt: "0909090909", diaChi: "Đà Nẵng", ngayDangKy: "2026-03-05", maCTHoc: "CT001" },
-]);
-
-const filteredList = computed(() => {
-  const q = searchQuery.value.toLowerCase().trim();
-  if (!q) return data.value;
-  return data.value.filter(
-    (item) =>
-      item.maHV.toLowerCase().includes(q) ||
-      item.hoTen.toLowerCase().includes(q) ||
-      item.cccd.includes(q) ||
-      item.sdt.includes(q)
-  );
-});
-
-function resetForm() {
-  form.value = {
-    maHV: "",
-    hoTen: "",
-    ngaySinh: "",
-    gioiTinh: "",
-    cccd: "",
-    sdt: "",
-    diaChi: "",
-    ngayDangKy: "",
-    maCTHoc: "",
-  };
-}
-
-function openAddModal() {
-  isEditing.value = false;
-  editingIndex.value = -1;
-  resetForm();
-  showFormModal.value = true;
-}
-
-function openEditModal(item) {
-  isEditing.value = true;
-  editingIndex.value = data.value.findIndex((x) => x.maHV === item.maHV);
-  form.value = { ...item };
-  showFormModal.value = true;
-}
-
-function closeFormModal() {
-  showFormModal.value = false;
-}
-
-function save() {
-  if (isEditing.value) {
-    data.value[editingIndex.value] = { ...form.value };
-  } else {
-    data.value.push({ ...form.value });
+const loadData = async () => {
+  try {
+    const res = await getAll("/hoc-vien");
+    rows.value = res.data;
+  } catch (error) {
+    console.log(error);
+    alert("Không thể tải dữ liệu học viên");
   }
-  closeFormModal();
-}
+};
 
-function openDeleteModal(item) {
-  deleteTarget.value = item;
-  showDeleteModal.value = true;
-}
+const resetForm = () => {
+  form.value = {
+    mahv: null,
+    hoten: "",
+    ngaysinh: "",
+    gioitinh: "",
+    cccd: "",
+    sodienthoai: "",
+    email: "",
+    diachi: "",
+  };
+};
 
-function closeDeleteModal() {
-  deleteTarget.value = null;
-  showDeleteModal.value = false;
-}
+const openModal = () => {
+  const modalElement = document.getElementById("hocVienModal");
+  const modal = Modal.getOrCreateInstance(modalElement);
+  modal.show();
+};
 
-function confirmDelete() {
-  const idx = data.value.findIndex((x) => x.maHV === deleteTarget.value.maHV);
-  if (idx !== -1) data.value.splice(idx, 1);
-  closeDeleteModal();
-}
+const closeModal = () => {
+  const modalElement = document.getElementById("hocVienModal");
+  const modal = Modal.getOrCreateInstance(modalElement);
+  modal.hide();
+};
+
+const openAdd = () => {
+  isEdit.value = false;
+  resetForm();
+  openModal();
+};
+
+const openEdit = (row) => {
+  isEdit.value = true;
+  form.value = { ...row };
+  openModal();
+};
+
+const saveData = async () => {
+  if (!form.value.hoten) {
+    alert("Vui lòng nhập họ tên học viên");
+    return;
+  }
+
+  if (!form.value.cccd) {
+    alert("Vui lòng nhập CCCD");
+    return;
+  }
+
+  try {
+    const data = {
+      mahv: form.value.mahv,
+      hoten: form.value.hoten,
+      ngaysinh: form.value.ngaysinh,
+      gioitinh: form.value.gioitinh,
+      cccd: form.value.cccd,
+      sodienthoai: form.value.sodienthoai,
+      email: form.value.email,
+      diachi: form.value.diachi,
+    };
+
+    if (isEdit.value) {
+      await updateData("/hoc-vien", form.value.mahv, data);
+      alert("Cập nhật thành công");
+    } else {
+      await createData("/hoc-vien", data);
+      alert("Thêm thành công");
+    }
+
+    closeModal();
+    await loadData();
+  } catch (error) {
+    console.log(error);
+    alert("Lưu thất bại");
+  }
+};
+
+onMounted(() => {
+  loadData();
+});
 </script>

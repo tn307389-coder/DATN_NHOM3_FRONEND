@@ -1,11 +1,11 @@
 <template>
   <div>
     <SimpleTablePage
-      title="Quản lý phòng học"
-      subtitle="Danh sách phòng học của trung tâm"
-      search-placeholder="Tìm kiếm phòng học..."
-      endpoint="/phong-hoc"
-      id-key="maphong"
+      title="Quản lý ca học"
+      subtitle="Danh sách ca học trong ngày"
+      search-placeholder="Tìm kiếm ca học..."
+      endpoint="/ca-hoc"
+      id-key="macahoc"
       :columns="columns"
       :rows="rows"
       @reload="loadData"
@@ -13,12 +13,12 @@
       @edit="openEdit"
     />
 
-    <div class="modal fade" id="phongHocModal" tabindex="-1">
+    <div class="modal fade" id="caHocModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ isEdit ? "Sửa phòng học" : "Thêm phòng học" }}
+              {{ isEdit ? "Sửa ca học" : "Thêm ca học" }}
             </h5>
 
             <button
@@ -30,32 +30,30 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Tên phòng</label>
+              <label class="form-label">Tên ca học</label>
               <input
-                v-model="form.tenphong"
+                v-model="form.tencahoc"
                 class="form-control"
-                placeholder="Ví dụ: Phòng 101"
+                placeholder="Ví dụ: Ca sáng, Ca chiều"
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Sức chứa</label>
+              <label class="form-label">Giờ bắt đầu</label>
               <input
-                v-model="form.succhua"
-                type="number"
+                v-model="form.giobatdau"
+                type="time"
                 class="form-control"
-                placeholder="Nhập sức chứa"
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Trạng thái</label>
-              <select v-model="form.trangthai" class="form-select">
-                <option value="">-- Chọn trạng thái --</option>
-                <option value="Đang sử dụng">Đang sử dụng</option>
-                <option value="Trống">Trống</option>
-                <option value="Bảo trì">Bảo trì</option>
-              </select>
+              <label class="form-label">Giờ kết thúc</label>
+              <input
+                v-model="form.gioketthuc"
+                type="time"
+                class="form-control"
+              />
             </div>
           </div>
 
@@ -85,10 +83,10 @@ import {
 } from "../services/crudService";
 
 const columns = [
-  { key: "maphong", label: "Mã phòng" },
-  { key: "tenphong", label: "Tên phòng" },
-  { key: "succhua", label: "Sức chứa" },
-  { key: "trangthai", label: "Trạng thái" },
+  { key: "macahoc", label: "Mã ca học" },
+  { key: "tencahoc", label: "Tên ca học" },
+  { key: "giobatdau", label: "Giờ bắt đầu" },
+  { key: "gioketthuc", label: "Giờ kết thúc" },
 ];
 
 const rows = ref([]);
@@ -96,39 +94,39 @@ const rows = ref([]);
 const isEdit = ref(false);
 
 const form = ref({
-  maphong: null,
-  tenphong: "",
-  succhua: "",
-  trangthai: "",
+  macahoc: null,
+  tencahoc: "",
+  giobatdau: "",
+  gioketthuc: "",
 });
 
 const loadData = async () => {
   try {
-    const res = await getAll("/phong-hoc");
+    const res = await getAll("/ca-hoc");
     rows.value = res.data;
   } catch (error) {
     console.log(error);
-    alert("Không thể tải dữ liệu phòng học");
+    alert("Không thể tải dữ liệu ca học");
   }
 };
 
 const resetForm = () => {
   form.value = {
-    maphong: null,
-    tenphong: "",
-    succhua: "",
-    trangthai: "",
+    macahoc: null,
+    tencahoc: "",
+    giobatdau: "",
+    gioketthuc: "",
   };
 };
 
 const openModal = () => {
-  const modalElement = document.getElementById("phongHocModal");
+  const modalElement = document.getElementById("caHocModal");
   const modal = Modal.getOrCreateInstance(modalElement);
   modal.show();
 };
 
 const closeModal = () => {
-  const modalElement = document.getElementById("phongHocModal");
+  const modalElement = document.getElementById("caHocModal");
   const modal = Modal.getOrCreateInstance(modalElement);
   modal.hide();
 };
@@ -146,22 +144,22 @@ const openEdit = (row) => {
 };
 
 const saveData = async () => {
-  if (!form.value.tenphong) {
-    alert("Vui lòng nhập tên phòng");
+  if (!form.value.tencahoc) {
+    alert("Vui lòng nhập tên ca học");
+    return;
+  }
+
+  if (!form.value.giobatdau || !form.value.gioketthuc) {
+    alert("Vui lòng nhập đầy đủ giờ bắt đầu và giờ kết thúc");
     return;
   }
 
   try {
-    const data = {
-      ...form.value,
-      succhua: form.value.succhua ? Number(form.value.succhua) : null,
-    };
-
     if (isEdit.value) {
-      await updateData("/phong-hoc", form.value.maphong, data);
+      await updateData("/ca-hoc", form.value.macahoc, form.value);
       alert("Cập nhật thành công");
     } else {
-      await createData("/phong-hoc", data);
+      await createData("/ca-hoc", form.value);
       alert("Thêm thành công");
     }
 

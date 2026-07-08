@@ -1,11 +1,11 @@
 <template>
   <div>
     <SimpleTablePage
-      title="Quản lý phòng học"
-      subtitle="Danh sách phòng học của trung tâm"
-      search-placeholder="Tìm kiếm phòng học..."
-      endpoint="/phong-hoc"
-      id-key="maphong"
+      title="Quản lý hạng GPLX"
+      subtitle="Danh sách hạng giấy phép lái xe"
+      search-placeholder="Tìm kiếm hạng GPLX..."
+      endpoint="/hang-gplx"
+      id-key="mahang"
       :columns="columns"
       :rows="rows"
       @reload="loadData"
@@ -13,12 +13,12 @@
       @edit="openEdit"
     />
 
-    <div class="modal fade" id="phongHocModal" tabindex="-1">
+    <div class="modal fade" id="hangGPLXModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ isEdit ? "Sửa phòng học" : "Thêm phòng học" }}
+              {{ isEdit ? "Sửa hạng GPLX" : "Thêm hạng GPLX" }}
             </h5>
 
             <button
@@ -30,32 +30,22 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Tên phòng</label>
+              <label class="form-label">Tên hạng</label>
               <input
-                v-model="form.tenphong"
+                v-model="form.tenhang"
                 class="form-control"
-                placeholder="Ví dụ: Phòng 101"
+                placeholder="Ví dụ: A1, B1, B2, C"
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Sức chứa</label>
-              <input
-                v-model="form.succhua"
-                type="number"
+              <label class="form-label">Mô tả</label>
+              <textarea
+                v-model="form.mota"
                 class="form-control"
-                placeholder="Nhập sức chứa"
-              />
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Trạng thái</label>
-              <select v-model="form.trangthai" class="form-select">
-                <option value="">-- Chọn trạng thái --</option>
-                <option value="Đang sử dụng">Đang sử dụng</option>
-                <option value="Trống">Trống</option>
-                <option value="Bảo trì">Bảo trì</option>
-              </select>
+                rows="3"
+                placeholder="Nhập mô tả"
+              ></textarea>
             </div>
           </div>
 
@@ -85,10 +75,9 @@ import {
 } from "../services/crudService";
 
 const columns = [
-  { key: "maphong", label: "Mã phòng" },
-  { key: "tenphong", label: "Tên phòng" },
-  { key: "succhua", label: "Sức chứa" },
-  { key: "trangthai", label: "Trạng thái" },
+  { key: "mahang", label: "Mã hạng" },
+  { key: "tenhang", label: "Tên hạng" },
+  { key: "mota", label: "Mô tả" },
 ];
 
 const rows = ref([]);
@@ -96,39 +85,37 @@ const rows = ref([]);
 const isEdit = ref(false);
 
 const form = ref({
-  maphong: null,
-  tenphong: "",
-  succhua: "",
-  trangthai: "",
+  mahang: null,
+  tenhang: "",
+  mota: "",
 });
 
 const loadData = async () => {
   try {
-    const res = await getAll("/phong-hoc");
+    const res = await getAll("/hang-gplx");
     rows.value = res.data;
   } catch (error) {
     console.log(error);
-    alert("Không thể tải dữ liệu phòng học");
+    alert("Không thể tải dữ liệu hạng GPLX");
   }
 };
 
 const resetForm = () => {
   form.value = {
-    maphong: null,
-    tenphong: "",
-    succhua: "",
-    trangthai: "",
+    mahang: null,
+    tenhang: "",
+    mota: "",
   };
 };
 
 const openModal = () => {
-  const modalElement = document.getElementById("phongHocModal");
+  const modalElement = document.getElementById("hangGPLXModal");
   const modal = Modal.getOrCreateInstance(modalElement);
   modal.show();
 };
 
 const closeModal = () => {
-  const modalElement = document.getElementById("phongHocModal");
+  const modalElement = document.getElementById("hangGPLXModal");
   const modal = Modal.getOrCreateInstance(modalElement);
   modal.hide();
 };
@@ -146,22 +133,17 @@ const openEdit = (row) => {
 };
 
 const saveData = async () => {
-  if (!form.value.tenphong) {
-    alert("Vui lòng nhập tên phòng");
+  if (!form.value.tenhang) {
+    alert("Vui lòng nhập tên hạng");
     return;
   }
 
   try {
-    const data = {
-      ...form.value,
-      succhua: form.value.succhua ? Number(form.value.succhua) : null,
-    };
-
     if (isEdit.value) {
-      await updateData("/phong-hoc", form.value.maphong, data);
+      await updateData("/hang-gplx", form.value.mahang, form.value);
       alert("Cập nhật thành công");
     } else {
-      await createData("/phong-hoc", data);
+      await createData("/hang-gplx", form.value);
       alert("Thêm thành công");
     }
 

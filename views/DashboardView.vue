@@ -6,13 +6,12 @@
       Chào mừng đến hệ thống quản lý trung tâm GPLX
     </p>
 
-    <!-- Card thống kê -->
     <div class="row g-3 mb-4">
       <div class="col-md-3">
         <div class="card bg-primary text-white shadow dashboard-card">
           <div class="card-body">
             <h5>👨‍🎓 Tổng học viên</h5>
-            <h2>0</h2>
+            <h2>{{ tongHocVien }}</h2>
           </div>
         </div>
       </div>
@@ -21,7 +20,7 @@
         <div class="card bg-success text-white shadow dashboard-card">
           <div class="card-body">
             <h5>👨‍🏫 Giáo viên</h5>
-            <h2>0</h2>
+            <h2>{{ tongGiaoVien }}</h2>
           </div>
         </div>
       </div>
@@ -30,7 +29,7 @@
         <div class="card bg-warning text-white shadow dashboard-card">
           <div class="card-body">
             <h5>🚗 Xe tập lái</h5>
-            <h2>0</h2>
+            <h2>{{ tongXeTapLai }}</h2>
           </div>
         </div>
       </div>
@@ -39,7 +38,7 @@
         <div class="card bg-danger text-white shadow dashboard-card">
           <div class="card-body">
             <h5>📅 Lịch học</h5>
-            <h2>0</h2>
+            <h2>{{ tongLichHoc }}</h2>
           </div>
         </div>
       </div>
@@ -48,7 +47,7 @@
         <div class="card bg-info text-white shadow dashboard-card">
           <div class="card-body">
             <h5>🏫 Phòng học</h5>
-            <h2>0</h2>
+            <h2>{{ tongPhongHoc }}</h2>
           </div>
         </div>
       </div>
@@ -57,7 +56,7 @@
         <div class="card bg-dark text-white shadow dashboard-card">
           <div class="card-body">
             <h5>💰 Doanh thu tháng</h5>
-            <h2>0đ</h2>
+            <h2>{{ doanhThu.toLocaleString("vi-VN") }} đ</h2>
           </div>
         </div>
       </div>
@@ -65,19 +64,18 @@
       <div class="col-md-3">
         <div class="card bg-secondary text-white shadow dashboard-card">
           <div class="card-body">
-            <h5>📝 Thi sát hạch hôm nay</h5>
-            <h2>0</h2>
+            <h5>📝 Thi sát hạch</h5>
+            <h2>{{ tongThiSatHach }}</h2>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Biểu đồ + Thông báo -->
     <div class="row g-3 mb-4">
       <div class="col-md-8">
         <div class="card border-0 shadow-sm">
           <div class="card-body">
-            <h5 class="mb-3">📊 Biểu đồ học viên theo tháng</h5> 
+            <h5 class="mb-3">📊 Biểu đồ học viên theo tháng</h5>
 
             <div class="chart-box">
               <div class="chart-item">
@@ -134,16 +132,16 @@
 
             <ul class="list-group list-group-flush">
               <li class="list-group-item">
-                12 học viên sắp thi sát hạch
+                {{ tongThiSatHach }} lượt thi sát hạch
               </li>
               <li class="list-group-item">
-                5 GPLX đang chờ trả
+                {{ tongXeTapLai }} xe tập lái trong hệ thống
               </li>
               <li class="list-group-item">
-                2 xe tập lái đang bảo trì
+                {{ tongLichHoc }} lịch học đã tạo
               </li>
               <li class="list-group-item">
-                8 học viên chưa thanh toán học phí
+                Doanh thu: {{ doanhThu.toLocaleString("vi-VN") }} đ
               </li>
             </ul>
           </div>
@@ -151,7 +149,6 @@
       </div>
     </div>
 
-    <!-- Hoạt động gần đây -->
     <div class="card border-0 shadow-sm">
       <div class="card-body">
         <h5 class="mb-3">📋 Hoạt động gần đây</h5>
@@ -160,8 +157,7 @@
           <thead class="table-light">
             <tr>
               <th>STT</th>
-              <th>Học viên</th>
-              <th>Hoạt động</th>
+              <th>Nội dung</th>
               <th>Thời gian</th>
               <th>Trạng thái</th>
             </tr>
@@ -170,41 +166,28 @@
           <tbody>
             <tr>
               <td>1</td>
-              <td>Nguyễn Văn A</td>
-              <td>Đăng ký khóa học B2</td>
+              <td>Tổng học viên hiện có: {{ tongHocVien }}</td>
               <td>Hôm nay</td>
               <td>
-                <span class="badge bg-success">Hoàn tất</span>
+                <span class="badge bg-success">Đã cập nhật</span>
               </td>
             </tr>
 
             <tr>
               <td>2</td>
-              <td>Trần Văn B</td>
-              <td>Thanh toán học phí</td>
-              <td>Hôm qua</td>
+              <td>Tổng giáo viên hiện có: {{ tongGiaoVien }}</td>
+              <td>Hôm nay</td>
               <td>
-                <span class="badge bg-primary">Đã thanh toán</span>
+                <span class="badge bg-primary">Đã cập nhật</span>
               </td>
             </tr>
 
             <tr>
               <td>3</td>
-              <td>Lê Văn C</td>
-              <td>Thi sát hạch</td>
-              <td>2 ngày trước</td>
+              <td>Tổng lịch học hiện có: {{ tongLichHoc }}</td>
+              <td>Hôm nay</td>
               <td>
-                <span class="badge bg-warning text-dark">Chờ kết quả</span>
-              </td>
-            </tr>
-
-            <tr>
-              <td>4</td>
-              <td>Phạm Văn D</td>
-              <td>Nhận GPLX</td>
-              <td>3 ngày trước</td>
-              <td>
-                <span class="badge bg-info">Đã nhận</span>
+                <span class="badge bg-info">Đã cập nhật</span>
               </td>
             </tr>
           </tbody>
@@ -214,6 +197,59 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import { onMounted, ref } from "vue";
+import { getAll } from "../services/crudService";
+
+const tongHocVien = ref(0);
+const tongGiaoVien = ref(0);
+const tongXeTapLai = ref(0);
+const tongLichHoc = ref(0);
+const tongPhongHoc = ref(0);
+const doanhThu = ref(0);
+const tongThiSatHach = ref(0);
+
+const loadDashboard = async () => {
+  try {
+    const [
+      hocVien,
+      giaoVien,
+      xeTapLai,
+      lichHoc,
+      phongHoc,
+      thiSatHach,
+      thanhToan,
+    ] = await Promise.all([
+      getAll("/hoc-vien"),
+      getAll("/giao-vien"),
+      getAll("/xe-tap-lai"),
+      getAll("/lich-hoc"),
+      getAll("/phong-hoc"),
+      getAll("/thi-sat-hach"),
+      getAll("/thanh-toan"),
+    ]);
+
+    tongHocVien.value = hocVien.data.length;
+    tongGiaoVien.value = giaoVien.data.length;
+    tongXeTapLai.value = xeTapLai.data.length;
+    tongLichHoc.value = lichHoc.data.length;
+    tongPhongHoc.value = phongHoc.data.length;
+    tongThiSatHach.value = thiSatHach.data.length;
+
+    doanhThu.value = thanhToan.data.reduce(
+      (tong, item) => tong + Number(item.sotien ?? 0),
+      0
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+onMounted(() => {
+  loadDashboard();
+});
+</script>
 
 <style scoped>
 .dashboard-card {

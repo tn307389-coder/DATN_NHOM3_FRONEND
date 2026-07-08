@@ -1,11 +1,11 @@
 <template>
   <div>
     <SimpleTablePage
-      title="Quản lý hồ sơ học viên"
-      subtitle="Danh sách hồ sơ đăng ký của học viên"
-      search-placeholder="Tìm kiếm hồ sơ học viên..."
-      endpoint="/ho-so-hoc-vien"
-      id-key="mahs"
+      title="Quản lý đăng ký khóa học"
+      subtitle="Danh sách học viên đăng ký khóa học"
+      search-placeholder="Tìm kiếm đăng ký..."
+      endpoint="/dang-ky-khoa-hoc"
+      id-key="madk"
       :columns="columns"
       :rows="rows"
       @reload="loadData"
@@ -13,12 +13,12 @@
       @edit="openEdit"
     />
 
-    <div class="modal fade" id="hoSoHocVienModal" tabindex="-1">
+    <div class="modal fade" id="dangKyKhoaHocModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ isEdit ? "Sửa hồ sơ học viên" : "Thêm hồ sơ học viên" }}
+              {{ isEdit ? "Sửa đăng ký khóa học" : "Thêm đăng ký khóa học" }}
             </h5>
 
             <button
@@ -44,6 +44,20 @@
             </div>
 
             <div class="mb-3">
+              <label class="form-label">Khóa học</label>
+              <select v-model="form.makh" class="form-select">
+                <option value="">-- Chọn khóa học --</option>
+                <option
+                  v-for="kh in khoaHocList"
+                  :key="kh.makh"
+                  :value="kh.makh"
+                >
+                  {{ kh.tenkhoahoc }}
+                </option>
+              </select>
+            </div>
+
+            <div class="mb-3">
               <label class="form-label">Ngày đăng ký</label>
               <input
                 v-model="form.ngaydangky"
@@ -53,24 +67,14 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Tình trạng</label>
-              <select v-model="form.tinhtrang" class="form-select">
-                <option value="">-- Chọn tình trạng --</option>
-                <option value="Đang xử lý">Đang xử lý</option>
-                <option value="Đã duyệt">Đã duyệt</option>
-                <option value="Bổ sung hồ sơ">Bổ sung hồ sơ</option>
-                <option value="Từ chối">Từ chối</option>
+              <label class="form-label">Trạng thái</label>
+              <select v-model="form.trangthai" class="form-select">
+                <option value="">-- Chọn trạng thái --</option>
+                <option value="Đã đăng ký">Đã đăng ký</option>
+                <option value="Đang học">Đang học</option>
+                <option value="Hoàn thành">Hoàn thành</option>
+                <option value="Đã hủy">Đã hủy</option>
               </select>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Ghi chú</label>
-              <textarea
-                v-model="form.ghichu"
-                class="form-control"
-                rows="3"
-                placeholder="Nhập ghi chú"
-              ></textarea>
             </div>
           </div>
 
@@ -100,40 +104,43 @@ import {
 } from "../services/crudService";
 
 const columns = [
-  { key: "mahs", label: "Mã hồ sơ" },
+  { key: "madk", label: "Mã ĐK" },
   { key: "hocvien", label: "Học viên" },
   { key: "cccd", label: "CCCD" },
+  { key: "khoahoc", label: "Khóa học" },
   { key: "ngaydangky", label: "Ngày đăng ký" },
-  { key: "tinhtrang", label: "Tình trạng" },
-  { key: "ghichu", label: "Ghi chú" },
+  { key: "trangthai", label: "Trạng thái" },
 ];
 
 const rows = ref([]);
 const hocVienList = ref([]);
+const khoaHocList = ref([]);
 
 const isEdit = ref(false);
 
 const form = ref({
-  mahs: null,
+  madk: null,
   mahv: "",
+  makh: "",
   ngaydangky: "",
-  tinhtrang: "",
-  ghichu: "",
+  trangthai: "",
 });
 
 const loadData = async () => {
   try {
-    const res = await getAll("/ho-so-hoc-vien");
+    const res = await getAll("/dang-ky-khoa-hoc");
 
     rows.value = res.data.map((item) => ({
       ...item,
       hocvien: item.hocVien?.hoten || "",
       cccd: item.hocVien?.cccd || "",
+      khoahoc: item.khoaHoc?.tenkhoahoc || "",
       mahv: item.hocVien?.mahv || "",
+      makh: item.khoaHoc?.makh || "",
     }));
   } catch (error) {
     console.log(error);
-    alert("Không thể tải dữ liệu hồ sơ học viên");
+    alert("Không thể tải dữ liệu đăng ký khóa học");
   }
 };
 
@@ -147,24 +154,34 @@ const loadHocVien = async () => {
   }
 };
 
+const loadKhoaHoc = async () => {
+  try {
+    const res = await getAll("/khoa-hoc");
+    khoaHocList.value = res.data;
+  } catch (error) {
+    console.log(error);
+    alert("Không thể tải dữ liệu khóa học");
+  }
+};
+
 const resetForm = () => {
   form.value = {
-    mahs: null,
+    madk: null,
     mahv: "",
+    makh: "",
     ngaydangky: "",
-    tinhtrang: "",
-    ghichu: "",
+    trangthai: "",
   };
 };
 
 const openModal = () => {
-  const modalElement = document.getElementById("hoSoHocVienModal");
+  const modalElement = document.getElementById("dangKyKhoaHocModal");
   const modal = Modal.getOrCreateInstance(modalElement);
   modal.show();
 };
 
 const closeModal = () => {
-  const modalElement = document.getElementById("hoSoHocVienModal");
+  const modalElement = document.getElementById("dangKyKhoaHocModal");
   const modal = Modal.getOrCreateInstance(modalElement);
   modal.hide();
 };
@@ -179,11 +196,11 @@ const openEdit = (row) => {
   isEdit.value = true;
 
   form.value = {
-    mahs: row.mahs,
+    madk: row.madk,
     mahv: row.mahv,
+    makh: row.makh,
     ngaydangky: row.ngaydangky,
-    tinhtrang: row.tinhtrang,
-    ghichu: row.ghichu,
+    trangthai: row.trangthai,
   };
 
   openModal();
@@ -195,27 +212,29 @@ const saveData = async () => {
     return;
   }
 
-  if (!form.value.ngaydangky) {
-    alert("Vui lòng chọn ngày đăng ký");
+  if (!form.value.makh) {
+    alert("Vui lòng chọn khóa học");
     return;
   }
 
   try {
     const data = {
-      mahs: form.value.mahs,
+      madk: form.value.madk,
       hocVien: {
         mahv: Number(form.value.mahv),
       },
+      khoaHoc: {
+        makh: Number(form.value.makh),
+      },
       ngaydangky: form.value.ngaydangky,
-      tinhtrang: form.value.tinhtrang,
-      ghichu: form.value.ghichu,
+      trangthai: form.value.trangthai,
     };
 
     if (isEdit.value) {
-      await updateData("/ho-so-hoc-vien", form.value.mahs, data);
+      await updateData("/dang-ky-khoa-hoc", form.value.madk, data);
       alert("Cập nhật thành công");
     } else {
-      await createData("/ho-so-hoc-vien", data);
+      await createData("/dang-ky-khoa-hoc", data);
       alert("Thêm thành công");
     }
 
@@ -229,6 +248,7 @@ const saveData = async () => {
 
 onMounted(async () => {
   await loadHocVien();
+  await loadKhoaHoc();
   await loadData();
 });
 </script>
