@@ -30,17 +30,18 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Tên lớp</label>
+              <label class="form-label">Tên lớp <span class="text-danger">*</span></label>
               <input
                 v-model="form.tenlop"
                 class="form-control"
                 placeholder="Nhập tên lớp học"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Khóa học</label>
-              <select v-model="form.makh" class="form-select">
+              <label class="form-label">Khóa học <span class="text-danger">*</span></label>
+              <select v-model="form.makh" class="form-select" required>
                 <option value="">-- Chọn khóa học --</option>
                 <option
                   v-for="kh in khoaHocList"
@@ -53,8 +54,8 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Giáo viên</label>
-              <select v-model="form.magv" class="form-select">
+              <label class="form-label">Giáo viên <span class="text-danger">*</span></label>
+              <select v-model="form.magv" class="form-select" required>
                 <option value="">-- Chọn giáo viên --</option>
                 <option
                   v-for="gv in giaoVienList"
@@ -67,26 +68,28 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Ngày bắt đầu</label>
+              <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
               <input
                 v-model="form.ngaybatdau"
                 type="date"
                 class="form-control"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Ngày kết thúc</label>
+              <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
               <input
                 v-model="form.ngayketthuc"
                 type="date"
                 class="form-control"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Trạng thái</label>
-              <select v-model="form.trangthai" class="form-select">
+              <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+              <select v-model="form.trangthai" class="form-select" required>
                 <option value="">-- Chọn trạng thái --</option>
                 <option value="Đang học">Đang học</option>
                 <option value="Đã kết thúc">Đã kết thúc</option>
@@ -119,6 +122,7 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
   { key: "malop", label: "Mã lớp" },
@@ -229,19 +233,19 @@ const openEdit = (row) => {
   openModal();
 };
 
+const requiredFields = [
+  { key: "tenlop", label: "Tên lớp" },
+  { key: "makh", label: "Khóa học" },
+  { key: "magv", label: "Giáo viên" },
+  { key: "ngaybatdau", label: "Ngày bắt đầu" },
+  { key: "ngayketthuc", label: "Ngày kết thúc" },
+  { key: "trangthai", label: "Trạng thái" },
+];
+
 const saveData = async () => {
-  if (!form.value.tenlop) {
-    alert("Vui lòng nhập tên lớp");
-    return;
-  }
-
-  if (!form.value.makh) {
-    alert("Vui lòng chọn khóa học");
-    return;
-  }
-
-  if (!form.value.magv) {
-    alert("Vui lòng chọn giáo viên");
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 

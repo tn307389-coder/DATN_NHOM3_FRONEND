@@ -4,8 +4,7 @@
     subtitle="Theo dõi danh sách học viên thi sát hạch"
     search-placeholder="Tìm kiếm thi sát hạch..."
     endpoint="/thi-sat-hach"
-id-key="mathi"
-@reload="loadData"
+    id-key="mathi"
     :columns="columns"
     :rows="rows"
   />

@@ -11,7 +11,17 @@
       @reload="loadData"
       @add="openAdd"
       @edit="openEdit"
-    />
+    >
+      <template #extra-actions="{ row }">
+        <button
+          class="btn btn-sm btn-info me-2"
+          title="Quản lý bảo trì"
+          @click="goToBaoTri(row)"
+        >
+          <i class="bi bi-wrench"></i>
+        </button>
+      </template>
+    </SimpleTablePage>
 
     <div class="modal fade" id="xeModal" tabindex="-1">
       <div class="modal-dialog">
@@ -30,45 +40,49 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Biển số</label>
+              <label class="form-label">Biển số <span class="text-danger">*</span></label>
               <input
                 v-model="form.bienso"
                 class="form-control"
                 placeholder="Ví dụ: 51A-12345"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Loại xe</label>
+              <label class="form-label">Loại xe <span class="text-danger">*</span></label>
               <input
                 v-model="form.loaixe"
                 class="form-control"
                 placeholder="Ví dụ: Xe số sàn, xe tải"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Hãng xe</label>
+              <label class="form-label">Hãng xe <span class="text-danger">*</span></label>
               <input
                 v-model="form.hangxe"
                 class="form-control"
                 placeholder="Ví dụ: Toyota Vios"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Năm sản xuất</label>
+              <label class="form-label">Năm sản xuất <span class="text-danger">*</span></label>
               <input
                 v-model="form.namsanxuat"
                 type="number"
                 class="form-control"
                 placeholder="Ví dụ: 2020"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Trạng thái</label>
-              <select v-model="form.trangthai" class="form-select">
+              <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+              <select v-model="form.trangthai" class="form-select" required>
                 <option value="">-- Chọn trạng thái --</option>
                 <option value="Đang sử dụng">Đang sử dụng</option>
                 <option value="Trống">Trống</option>
@@ -94,6 +108,7 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { Modal } from "bootstrap";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import {
@@ -101,6 +116,13 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
+
+const router = useRouter();
+
+const goToBaoTri = (row) => {
+  router.push({ path: "/lich-su-bao-tri-xe", query: { maxe: row.maxe } });
+};
 
 const columns = [
   { key: "maxe", label: "Mã xe" },
@@ -169,9 +191,18 @@ const openEdit = (row) => {
   openModal();
 };
 
+const requiredFields = [
+  { key: "bienso", label: "Biển số" },
+  { key: "loaixe", label: "Loại xe" },
+  { key: "hangxe", label: "Hãng xe" },
+  { key: "namsanxuat", label: "Năm sản xuất" },
+  { key: "trangthai", label: "Trạng thái" },
+];
+
 const saveData = async () => {
-  if (!form.value.bienso) {
-    alert("Vui lòng nhập biển số xe");
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 

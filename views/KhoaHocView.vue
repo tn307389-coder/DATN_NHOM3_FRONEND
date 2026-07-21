@@ -2,7 +2,7 @@
   <div>
     <SimpleTablePage
       title="Quản lý khóa học"
-      subtitle="Danh sách khóa học của trung tâm"
+      subtitle="Danh sách khóa học đào tạo"
       search-placeholder="Tìm kiếm khóa học..."
       endpoint="/khoa-hoc"
       id-key="makh"
@@ -14,78 +14,52 @@
     />
 
     <div class="modal fade" id="khoaHocModal" tabindex="-1">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
               {{ isEdit ? "Sửa khóa học" : "Thêm khóa học" }}
             </h5>
-
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
 
           <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Tên khóa học</label>
-              <input
-                v-model="form.tenkhoahoc"
-                class="form-control"
-                placeholder="Nhập tên khóa học"
-              />
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Chương trình học</label>
-              <select v-model="form.macth" class="form-select">
-                <option value="">-- Chọn chương trình học --</option>
-                <option
-                  v-for="ct in chuongTrinhList"
-                  :key="ct.macth"
-                  :value="ct.macth"
-                >
-                  {{ ct.tenchuongtrinh }} - {{ ct.hangbang }}
-                </option>
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Ngày bắt đầu</label>
-              <input
-                v-model="form.ngaybatdau"
-                type="date"
-                class="form-control"
-              />
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Ngày kết thúc</label>
-              <input
-                v-model="form.ngayketthuc"
-                type="date"
-                class="form-control"
-              />
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Trạng thái</label>
-              <select v-model="form.trangthai" class="form-select">
-                <option value="">-- Chọn trạng thái --</option>
-                <option value="Đang mở">Đang mở</option>
-                <option value="Đang học">Đang học</option>
-                <option value="Đã kết thúc">Đã kết thúc</option>
-              </select>
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Tên khóa học <span class="text-danger">*</span></label>
+                <input v-model="form.tenkhoahoc" class="form-control" placeholder="Nhập tên khóa học" required />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Chương trình học <span class="text-danger">*</span></label>
+                <select v-model="form.macth" class="form-select" required>
+                  <option value="">-- Chọn chương trình --</option>
+                  <option v-for="cth in chuongTrinhList" :key="cth.macth" :value="cth.macth">
+                    {{ cth.tencth }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Trạng thái</label>
+                <select v-model="form.trangthai" class="form-select">
+                  <option value="">-- Chọn trạng thái --</option>
+                  <option value="Đang mở">Đang mở</option>
+                  <option value="Đã kết thúc">Đã kết thúc</option>
+                  <option value="Tạm dừng">Tạm dừng</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Ngày bắt đầu</label>
+                <input v-model="form.ngaybatdau" type="date" class="form-control" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Ngày kết thúc</label>
+                <input v-model="form.ngayketthuc" type="date" class="form-control" />
+              </div>
             </div>
           </div>
 
           <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">
-              Hủy
-            </button>
-
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
             <button class="btn btn-primary" @click="saveData">
               {{ isEdit ? "Cập nhật" : "Thêm mới" }}
             </button>
@@ -100,16 +74,13 @@
 import { onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
-import {
-  getAll,
-  createData,
-  updateData,
-} from "../services/crudService";
+import { getAll, createData, updateData } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
-  { key: "makh", label: "Mã khóa" },
+  { key: "makh", label: "Mã KH" },
   { key: "tenkhoahoc", label: "Tên khóa học" },
-  { key: "chuongtrinh", label: "Chương trình" },
+  { key: "tencth", label: "Chương trình" },
   { key: "ngaybatdau", label: "Ngày bắt đầu" },
   { key: "ngayketthuc", label: "Ngày kết thúc" },
   { key: "trangthai", label: "Trạng thái" },
@@ -117,7 +88,6 @@ const columns = [
 
 const rows = ref([]);
 const chuongTrinhList = ref([]);
-
 const isEdit = ref(false);
 
 const form = ref({
@@ -132,11 +102,9 @@ const form = ref({
 const loadData = async () => {
   try {
     const res = await getAll("/khoa-hoc");
-
-    rows.value = res.data.map((item) => ({
-      ...item,
-      chuongtrinh: item.chuongTrinhHoc?.tenchuongtrinh || "",
-      macth: item.chuongTrinhHoc?.macth || "",
+    rows.value = (res.data || []).map((r) => ({
+      ...r,
+      tencth: r.chuongTrinhHoc ? r.chuongTrinhHoc.tencth : "",
     }));
   } catch (error) {
     console.log(error);
@@ -147,10 +115,9 @@ const loadData = async () => {
 const loadChuongTrinh = async () => {
   try {
     const res = await getAll("/chuong-trinh-hoc");
-    chuongTrinhList.value = res.data;
-  } catch (error) {
-    console.log(error);
-    alert("Không thể tải dữ liệu chương trình học");
+    chuongTrinhList.value = res.data || [];
+  } catch (e) {
+    console.log(e);
   }
 };
 
@@ -166,15 +133,8 @@ const resetForm = () => {
 };
 
 const openModal = () => {
-  const modalElement = document.getElementById("khoaHocModal");
-  const modal = Modal.getOrCreateInstance(modalElement);
+  const modal = Modal.getOrCreateInstance(document.getElementById("khoaHocModal"));
   modal.show();
-};
-
-const closeModal = () => {
-  const modalElement = document.getElementById("khoaHocModal");
-  const modal = Modal.getOrCreateInstance(modalElement);
-  modal.hide();
 };
 
 const openAdd = () => {
@@ -185,27 +145,26 @@ const openAdd = () => {
 
 const openEdit = (row) => {
   isEdit.value = true;
-
   form.value = {
     makh: row.makh,
     tenkhoahoc: row.tenkhoahoc,
-    macth: row.macth,
-    ngaybatdau: row.ngaybatdau,
-    ngayketthuc: row.ngayketthuc,
-    trangthai: row.trangthai,
+    macth: row.chuongTrinhHoc ? row.chuongTrinhHoc.macth : row.macth,
+    ngaybatdau: row.ngaybatdau || "",
+    ngayketthuc: row.ngayketthuc || "",
+    trangthai: row.trangthai || "",
   };
-
   openModal();
 };
 
-const saveData = async () => {
-  if (!form.value.tenkhoahoc) {
-    alert("Vui lòng nhập tên khóa học");
-    return;
-  }
+const requiredFields = [
+  { key: "tenkhoahoc", label: "Tên khóa học" },
+  { key: "macth", label: "Chương trình học" },
+];
 
-  if (!form.value.macth) {
-    alert("Vui lòng chọn chương trình học");
+const saveData = async () => {
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 
@@ -213,11 +172,9 @@ const saveData = async () => {
     const data = {
       makh: form.value.makh,
       tenkhoahoc: form.value.tenkhoahoc,
-      chuongTrinhHoc: {
-        macth: Number(form.value.macth),
-      },
-      ngaybatdau: form.value.ngaybatdau,
-      ngayketthuc: form.value.ngayketthuc,
+      macth: Number(form.value.macth),
+      ngaybatdau: form.value.ngaybatdau || null,
+      ngayketthuc: form.value.ngayketthuc || null,
       trangthai: form.value.trangthai,
     };
 
@@ -229,7 +186,7 @@ const saveData = async () => {
       alert("Thêm thành công");
     }
 
-    closeModal();
+    Modal.getOrCreateInstance(document.getElementById("khoaHocModal")).hide();
     await loadData();
   } catch (error) {
     console.log(error);
@@ -237,8 +194,8 @@ const saveData = async () => {
   }
 };
 
-onMounted(async () => {
-  await loadChuongTrinh();
-  await loadData();
+onMounted(() => {
+  loadData();
+  loadChuongTrinh();
 });
 </script>

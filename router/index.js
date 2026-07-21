@@ -29,9 +29,51 @@ import LichThiView from "../views/LichThiView.vue";
 import KetQuaThiView from "../views/KetQuaThiView.vue";
 import ThongBaoView from "../views/ThongBaoView.vue";
 import NhatKyHeThongView from "../views/NhatKyHeThongView.vue";
+import HoSoCuaToiView from "../views/HoSoCuaToiView.vue";
+import DuyetAnhView from "../views/DuyetAnhView.vue";
+import LichCuaToiView from "../views/LichCuaToiView.vue";
+import LichSuBaoTriXeView from "../views/LichSuBaoTriXeView.vue";
+
+// Trang công khai (website)
+import GioiThieuView from "../views/GioiThieuView.vue";
+import HangGplxPublicView from "../views/HangGplxPublicView.vue";
+import KhoaHocPublicView from "../views/KhoaHocPublicView.vue";
+import BangGiaView from "../views/BangGiaView.vue";
+import TinTucView from "../views/TinTucView.vue";
+import LienHeView from "../views/LienHeView.vue";
+
+import { canAccess, roleHome } from "../services/permissions";
+
+function currentRole() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "{}").maVaiTro;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Các đường dẫn trang công khai (không cần đăng nhập)
+const publicPaths = [
+  "/login",
+  "/trang-chu",
+  "/gioi-thieu",
+  "/hang-gplx",
+  "/khoa-hoc",
+  "/bang-gia",
+  "/tin-tuc",
+  "/lien-he",
+];
 
 const routes = [
   { path: "/login", component: LoginView },
+  { path: "/trang-chu", component: LoginView },
+  { path: "/gioi-thieu", component: GioiThieuView },
+  { path: "/hang-gplx", component: HangGplxPublicView },
+  { path: "/khoa-hoc", component: KhoaHocPublicView },
+  { path: "/bang-gia", component: BangGiaView },
+  { path: "/tin-tuc", component: TinTucView },
+  { path: "/lien-he", component: LienHeView },
+
   { path: "/", redirect: "/dashboard" },
   { path: "/dashboard", component: DashboardView },
   { path: "/tai-khoan", component: TaiKhoanView },
@@ -46,21 +88,25 @@ const routes = [
   { path: "/thanh-toan", component: ThanhToanView },
   { path: "/thi-sat-hach", component: ThiSatHachView },
   { path: "/tra-gplx", component: TraGPLXView },
-  { path: "/hang-gplx", component: HangGPLXView },
-{ path: "/xe", component: XeView },
-{ path: "/khoa-hoc", component: KhoaHocView },
-{ path: "/dang-ky-khoa-hoc", component: DangKyKhoaHocView },
-{ path: "/lop-hoc", component: LopHocView },
-{ path: "/mon-hoc", component: MonHocView },
-{ path: "/ca-hoc", component: CaHocView },
-{ path: "/diem-danh", component: DiemDanhView },
-{ path: "/bang-diem-thuong-xuyen", component: BangDiemThuongXuyenView },
-{ path: "/phong-thi", component: PhongThiView },
-{ path: "/ca-thi", component: CaThiView },
-{ path: "/lich-thi", component: LichThiView },
-{ path: "/ket-qua-thi", component: KetQuaThiView },
-{ path: "/thong-bao", component: ThongBaoView },
-{ path: "/nhat-ky-he-thong", component: NhatKyHeThongView },
+  { path: "/quan-ly-hang-gplx", component: HangGPLXView },
+  { path: "/xe", component: XeView },
+  { path: "/quan-ly-khoa-hoc", component: KhoaHocView },
+  { path: "/dang-ky-khoa-hoc", component: DangKyKhoaHocView },
+  { path: "/lop-hoc", component: LopHocView },
+  { path: "/mon-hoc", component: MonHocView },
+  { path: "/ca-hoc", component: CaHocView },
+  { path: "/diem-danh", component: DiemDanhView },
+  { path: "/bang-diem-thuong-xuyen", component: BangDiemThuongXuyenView },
+  { path: "/phong-thi", component: PhongThiView },
+  { path: "/ca-thi", component: CaThiView },
+  { path: "/lich-thi", component: LichThiView },
+  { path: "/ket-qua-thi", component: KetQuaThiView },
+  { path: "/thong-bao", component: ThongBaoView },
+  { path: "/nhat-ky-he-thong", component: NhatKyHeThongView },
+  { path: "/ho-so-cua-toi", component: HoSoCuaToiView },
+  { path: "/duyet-anh", component: DuyetAnhView },
+  { path: "/lich-cua-toi", component: LichCuaToiView },
+  { path: "/lich-su-bao-tri-xe", component: LichSuBaoTriXeView },
 ];
 
 const router = createRouter({
@@ -69,15 +115,34 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const isLogin = localStorage.getItem("isLogin");
+  const token = localStorage.getItem("token");
 
-  if (to.path === "/login") {
-    next();
+  // Trang công khai: cho phép truy cập không cần đăng nhập
+  if (publicPaths.includes(to.path)) {
+    // Nếu đã đăng nhập mà vào trang login thì về trang chủrole
+    if (to.path === "/login" && token) {
+      const r = currentRole();
+      next(r === "GV" || r === "HV" ? "/login" : roleHome(r));
+    } else {
+      next();
+    }
     return;
   }
 
-  if (!isLogin) {
+  if (!token) {
     next("/login");
+    return;
+  }
+
+  const role = currentRole();
+
+  if (to.path === "/") {
+    next(roleHome(role));
+    return;
+  }
+
+  if (!canAccess(role, to.path)) {
+    next(roleHome(role));
     return;
   }
 

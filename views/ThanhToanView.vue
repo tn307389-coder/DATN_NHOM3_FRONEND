@@ -31,8 +31,8 @@
           <div class="modal-body">
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Học viên</label>
-                <select v-model="form.mahv" class="form-select">
+                <label class="form-label">Học viên <span class="text-danger">*</span></label>
+                <select v-model="form.mahv" class="form-select" required>
                   <option value="">-- Chọn học viên --</option>
 
                   <option
@@ -46,8 +46,8 @@
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Đăng ký khóa học</label>
-                <select v-model="form.madk" class="form-select">
+                <label class="form-label">Đăng ký khóa học <span class="text-danger">*</span></label>
+                <select v-model="form.madk" class="form-select" required>
                   <option value="">-- Chọn đăng ký khóa học --</option>
 
                   <option
@@ -61,27 +61,29 @@
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Ngày thanh toán</label>
+                <label class="form-label">Ngày thanh toán <span class="text-danger">*</span></label>
                 <input
                   v-model="form.ngaythanhtoan"
                   type="date"
                   class="form-control"
+                  required
                 />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Số tiền</label>
+                <label class="form-label">Số tiền <span class="text-danger">*</span></label>
                 <input
                   v-model="form.sotien"
                   type="number"
                   class="form-control"
                   placeholder="Nhập số tiền"
+                  required
                 />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Phương thức</label>
-                <select v-model="form.phuongthuc" class="form-select">
+                <label class="form-label">Phương thức <span class="text-danger">*</span></label>
+                <select v-model="form.phuongthuc" class="form-select" required>
                   <option value="">-- Chọn phương thức --</option>
                   <option value="Tiền mặt">Tiền mặt</option>
                   <option value="Chuyển khoản">Chuyển khoản</option>
@@ -90,8 +92,8 @@
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Trạng thái</label>
-                <select v-model="form.trangthai" class="form-select">
+                <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                <select v-model="form.trangthai" class="form-select" required>
                   <option value="">-- Chọn trạng thái --</option>
                   <option value="Đã thanh toán">Đã thanh toán</option>
                   <option value="Chưa thanh toán">Chưa thanh toán</option>
@@ -125,6 +127,7 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
   { key: "matt", label: "Mã TT" },
@@ -233,19 +236,19 @@ const openEdit = (row) => {
   openModal();
 };
 
+const requiredFields = [
+  { key: "mahv", label: "Học viên" },
+  { key: "madk", label: "Đăng ký khóa học" },
+  { key: "ngaythanhtoan", label: "Ngày thanh toán" },
+  { key: "sotien", label: "Số tiền" },
+  { key: "phuongthuc", label: "Phương thức" },
+  { key: "trangthai", label: "Trạng thái" },
+];
+
 const saveData = async () => {
-  if (!form.value.mahv) {
-    alert("Vui lòng chọn học viên");
-    return;
-  }
-
-  if (!form.value.madk) {
-    alert("Vui lòng chọn đăng ký khóa học");
-    return;
-  }
-
-  if (!form.value.sotien) {
-    alert("Vui lòng nhập số tiền");
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 

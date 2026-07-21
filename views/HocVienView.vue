@@ -31,26 +31,28 @@
           <div class="modal-body">
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Họ tên</label>
+                <label class="form-label">Họ tên <span class="text-danger">*</span></label>
                 <input
                   v-model="form.hoten"
                   class="form-control"
                   placeholder="Nhập họ tên học viên"
+                  required
                 />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Ngày sinh</label>
+                <label class="form-label">Ngày sinh <span class="text-danger">*</span></label>
                 <input
                   v-model="form.ngaysinh"
                   type="date"
                   class="form-control"
+                  required
                 />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Giới tính</label>
-                <select v-model="form.gioitinh" class="form-select">
+                <label class="form-label">Giới tính <span class="text-danger">*</span></label>
+                <select v-model="form.gioitinh" class="form-select" required>
                   <option value="">-- Chọn giới tính --</option>
                   <option value="Nam">Nam</option>
                   <option value="Nữ">Nữ</option>
@@ -58,40 +60,44 @@
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">CCCD</label>
+                <label class="form-label">CCCD <span class="text-danger">*</span></label>
                 <input
                   v-model="form.cccd"
                   class="form-control"
                   placeholder="Nhập số CCCD"
+                  required
                 />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Số điện thoại</label>
+                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                 <input
                   v-model="form.sodienthoai"
                   class="form-control"
                   placeholder="Nhập số điện thoại"
+                  required
                 />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Email</label>
+                <label class="form-label">Email <span class="text-danger">*</span></label>
                 <input
                   v-model="form.email"
                   type="email"
                   class="form-control"
                   placeholder="Nhập email"
+                  required
                 />
               </div>
 
               <div class="col-md-12 mb-3">
-                <label class="form-label">Địa chỉ</label>
+                <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
                 <textarea
                   v-model="form.diachi"
                   class="form-control"
                   rows="3"
                   placeholder="Nhập địa chỉ"
+                  required
                 ></textarea>
               </div>
             </div>
@@ -121,6 +127,7 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
   { key: "mahv", label: "Mã HV" },
@@ -195,14 +202,20 @@ const openEdit = (row) => {
   openModal();
 };
 
-const saveData = async () => {
-  if (!form.value.hoten) {
-    alert("Vui lòng nhập họ tên học viên");
-    return;
-  }
+const requiredFields = [
+  { key: "hoten", label: "Họ tên" },
+  { key: "ngaysinh", label: "Ngày sinh" },
+  { key: "gioitinh", label: "Giới tính" },
+  { key: "cccd", label: "CCCD" },
+  { key: "sodienthoai", label: "Số điện thoại" },
+  { key: "email", label: "Email" },
+  { key: "diachi", label: "Địa chỉ" },
+];
 
-  if (!form.value.cccd) {
-    alert("Vui lòng nhập CCCD");
+const saveData = async () => {
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 

@@ -6,7 +6,7 @@
         <p class="text-muted mb-0">{{ subtitle }}</p>
       </div>
 
-      <button class="btn btn-primary" @click="$emit('add')">
+      <button v-if="canAdd" class="btn btn-primary" @click="$emit('add')">
         <i class="bi bi-plus-circle me-1"></i>
         Thêm mới
       </button>
@@ -43,13 +43,17 @@
 
               <td class="text-center">
                 <button
+                  v-if="canEdit"
                   class="btn btn-sm btn-warning me-2"
                   @click="$emit('edit', row)"
                 >
                   <i class="bi bi-pencil-square"></i>
                 </button>
 
+                <slot name="extra-actions" :row="row" />
+
                 <button
+                  v-if="canDelete"
                   class="btn btn-sm btn-danger"
                   @click="handleDelete(row)"
                 >
@@ -78,7 +82,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import { deleteData } from "../../services/crudService";
 
 const props = defineProps({
@@ -110,9 +114,27 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  editable: {
+    type: Boolean,
+    default: true,
+  },
+  deletable: {
+    type: Boolean,
+    default: true,
+  },
+  addable: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const emit = defineEmits(["add", "edit", "reload"]);
+
+// Chế độ chỉ xem (view) được cung cấp từ layout theo vai trò + trang
+const readOnly = inject("readOnly", ref(false));
+const canAdd = computed(() => !readOnly.value && props.addable);
+const canEdit = computed(() => !readOnly.value && props.editable);
+const canDelete = computed(() => !readOnly.value && props.deletable);
 
 const keyword = ref("");
 

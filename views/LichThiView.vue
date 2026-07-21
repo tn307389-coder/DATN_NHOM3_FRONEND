@@ -8,6 +8,9 @@
       id-key="malichthi"
       :columns="columns"
       :rows="rows"
+      :addable="!isHV"
+      :editable="!isHV"
+      :deletable="!isHV"
       @reload="loadData"
       @add="openAdd"
       @edit="openEdit"
@@ -34,11 +37,12 @@
             <div class="row">
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Khóa học</label>
+                <label class="form-label">Khóa học <span class="text-danger">*</span></label>
 
                 <select
                   class="form-select"
-                  v-model="form.makhoahoc">
+                  v-model="form.makhoahoc"
+                  required>
 
                   <option value="">
                     -- Chọn khóa học --
@@ -59,12 +63,13 @@
               <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-                  Phòng thi
+                  Phòng thi <span class="text-danger">*</span>
                 </label>
 
                 <select
                   class="form-select"
-                  v-model="form.maphongthi">
+                  v-model="form.maphongthi"
+                  required>
 
                   <option value="">
                     -- Chọn phòng --
@@ -86,12 +91,13 @@
               <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-                  Ca thi
+                  Ca thi <span class="text-danger">*</span>
                 </label>
 
                 <select
                   class="form-select"
-                  v-model="form.macathi">
+                  v-model="form.macathi"
+                  required>
 
                   <option value="">
                     -- Chọn ca --
@@ -113,26 +119,28 @@
               <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-                  Ngày thi
+                  Ngày thi <span class="text-danger">*</span>
                 </label>
 
                 <input
                   type="date"
                   class="form-control"
-                  v-model="form.ngaythi">
+                  v-model="form.ngaythi"
+                  required>
 
               </div>
 
               <div class="col-12">
 
                 <label class="form-label">
-                  Ghi chú
+                  Ghi chú <span class="text-danger">*</span>
                 </label>
 
                 <textarea
                   rows="3"
                   class="form-control"
-                  v-model="form.ghichu">
+                  v-model="form.ghichu"
+                  required>
                 </textarea>
 
               </div>
@@ -179,6 +187,10 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
+import { useMyScope } from "../composables/useMyScope";
+
+const { isHV, myMakh, loadMyScope } = useMyScope();
 
 const columns = [
   { key: "malichthi", label: "Mã" },
@@ -209,7 +221,7 @@ const loadData = async () => {
   try {
     const res = await getAll("/lich-thi");
 
-    rows.value = res.data.map((item) => ({
+    let list = res.data.map((item) => ({
       malichthi: item.malichthi,
       khoahoc: item.khoaHoc?.tenkhoahoc || "",
       phongthi: item.phongThi?.tenphong || "",
@@ -221,6 +233,11 @@ const loadData = async () => {
       maphongthi: item.phongThi?.maphongthi,
       macathi: item.caThi?.macathi,
     }));
+    if (isHV.value) {
+      const khSet = myMakh.value.map(String);
+      list = list.filter((r) => khSet.includes(String(r.makhoahoc)));
+    }
+    rows.value = list;
   } catch (e) {
     console.log(e);
     alert("Không tải được dữ liệu");
@@ -277,7 +294,21 @@ const openEdit = (row) => {
   openModal();
 };
 
+const requiredFields = [
+  { key: "makhoahoc", label: "Khóa học" },
+  { key: "maphongthi", label: "Phòng thi" },
+  { key: "macathi", label: "Ca thi" },
+  { key: "ngaythi", label: "Ngày thi" },
+  { key: "ghichu", label: "Ghi chú" },
+];
+
 const saveData = async () => {
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
+    return;
+  }
+
   try {
     const data = {
       malichthi: form.value.malichthi,
@@ -319,6 +350,7 @@ const saveData = async () => {
 };
 
 onMounted(async () => {
+  await loadMyScope();
   await loadKhoaHoc();
   await loadPhongThi();
   await loadCaThi();

@@ -1,75 +1,56 @@
 <template>
-  <div class="sidebar">
+  <aside class="sidebar" :class="{'dark-mode': theme === 'dark'}">
     <div class="sidebar-brand">
-      <div class="brand-icon">
-        🚘
-      </div>
-
-      <div>
+      <div class="brand-icon">🚘</div>
+      <div class="brand-text">
         <h4>DriveHub</h4>
-        <small>GPLX System</small>
+        <small>Quản trị GPLX</small>
       </div>
     </div>
 
-    <div class="menu-scroll">
+    <nav class="menu-scroll">
       <router-link
-        v-for="item in menuItems"
+        v-for="item in visibleMenu"
         :key="item.path"
         :to="item.path"
         class="menu-item"
+        active-class="active"
       >
         <span class="menu-icon">{{ item.icon }}</span>
         <span class="menu-text">{{ item.name }}</span>
       </router-link>
+    </nav>
+
+    <div class="sidebar-footer">
+      <small>© 2026 DATN Nhóm 3</small>
     </div>
-  </div>
+  </aside>
 </template>
 
 <script setup>
-const menuItems = [
-  { path: "/", icon: "📊", name: "Dashboard" },
-  { path: "/tai-khoan", icon: "👤", name: "Tài khoản" },
-  { path: "/hoc-vien", icon: "👨‍🎓", name: "Học viên" },
-  { path: "/ho-so-hoc-vien", icon: "📁", name: "Hồ sơ học viên" },
-  { path: "/giao-vien", icon: "👨‍🏫", name: "Giáo viên" },
-  { path: "/chuong-trinh-hoc", icon: "📚", name: "Chương trình học" },
-  { path: "/khoa-hoc", icon: "🎓", name: "Khóa học" },
-  { path: "/dang-ky-khoa-hoc", icon: "📝", name: "Đăng ký khóa học" },
-  { path: "/lop-hoc", icon: "🏷️", name: "Lớp học" },
-  { path: "/mon-hoc", icon: "📖", name: "Môn học" },
-  { path: "/phong-hoc", icon: "🏫", name: "Phòng học" },
-  { path: "/xe-tap-lai", icon: "🚗", name: "Xe tập lái" },
-  { path: "/xe", icon: "🚘", name: "Xe" },
-  { path: "/phan-cong", icon: "📋", name: "Phân công" },
-  { path: "/ca-hoc", icon: "⏰", name: "Ca học" },
-  { path: "/lich-hoc", icon: "📅", name: "Lịch học" },
-  { path: "/diem-danh", icon: "✅", name: "Điểm danh" },
-  { path: "/bang-diem-thuong-xuyen", icon: "📊", name: "Bảng điểm thường xuyên" },
-  { path: "/thanh-toan", icon: "💰", name: "Thanh toán" },
-  { path: "/phong-thi", icon: "🏢", name: "Phòng thi" },
-  { path: "/ca-thi", icon: "⏱️", name: "Ca thi" },
-  { path: "/lich-thi", icon: "📆", name: "Lịch thi" },
-  { path: "/ket-qua-thi", icon: "🏆", name: "Kết quả thi" },
-  { path: "/thi-sat-hach", icon: "📝", name: "Thi sát hạch" },
-  { path: "/tra-gplx", icon: "🪪", name: "Trả GPLX" },
-  { path: "/hang-gplx", icon: "🪪", name: "Hạng GPLX" },
-  { path: "/thong-bao", icon: "🔔", name: "Thông báo" },
-  { path: "/nhat-ky-he-thong", icon: "🧾", name: "Nhật ký hệ thống" },
-];
+import { computed, inject } from "vue";
+import { allowedPaths, MENU } from "../../services/permissions";
+
+const theme = inject("theme");
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+const visibleMenu = computed(() => {
+  const allowed = allowedPaths(user.maVaiTro);
+  if (allowed === "ALL") return MENU;
+  return MENU.filter((i) => allowed.includes(i.path));
+});
 </script>
 
 <style scoped>
 .sidebar {
-  width: 270px;
+  width: 264px;
   height: 100vh;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #111827, #1f2937);
-  color: white;
-  overflow: hidden;
+  background: #ffffff;
+  border-right: 1px solid #e9eef5;
+  display: flex;
+  flex-direction: column;
   position: sticky;
   top: 0;
   flex-shrink: 0;
-  box-shadow: 4px 0 18px rgba(0, 0, 0, 0.18);
 }
 
 .sidebar-brand {
@@ -77,8 +58,8 @@ const menuItems = [
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 22px;
+  border-bottom: 1px solid #eef2f7;
 }
 
 .brand-icon {
@@ -88,47 +69,50 @@ const menuItems = [
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
+  border-radius: 12px;
   font-size: 22px;
-  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.35);
+  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.3);
 }
 
-.sidebar-brand h4 {
+.brand-text h4 {
   margin: 0;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
-  color: white;
+  color: #111827;
+  line-height: 1.1;
 }
 
-.sidebar-brand small {
-  color: #9ca3af;
+.brand-text small {
+  color: #94a3b8;
   font-size: 12px;
 }
 
 .menu-scroll {
-  height: calc(100vh - 76px);
+  flex: 1;
   overflow-y: auto;
-  padding: 14px 12px 24px;
+  padding: 14px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #d1d5db;
-  padding: 13px 14px;
-  margin-bottom: 6px;
+  color: #475569;
+  padding: 11px 14px;
   text-decoration: none;
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 600;
-  border-radius: 14px;
-  transition: 0.25s;
+  border-radius: 12px;
+  transition: background 0.18s, color 0.18s, transform 0.18s;
 }
 
 .menu-icon {
-  width: 24px;
+  width: 22px;
   text-align: center;
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .menu-text {
@@ -136,27 +120,75 @@ const menuItems = [
 }
 
 .menu-item:hover {
-  background: rgba(13, 110, 253, 0.18);
-  color: white;
-  transform: translateX(4px);
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
-.router-link-active {
+.menu-item.active {
   background: linear-gradient(135deg, #0d6efd, #2563eb);
-  color: white;
-  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.28);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.25);
+}
+
+.sidebar-footer {
+  padding: 14px 22px;
+  border-top: 1px solid #eef2f7;
+  color: #94a3b8;
+  font-size: 12px;
 }
 
 .menu-scroll::-webkit-scrollbar {
   width: 6px;
 }
-
 .menu-scroll::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  background: #cbd5e1;
   border-radius: 20px;
 }
-
 .menu-scroll::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* Dark Mode */
+.sidebar.dark-mode {
+  background: #1e293b;
+  border-right-color: #334155;
+}
+
+.dark-mode .sidebar-brand {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .brand-text h4 {
+  color: #f1f5f9;
+}
+
+.dark-mode .menu-item {
+  color: #94a3b8;
+}
+
+.dark-mode .menu-item:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .sidebar-footer {
+  border-top-color: #334155;
+  color: #64748b;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    z-index: 1050;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    border-right: none;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
 }
 </style>

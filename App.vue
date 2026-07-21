@@ -1,8 +1,19 @@
 <template>
-  <router-view v-if="$route.path === '/login'" />
+  <div v-if="isMember" class="site-layout">
+    <SiteNavbar />
+    <router-view />
+    <ToastContainer />
+  </div>
 
-  <div v-else class="app-layout">
+  <div v-else-if="isAnonymous" class="site-layout">
+    <SiteNavbar />
+    <router-view />
+    <ToastContainer />
+  </div>
+
+  <div v-else class="app-layout" :class="{ 'dark-mode': theme === 'dark' }">
     <Sidebar />
+    <div class="sidebar-overlay" @click="toggleSidebar"></div>
 
     <div class="main-content">
       <Header />
@@ -15,13 +26,79 @@
 
       <Footer />
     </div>
+    <ToastContainer />
   </div>
 </template>
 
 <script setup>
+import { computed, provide, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import Header from "./components/layout/Header.vue";
 import Sidebar from "./components/layout/Sidebar.vue";
 import Footer from "./components/layout/Footer.vue";
+import SiteNavbar from "./components/site/SiteNavbar.vue";
+import ToastContainer from "./components/common/ToastContainer.vue";
+import { useSite } from "./composables/useSite";
+import { getPageMode } from "./services/permissions";
+
+const route = useRoute();
+const { role, authVersion } = useSite();
+
+// Dark mode state
+const isDarkMode = ref(false);
+const theme = computed(() => isDarkMode.value ? "dark" : "light");
+
+// Toggle dark mode
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value;
+  document.documentElement.setAttribute("data-bs-theme", theme.value);
+  localStorage.setItem("theme", theme.value);
+};
+
+// Load theme on startup
+if (typeof localStorage !== "undefined") {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    isDarkMode.value = true;
+    document.documentElement.setAttribute("data-bs-theme", "dark");
+  }
+}
+
+provide("theme", theme);
+provide("toggleTheme", toggleTheme);
+
+const user = computed(() => {
+  authVersion.value;
+  route.value;
+  try {
+    return JSON.parse(localStorage.getItem("user") || "{}");
+  } catch (e) {
+    return {};
+  }
+});
+
+const isMember = computed(() => ["GV", "HV"].includes(user.value.maVaiTro));
+const isAnonymous = computed(() => !user.value || !user.value.maVaiTro);
+const readOnly = computed(() => getPageMode(user.value.maVaiTro, route.path) === "view");
+provide("readOnly", readOnly);
+provide("theme", theme);
+provide("toggleTheme", toggleTheme);
+
+// Mobile sidebar toggle
+const toggleSidebar = () => {
+  document.querySelector('.sidebar')?.classList.toggle('open');
+};
+
+// Track screen size for sidebar auto-hide
+const handleResize = () => {
+  if (window.innerWidth <= 768) {
+    document.querySelector('.sidebar')?.classList.remove('open');
+  }
+};
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', handleResize);
+}
 </script>
 
 <style scoped>
@@ -29,6 +106,8 @@ import Footer from "./components/layout/Footer.vue";
   display: flex;
   min-height: 100vh;
   background: #f3f6fb;
+  font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial,
+    "Noto Sans", "Liberation Sans", sans-serif;
 }
 
 .main-content {
@@ -46,6 +125,22 @@ import Footer from "./components/layout/Footer.vue";
 
 .page-container {
   max-width: 100%;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.portal-layout {
+  min-height: 100vh;
+  background: #f3f6fb;
+}
+
+.portal-content {
+  padding: 28px;
+  background: linear-gradient(180deg, #f3f6fb, #eef2f7);
+}
+
+.portal-content .page-container {
+  max-width: 1200px;
+  margin: 0 auto;
   animation: fadeIn 0.25s ease-in-out;
 }
 
@@ -136,6 +231,47 @@ import Footer from "./components/layout/Footer.vue";
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Mobile responsive */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1040;
+}
+
+@media (max-width: 768px) {
+  .app-layout .sidebar {
+    position: fixed;
+    left: -280px;
+    z-index: 1050;
+    transition: left 0.3s ease;
+  }
+
+  .app-layout .sidebar.open {
+    left: 0;
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  .content-area {
+    padding: 16px;
+  }
+
+  :deep(.card-body) {
+    padding: 16px;
+  }
+
+  :deep(h2) {
+    font-size: 1.5rem;
   }
 }
 </style>

@@ -1,340 +1,297 @@
 <template>
   <div>
-    <SimpleTablePage
-      title="Quản lý điểm danh"
-      subtitle="Theo dõi điểm danh học viên"
-      search-placeholder="Tìm kiếm điểm danh..."
-      endpoint="/diem-danh"
-      id-key="madd"
-      :columns="columns"
-      :rows="rows"
-      @reload="loadData"
-      @add="openAdd"
-      @edit="openEdit"
-    />
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h4 class="fw-bold mb-1">Điểm danh học viên</h4>
+        <p class="text-muted mb-3" v-if="!isHV">Chọn lớp học và ngày để tiến hành điểm danh</p>
+        <p class="text-muted mb-3" v-else>Xem thông tin điểm danh của bạn theo lớp và ngày</p>
 
-    <div class="modal fade" id="diemDanhModal" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-
-          <div class="modal-header">
-            <h5 class="modal-title">
-              {{ isEdit ? "Sửa điểm danh" : "Thêm điểm danh" }}
-            </h5>
-
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal">
-            </button>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Lớp học <span class="text-danger">*</span></label>
+            <select class="form-select" v-model="selectedLop" @change="onLopChange">
+              <option value="">-- Chọn lớp học --</option>
+              <option v-for="lh in lopHocList" :key="lh.malop" :value="lh.malop">
+                {{ lh.tenlop }}
+                <template v-if="lh.khoaHoc"> ({{ lh.khoaHoc.tenkhoahoc }})</template>
+              </option>
+            </select>
           </div>
 
-          <div class="modal-body">
-
-            <div class="row">
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Học viên</label>
-
-                <select
-                  v-model="form.mahv"
-                  class="form-select">
-
-                  <option value="">
-                    -- Chọn học viên --
-                  </option>
-
-                  <option
-                    v-for="hv in hocVienList"
-                    :key="hv.mahv"
-                    :value="hv.mahv">
-
-                    {{ hv.hoten }}
-
-                  </option>
-
-                </select>
-
-              </div>
-
-              <div class="col-md-6 mb-3">
-
-                <label class="form-label">
-                  Lịch học
-                </label>
-
-                <select
-                  v-model="form.malich"
-                  class="form-select">
-
-                  <option value="">
-                    -- Chọn lịch học --
-                  </option>
-
-                  <option
-                    v-for="lh in lichHocList"
-                    :key="lh.malich"
-                    :value="lh.malich">
-
-                    {{ lh.ngayhoc }} -
-                    {{ lh.monHoc?.tenmonhoc }}
-
-                  </option>
-
-                </select>
-
-              </div>
-
-              <div class="col-md-6 mb-3">
-
-                <label class="form-label">
-                  Ngày điểm danh
-                </label>
-
-                <input
-                  type="date"
-                  class="form-control"
-                  v-model="form.ngaydiemdanh">
-
-              </div>
-
-              <div class="col-md-6 mb-3">
-
-                <label class="form-label">
-                  Trạng thái
-                </label>
-
-                <select
-                  class="form-select"
-                  v-model="form.trangthai">
-
-                  <option value="">
-                    -- Chọn --
-                  </option>
-
-                  <option>
-                    Có mặt
-                  </option>
-
-                  <option>
-                    Vắng
-                  </option>
-
-                  <option>
-                    Đi trễ
-                  </option>
-
-                  <option>
-                    Có phép
-                  </option>
-
-                </select>
-
-              </div>
-
-              <div class="col-12">
-
-                <label class="form-label">
-                  Ghi chú
-                </label>
-
-                <textarea
-                  rows="3"
-                  class="form-control"
-                  v-model="form.ghichu">
-                </textarea>
-
-              </div>
-
-            </div>
-
+          <div class="col-md-4">
+            <label class="form-label">Ngày điểm danh <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" v-model="selectedDate" />
           </div>
 
-          <div class="modal-footer">
-
-            <button
-              class="btn btn-secondary"
-              data-bs-dismiss="modal">
-
-              Hủy
-
+          <div class="col-md-4">
+            <button class="btn btn-primary w-100" @click="loadStudents" :disabled="!selectedLop || !selectedDate || loading">
+              <i class="bi bi-arrow-clockwise"></i> Tải danh sách
             </button>
-
-            <button
-              class="btn btn-primary"
-              @click="saveData">
-
-              {{ isEdit ? "Cập nhật" : "Thêm mới" }}
-
-            </button>
-
           </div>
-
         </div>
       </div>
     </div>
 
+    <div v-if="loading" class="text-center py-5 text-muted">
+      <div class="spinner-border text-primary"></div>
+    </div>
+
+    <div v-else-if="students.length" class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div>
+            <h5 class="fw-bold mb-0">{{ currentLopName }}</h5>
+            <small class="text-muted">Ngày: {{ selectedDate }}</small>
+          </div>
+          <div>
+            <span class="badge bg-success me-2">Có mặt: {{ presentCount }}</span>
+            <span class="badge bg-secondary">Vắng: {{ absentCount }}</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width: 60px">#</th>
+                <th>Học viên</th>
+                <th>Trạng thái</th>
+                <th class="text-end">Có mặt</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(sv, idx) in students" :key="sv.mahv">
+                <td>{{ idx + 1 }}</td>
+                <td>
+                  <div class="fw-semibold">{{ sv.hoten }}</div>
+                  <small class="text-muted" v-if="sv.cccd">CCCD: {{ sv.cccd }}</small>
+                </td>
+                <td>
+                  <span class="badge" :class="sv.present ? 'bg-success' : 'bg-secondary'">
+                    {{ sv.present ? "Có mặt" : "Vắng" }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <label class="diemdanh-switch" :class="{ disabled: isHV }">
+                    <input type="checkbox" v-model="sv.present" :disabled="isHV" />
+                    <span class="slider"></span>
+                  </label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3" v-if="!isHV">
+          <button class="btn btn-outline-secondary me-2" @click="selectAll(true)">
+            <i class="bi bi-check-all"></i> Tất cả có mặt
+          </button>
+          <button class="btn btn-outline-secondary me-2" @click="selectAll(false)">
+            <i class="bi bi-x-circle"></i> Tất cả vắng
+          </button>
+          <button class="btn btn-primary" @click="saveAll" :disabled="saving">
+            <i class="bi bi-save"></i> Lưu điểm danh
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="loaded" class="card shadow-sm">
+      <div class="card-body text-center text-muted py-5">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        Lớp học này chưa có học viên đăng ký hoặc chưa chọn ngày.
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { Modal } from "bootstrap";
+import { ref, computed } from "vue";
+import { getAll, createData } from "../services/crudService";
+import api from "../services/api";
 
-import SimpleTablePage from "../components/common/SimpleTablePage.vue";
+const lopHocList = ref([]);
+const selectedLop = ref("");
+const selectedDate = ref(new Date().toISOString().slice(0, 10));
+const students = ref([]);
+const loading = ref(false);
+const saving = ref(false);
+const loaded = ref(false);
 
-import {
-  getAll,
-  createData,
-  updateData,
-} from "../services/crudService";
+const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+const isHV = computed(() => currentUser.maVaiTro === "HV");
+const myMahv = ref(null);
 
-const columns = [
-  { key: "madd", label: "Mã" },
-  { key: "hocvien", label: "Học viên" },
-  { key: "lichhoc", label: "Lịch học" },
-  { key: "ngaydiemdanh", label: "Ngày" },
-  { key: "trangthai", label: "Trạng thái" },
-  { key: "ghichu", label: "Ghi chú" },
-];
+const currentRoleLabel = computed(() =>
+  isHV.value ? "Học viên" : ""
+);
 
-const rows = ref([]);
-
-const hocVienList = ref([]);
-
-const lichHocList = ref([]);
-
-const isEdit = ref(false);
-
-const form = ref({
-  madd: null,
-  mahv: "",
-  malich: "",
-  ngaydiemdanh: "",
-  trangthai: "",
-  ghichu: "",
-});
-const loadData = async () => {
+const loadMyProfile = async () => {
+  if (!isHV.value) return;
   try {
-    const res = await getAll("/diem-danh");
-
-    rows.value = res.data.map((item) => ({
-      madd: item.madd,
-      hocvien: item.hocVien?.hoten || "",
-      lichhoc: `${item.lichHoc?.ngayhoc || ""} - ${
-        item.lichHoc?.monHoc?.tenmonhoc || ""
-      }`,
-      ngaydiemdanh: item.ngaydiemdanh,
-      trangthai: item.trangthai,
-      ghichu: item.ghichu,
-
-      mahv: item.hocVien?.mahv,
-      malich: item.lichHoc?.malich,
-    }));
+    const me = await api.get("/tai-khoan/me");
+    const cccd = me.data.cccd;
+    if (cccd) {
+      const hv = await api.get("/hoc-vien/me");
+      myMahv.value = hv.data.mahv;
+    }
   } catch (e) {
-    console.log(e);
-    alert("Không tải được dữ liệu");
+    console.error(e);
   }
 };
 
-const loadHocVien = async () => {
-  const res = await getAll("/hoc-vien");
-  hocVienList.value = res.data;
+const currentLopName = computed(() => {
+  const lh = lopHocList.value.find((x) => String(x.malop) === String(selectedLop.value));
+  if (!lh) return "";
+  return `${lh.tenlop}${lh.khoaHoc ? " (" + lh.khoaHoc.tenkhoahoc + ")" : ""}`;
+});
+
+const presentCount = computed(() => students.value.filter((s) => s.present).length);
+const absentCount = computed(() => students.value.length - presentCount.value);
+
+const loadLopHoc = async () => {
+  const res = await getAll("/lop-hoc");
+  lopHocList.value = res.data;
 };
 
-const loadLichHoc = async () => {
-  const res = await getAll("/lich-hoc");
-  lichHocList.value = res.data;
+const onLopChange = () => {
+  students.value = [];
+  loaded.value = false;
 };
 
-const resetForm = () => {
-  form.value = {
-    madd: null,
-    mahv: "",
-    malich: "",
-    ngaydiemdanh: "",
-    trangthai: "",
-    ghichu: "",
-  };
-};
-
-const openModal = () => {
-  Modal.getOrCreateInstance(
-    document.getElementById("diemDanhModal")
-  ).show();
-};
-
-const closeModal = () => {
-  Modal.getOrCreateInstance(
-    document.getElementById("diemDanhModal")
-  ).hide();
-};
-
-const openAdd = () => {
-  isEdit.value = false;
-  resetForm();
-  openModal();
-};
-
-const openEdit = (row) => {
-  isEdit.value = true;
-
-  form.value = {
-    madd: row.madd,
-    mahv: row.mahv,
-    malich: row.malich,
-    ngaydiemdanh: row.ngaydiemdanh,
-    trangthai: row.trangthai,
-    ghichu: row.ghichu,
-  };
-
-  openModal();
-};
-
-const saveData = async () => {
-  if (!form.value.mahv) {
-    alert("Chọn học viên");
-    return;
-  }
-
-  if (!form.value.malich) {
-    alert("Chọn lịch học");
-    return;
-  }
-
+const loadStudents = async () => {
+  if (!selectedLop.value || !selectedDate.value) return;
+  loading.value = true;
+  loaded.value = false;
   try {
-    const data = {
-      madd: form.value.madd,
-      hocVien: {
-        mahv: Number(form.value.mahv),
-      },
-      lichHoc: {
-        malich: Number(form.value.malich),
-      },
-      ngaydiemdanh: form.value.ngaydiemdanh,
-      trangthai: form.value.trangthai,
-      ghichu: form.value.ghichu,
-    };
+    const lopRes = await getAll("/lop-hoc");
+    const lop = lopRes.data.find((x) => String(x.malop) === String(selectedLop.value));
+    if (!lop || !lop.khoaHoc) {
+      students.value = [];
+      loaded.value = true;
+      return;
+    }
+    const makh = lop.khoaHoc.makh;
 
-    if (isEdit.value) {
-      await updateData("/diem-danh", form.value.madd, data);
-      alert("Cập nhật thành công");
-    } else {
-      await createData("/diem-danh", data);
-      alert("Thêm thành công");
+    const dkRes = await getAll("/dang-ky-khoa-hoc");
+    const mahvList = dkRes.data
+      .filter((dk) => dk.khoaHoc && dk.khoaHoc.makh === makh)
+      .map((dk) => dk.hocVien?.mahv)
+      .filter(Boolean);
+
+    const hvRes = await getAll("/hoc-vien");
+    const hocVienMap = {};
+    hvRes.data.forEach((hv) => (hocVienMap[hv.mahv] = hv));
+
+    const ddRes = await getAll("/diem-danh");
+    const ddMap = {};
+    ddRes.data.forEach((dd) => {
+      if (
+        dd.malich === Number(selectedLop.value) &&
+        dd.ngaydiemdanh === selectedDate.value
+      ) {
+        ddMap[dd.mahv] = dd.trangthai;
+      }
+    });
+
+    let list = mahvList.map((mahv) => {
+      const hv = hocVienMap[mahv] || { mahv, hoten: "HV " + mahv };
+      const existing = ddMap[mahv];
+      return {
+        mahv,
+        hoten: hv.hoten,
+        cccd: hv.cccd,
+        present: existing ? existing === "Có mặt" : true,
+      };
+    });
+
+    if (isHV.value && myMahv.value) {
+      list = list.filter((s) => String(s.mahv) === String(myMahv.value));
     }
 
-    closeModal();
-    loadData();
+    students.value = list;
+    loaded.value = true;
   } catch (e) {
-    console.log(e);
-    alert("Lưu thất bại");
+    console.error(e);
+    alert("Không tải được danh sách học viên");
+  } finally {
+    loading.value = false;
   }
 };
 
+const selectAll = (val) => {
+  students.value.forEach((s) => (s.present = val));
+};
+
+const saveAll = async () => {
+  if (!selectedLop.value || !selectedDate.value) return;
+  saving.value = true;
+  try {
+    for (const sv of students.value) {
+      const data = {
+        hocVien: { mahv: Number(sv.mahv) },
+        lichHoc: { malich: Number(selectedLop.value) },
+        ngaydiemdanh: selectedDate.value,
+        trangthai: sv.present ? "Có mặt" : "Vắng",
+        ghichu: "",
+      };
+      await createData("/diem-danh", data);
+    }
+    alert("Lưu điểm danh thành công");
+  } catch (e) {
+    console.error(e);
+    alert("Lưu điểm danh thất bại");
+  } finally {
+    saving.value = false;
+  }
+};
+
+import { onMounted } from "vue";
 onMounted(async () => {
-  await loadHocVien();
-  await loadLichHoc();
-  await loadData();
+  await loadMyProfile();
+  await loadLopHoc();
 });
 </script>
+
+<style scoped>
+.diemdanh-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+.diemdanh-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.diemdanh-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #cbd5e1;
+  border-radius: 999px;
+  transition: 0.25s;
+}
+.diemdanh-switch .slider::before {
+  content: "";
+  position: absolute;
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.25s;
+}
+.diemdanh-switch input:checked + .slider {
+  background: #198754;
+}
+.diemdanh-switch input:checked + .slider::before {
+  transform: translateX(22px);
+}
+.diemdanh-switch.disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+</style>

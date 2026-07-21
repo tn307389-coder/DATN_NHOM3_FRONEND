@@ -4,10 +4,12 @@
     subtitle="Theo dõi việc trả giấy phép lái xe cho học viên"
     search-placeholder="Tìm kiếm GPLX..."
     endpoint="/tra-gplx"
-id-key="magplx"
-@reload="loadData"
+    id-key="id"
     :columns="columns"
     :rows="rows"
+    :editable="false"
+    :deletable="false"
+    :addable="false"
   />
 </template>
 

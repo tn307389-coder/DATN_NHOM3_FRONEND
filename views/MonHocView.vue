@@ -30,17 +30,18 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Tên môn học</label>
+              <label class="form-label">Tên môn học <span class="text-danger">*</span></label>
               <input
                 v-model="form.tenmonhoc"
                 class="form-control"
                 placeholder="Nhập tên môn học"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Loại môn học</label>
-              <select v-model="form.loaimonhoc" class="form-select">
+              <label class="form-label">Loại môn học <span class="text-danger">*</span></label>
+              <select v-model="form.loaimonhoc" class="form-select" required>
                 <option value="">-- Chọn loại môn --</option>
                 <option value="Lý thuyết">Lý thuyết</option>
                 <option value="Thực hành">Thực hành</option>
@@ -49,22 +50,24 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Số tiết</label>
+              <label class="form-label">Số tiết <span class="text-danger">*</span></label>
               <input
                 v-model="form.sotiet"
                 type="number"
                 class="form-control"
                 placeholder="Nhập số tiết"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Ghi chú</label>
+              <label class="form-label">Ghi chú <span class="text-danger">*</span></label>
               <textarea
                 v-model="form.ghichu"
                 class="form-control"
                 rows="3"
                 placeholder="Nhập ghi chú"
+                required
               ></textarea>
             </div>
           </div>
@@ -93,6 +96,7 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
   { key: "mamh", label: "Mã môn" },
@@ -158,9 +162,17 @@ const openEdit = (row) => {
   openModal();
 };
 
+const requiredFields = [
+  { key: "tenmonhoc", label: "Tên môn học" },
+  { key: "loaimonhoc", label: "Loại môn học" },
+  { key: "sotiet", label: "Số tiết" },
+  { key: "ghichu", label: "Ghi chú" },
+];
+
 const saveData = async () => {
-  if (!form.value.tenmonhoc) {
-    alert("Vui lòng nhập tên môn học");
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 
