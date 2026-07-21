@@ -8,6 +8,9 @@
       id-key="macahoc"
       :columns="columns"
       :rows="rows"
+      :addable="!isHV"
+      :editable="!isHV"
+      :deletable="!isHV"
       @reload="loadData"
       @add="openAdd"
       @edit="openEdit"
@@ -30,29 +33,32 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Tên ca học</label>
+              <label class="form-label">Tên ca học <span class="text-danger">*</span></label>
               <input
                 v-model="form.tencahoc"
                 class="form-control"
                 placeholder="Ví dụ: Ca sáng, Ca chiều"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Giờ bắt đầu</label>
+              <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
               <input
                 v-model="form.giobatdau"
                 type="time"
                 class="form-control"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Giờ kết thúc</label>
+              <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
               <input
                 v-model="form.gioketthuc"
                 type="time"
                 class="form-control"
+                required
               />
             </div>
           </div>
@@ -81,6 +87,10 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
+import { useMyScope } from "../composables/useMyScope";
+
+const { isHV, myMalop, loadMyScope } = useMyScope();
 
 const columns = [
   { key: "macahoc", label: "Mã ca học" },
@@ -103,7 +113,20 @@ const form = ref({
 const loadData = async () => {
   try {
     const res = await getAll("/ca-hoc");
-    rows.value = res.data;
+    let list = res.data;
+    if (isHV.value && myMalop.value.length) {
+      const lopSet = myMalop.value.map(String);
+      const lich = (await getAll("/lich-hoc")).data || [];
+      const myCa = new Set(
+        lich
+          .filter((l) => l.lopHoc && lopSet.includes(String(l.lopHoc.malop)))
+          .map((l) => l.caHoc?.macahoc)
+          .filter(Boolean)
+          .map(String)
+      );
+      list = list.filter((c) => myCa.has(String(c.macahoc)));
+    }
+    rows.value = list;
   } catch (error) {
     console.log(error);
     alert("Không thể tải dữ liệu ca học");
@@ -143,14 +166,16 @@ const openEdit = (row) => {
   openModal();
 };
 
-const saveData = async () => {
-  if (!form.value.tencahoc) {
-    alert("Vui lòng nhập tên ca học");
-    return;
-  }
+const requiredFields = [
+  { key: "tencahoc", label: "Tên ca học" },
+  { key: "giobatdau", label: "Giờ bắt đầu" },
+  { key: "gioketthuc", label: "Giờ kết thúc" },
+];
 
-  if (!form.value.giobatdau || !form.value.gioketthuc) {
-    alert("Vui lòng nhập đầy đủ giờ bắt đầu và giờ kết thúc");
+const saveData = async () => {
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 
@@ -171,7 +196,8 @@ const saveData = async () => {
   }
 };
 
-onMounted(() => {
-  loadData();
+onMounted(async () => {
+  await loadMyScope();
+  await loadData();
 });
 </script>

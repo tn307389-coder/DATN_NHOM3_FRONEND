@@ -31,17 +31,18 @@
           <div class="modal-body">
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Tên chương trình</label>
+                <label class="form-label">Tên chương trình <span class="text-danger">*</span></label>
                 <input
                   v-model="form.tenchuongtrinh"
                   class="form-control"
                   placeholder="Nhập tên chương trình"
+                  required
                 />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Hạng bằng</label>
-                <select v-model="form.hangbang" class="form-select">
+                <label class="form-label">Hạng bằng <span class="text-danger">*</span></label>
+                <select v-model="form.hangbang" class="form-select" required>
                   <option value="">-- Chọn hạng bằng --</option>
                   <option value="A1">A1</option>
                   <option value="A2">A2</option>
@@ -54,32 +55,35 @@
               </div>
 
               <div class="col-md-6 mb-3">
-                <label class="form-label">Học phí</label>
+                <label class="form-label">Học phí <span class="text-danger">*</span></label>
                 <input
                   v-model="form.hocphi"
                   type="number"
                   class="form-control"
                   placeholder="Nhập học phí"
+                  required
                 />
               </div>
 
               <div class="col-md-3 mb-3">
-                <label class="form-label">Buổi lý thuyết</label>
+                <label class="form-label">Buổi lý thuyết <span class="text-danger">*</span></label>
                 <input
                   v-model="form.sobuoilythuyet"
                   type="number"
                   class="form-control"
                   placeholder="Số buổi"
+                  required
                 />
               </div>
 
               <div class="col-md-3 mb-3">
-                <label class="form-label">Buổi thực hành</label>
+                <label class="form-label">Buổi thực hành <span class="text-danger">*</span></label>
                 <input
                   v-model="form.sobuoithuchanh"
                   type="number"
                   class="form-control"
                   placeholder="Số buổi"
+                  required
                 />
               </div>
             </div>
@@ -109,6 +113,7 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
   { key: "macth", label: "Mã CT" },
@@ -192,14 +197,18 @@ const openEdit = (row) => {
   openModal();
 };
 
-const saveData = async () => {
-  if (!form.value.tenchuongtrinh) {
-    alert("Vui lòng nhập tên chương trình");
-    return;
-  }
+const requiredFields = [
+  { key: "tenchuongtrinh", label: "Tên chương trình" },
+  { key: "hangbang", label: "Hạng bằng" },
+  { key: "hocphi", label: "Học phí" },
+  { key: "sobuoilythuyet", label: "Buổi lý thuyết" },
+  { key: "sobuoithuchanh", label: "Buổi thực hành" },
+];
 
-  if (!form.value.hangbang) {
-    alert("Vui lòng chọn hạng bằng");
+const saveData = async () => {
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 

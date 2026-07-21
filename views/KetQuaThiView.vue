@@ -35,12 +35,13 @@
               <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-                  Học viên
+                  Học viên <span class="text-danger">*</span>
                 </label>
 
                 <select
                   class="form-select"
-                  v-model="form.mahv">
+                  v-model="form.mahv"
+                  required>
 
                   <option value="">
                     -- Chọn học viên --
@@ -62,12 +63,13 @@
               <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-                  Lịch thi
+                  Lịch thi <span class="text-danger">*</span>
                 </label>
 
                 <select
                   class="form-select"
-                  v-model="form.malichthi">
+                  v-model="form.malichthi"
+                  required>
 
                   <option value="">
                     -- Chọn lịch thi --
@@ -89,26 +91,28 @@
               <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-                  Điểm
+                  Điểm <span class="text-danger">*</span>
                 </label>
 
                 <input
                   class="form-control"
                   type="number"
                   step="0.1"
-                  v-model="form.diem">
+                  v-model="form.diem"
+                  required>
 
               </div>
 
               <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-                  Kết quả
+                  Kết quả <span class="text-danger">*</span>
                 </label>
 
                 <select
                   class="form-select"
-                  v-model="form.ketqua">
+                  v-model="form.ketqua"
+                  required>
 
                   <option value="">
                     -- Chọn --
@@ -129,13 +133,14 @@
               <div class="col-12">
 
                 <label class="form-label">
-                  Ghi chú
+                  Ghi chú <span class="text-danger">*</span>
                 </label>
 
                 <textarea
                   rows="3"
                   class="form-control"
-                  v-model="form.ghichu">
+                  v-model="form.ghichu"
+                  required>
                 </textarea>
 
               </div>
@@ -178,6 +183,7 @@ import {
  createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
   { key: "makq", label: "Mã" },
@@ -266,7 +272,21 @@ const openEdit = (row) => {
   openModal();
 };
 
+const requiredFields = [
+  { key: "mahv", label: "Học viên" },
+  { key: "malichthi", label: "Lịch thi" },
+  { key: "diem", label: "Điểm" },
+  { key: "ketqua", label: "Kết quả" },
+  { key: "ghichu", label: "Ghi chú" },
+];
+
 const saveData = async () => {
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
+    return;
+  }
+
   const data = {
     makq: form.value.makq,
     hocVien: {

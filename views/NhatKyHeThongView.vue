@@ -5,10 +5,12 @@
       subtitle="Lịch sử thao tác của người dùng"
       search-placeholder="Tìm kiếm..."
       endpoint="/nhat-ky-he-thong"
-      id-key="mank"
+      id-key="id"
       :columns="columns"
       :rows="rows"
-      @reload="loadData"
+      :editable="false"
+      :deletable="false"
+      :addable="false"
     />
   </div>
 </template>

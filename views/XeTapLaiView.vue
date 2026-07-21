@@ -30,8 +30,8 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Xe</label>
-              <select v-model="form.maxe" class="form-select">
+              <label class="form-label">Xe <span class="text-danger">*</span></label>
+              <select v-model="form.maxe" class="form-select" required>
                 <option value="">-- Chọn xe --</option>
                 <option
                   v-for="xe in xeList"
@@ -44,8 +44,8 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Hạng bằng</label>
-              <select v-model="form.hangbang" class="form-select">
+              <label class="form-label">Hạng bằng <span class="text-danger">*</span></label>
+              <select v-model="form.hangbang" class="form-select" required>
                 <option value="">-- Chọn hạng bằng --</option>
                 <option value="A1">A1</option>
                 <option value="A2">A2</option>
@@ -58,8 +58,8 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Trạng thái</label>
-              <select v-model="form.trangthai" class="form-select">
+              <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+              <select v-model="form.trangthai" class="form-select" required>
                 <option value="">-- Chọn trạng thái --</option>
                 <option value="Đang sử dụng">Đang sử dụng</option>
                 <option value="Trống">Trống</option>
@@ -92,6 +92,7 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
   { key: "maxetl", label: "Mã xe tập lái" },
@@ -181,14 +182,16 @@ const openEdit = (row) => {
   openModal();
 };
 
-const saveData = async () => {
-  if (!form.value.maxe) {
-    alert("Vui lòng chọn xe");
-    return;
-  }
+const requiredFields = [
+  { key: "maxe", label: "Xe" },
+  { key: "hangbang", label: "Hạng bằng" },
+  { key: "trangthai", label: "Trạng thái" },
+];
 
-  if (!form.value.hangbang) {
-    alert("Vui lòng chọn hạng bằng");
+const saveData = async () => {
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 

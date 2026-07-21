@@ -1,193 +1,164 @@
 <template>
   <div>
-    <SimpleTablePage
-      title="Quản lý bảng điểm thường xuyên"
-      subtitle="Điểm quá trình của học viên"
-      search-placeholder="Tìm kiếm..."
-      endpoint="/bang-diem-thuong-xuyen"
-      id-key="mabd"
-      :columns="columns"
-      :rows="rows"
-      @reload="loadData"
-      @add="openAdd"
-      @edit="openEdit"
-    />
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h4 class="fw-bold mb-1">Bảng điểm thường xuyên</h4>
+        <p class="text-muted mb-3" v-if="!isHV">Chọn lớp học và môn học để nhập điểm cho học viên</p>
+        <p class="text-muted mb-3" v-else>Xem điểm thường xuyên của bạn theo lớp và môn học</p>
 
-    <div class="modal fade" id="bangDiemModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-
-          <div class="modal-header">
-            <h5 class="modal-title">
-              {{ isEdit ? "Sửa bảng điểm" : "Thêm bảng điểm" }}
-            </h5>
-
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal">
-            </button>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Lớp học <span class="text-danger">*</span></label>
+            <select class="form-select" v-model="selectedLop" @change="onLopChange">
+              <option value="">-- Chọn lớp học --</option>
+              <option v-for="lh in lopHocList" :key="lh.malop" :value="lh.malop">
+                {{ lh.tenlop }}
+                <template v-if="lh.khoaHoc"> ({{ lh.khoaHoc.tenkhoahoc }})</template>
+              </option>
+            </select>
           </div>
 
-          <div class="modal-body">
-
-            <div class="mb-3">
-              <label class="form-label">Học viên</label>
-
-              <select
-                class="form-select"
-                v-model="form.mahv">
-
-                <option value="">
-                  -- Chọn học viên --
-                </option>
-
-                <option
-                  v-for="hv in hocVienList"
-                  :key="hv.mahv"
-                  :value="hv.mahv">
-
-                  {{ hv.hoten }}
-
-                </option>
-
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">
-                Môn học
-              </label>
-
-              <select
-                class="form-select"
-                v-model="form.mamh">
-
-                <option value="">
-                  -- Chọn môn học --
-                </option>
-
-                <option
-                  v-for="mh in monHocList"
-                  :key="mh.mamh"
-                  :value="mh.mamh">
-
-                  {{ mh.tenmonhoc }}
-
-                </option>
-
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">
-                Điểm
-              </label>
-
-              <input
-                type="number"
-                step="0.1"
-                class="form-control"
-                v-model="form.diem">
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">
-                Ghi chú
-              </label>
-
-              <textarea
-                rows="3"
-                class="form-control"
-                v-model="form.ghichu">
-              </textarea>
-            </div>
-
+          <div class="col-md-4">
+            <label class="form-label">Môn học <span class="text-danger">*</span></label>
+            <select class="form-select" v-model="selectedMon" @change="onMonChange">
+              <option value="">-- Chọn môn học --</option>
+              <option v-for="mh in monHocList" :key="mh.mamh" :value="mh.mamh">
+                {{ mh.tenmonhoc }}
+              </option>
+            </select>
           </div>
 
-          <div class="modal-footer">
-
-            <button
-              class="btn btn-secondary"
-              data-bs-dismiss="modal">
-              Hủy
+          <div class="col-md-4">
+            <button class="btn btn-primary w-100" @click="loadStudents" :disabled="!selectedLop || !selectedMon || loading">
+              <i class="bi bi-arrow-clockwise"></i> Tải danh sách
             </button>
-
-            <button
-              class="btn btn-primary"
-              @click="saveData">
-
-              {{ isEdit ? "Cập nhật" : "Thêm mới" }}
-
-            </button>
-
           </div>
-
         </div>
       </div>
     </div>
 
+    <div v-if="loading" class="text-center py-5 text-muted">
+      <div class="spinner-border text-primary"></div>
+    </div>
+
+    <div v-else-if="students.length" class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div>
+            <h5 class="fw-bold mb-0">{{ currentLopName }}</h5>
+            <small class="text-muted">Môn: {{ currentMonName }}</small>
+          </div>
+          <div>
+            <span class="badge bg-primary">Sĩ số: {{ students.length }}</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width: 60px">#</th>
+                <th>Học viên</th>
+                <th style="width: 200px">Điểm (0-10)</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(sv, idx) in students" :key="sv.mahv">
+                <td>{{ idx + 1 }}</td>
+                <td>
+                  <div class="fw-semibold">{{ sv.hoten }}</div>
+                  <small class="text-muted" v-if="sv.cccd">CCCD: {{ sv.cccd }}</small>
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="10"
+                    class="form-control diem-input"
+                    v-model="sv.diem"
+                    placeholder="Nhập điểm"
+                    :disabled="isHV"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="sv.ghichu"
+                    placeholder="Ghi chú"
+                    :disabled="isHV"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3" v-if="!isHV">
+          <button class="btn btn-primary" @click="saveAll" :disabled="saving">
+            <i class="bi bi-save"></i> Lưu bảng điểm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="loaded" class="card shadow-sm">
+      <div class="card-body text-center text-muted py-5">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        Lớp học này chưa có học viên đăng ký hoặc chưa chọn môn học.
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { Modal } from "bootstrap";
+import { ref, computed, onMounted } from "vue";
+import { getAll, createData, updateData } from "../services/crudService";
+import api from "../services/api";
 
-import SimpleTablePage from "../components/common/SimpleTablePage.vue";
-
-import {
-  getAll,
-  createData,
-  updateData,
-} from "../services/crudService";
-
-const columns = [
-  { key: "mabd", label: "Mã" },
-  { key: "hocvien", label: "Học viên" },
-  { key: "monhoc", label: "Môn học" },
-  { key: "diem", label: "Điểm" },
-  { key: "ghichu", label: "Ghi chú" },
-];
-
-const rows = ref([]);
-
-const hocVienList = ref([]);
-
+const lopHocList = ref([]);
 const monHocList = ref([]);
+const selectedLop = ref("");
+const selectedMon = ref("");
+const students = ref([]);
+const loading = ref(false);
+const saving = ref(false);
+const loaded = ref(false);
 
-const isEdit = ref(false);
+const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+const isHV = computed(() => currentUser.maVaiTro === "HV");
+const myMahv = ref(null);
 
-const form = ref({
-  mabd: null,
-  mahv: "",
-  mamh: "",
-  diem: "",
-  ghichu: "",
-});
-const loadData = async () => {
+const loadMyProfile = async () => {
+  if (!isHV.value) return;
   try {
-    const res = await getAll("/bang-diem-thuong-xuyen");
-
-    rows.value = res.data.map((item) => ({
-      mabd: item.mabd,
-      hocvien: item.hocVien?.hoten || "",
-      monhoc: item.monHoc?.tenmonhoc || "",
-      diem: item.diem,
-      ghichu: item.ghichu,
-
-      mahv: item.hocVien?.mahv,
-      mamh: item.monHoc?.mamh,
-    }));
+    const me = await api.get("/tai-khoan/me");
+    const cccd = me.data.cccd;
+    if (cccd) {
+      const hv = await api.get("/hoc-vien/me");
+      myMahv.value = hv.data.mahv;
+    }
   } catch (e) {
-    console.log(e);
-    alert("Không tải được dữ liệu");
+    console.error(e);
   }
 };
 
-const loadHocVien = async () => {
-  const res = await getAll("/hoc-vien");
-  hocVienList.value = res.data;
+const currentLopName = computed(() => {
+  const lh = lopHocList.value.find((x) => String(x.malop) === String(selectedLop.value));
+  if (!lh) return "";
+  return `${lh.tenlop}${lh.khoaHoc ? " (" + lh.khoaHoc.tenkhoahoc + ")" : ""}`;
+});
+
+const currentMonName = computed(() => {
+  const mh = monHocList.value.find((x) => String(x.mamh) === String(selectedMon.value));
+  return mh ? mh.tenmonhoc : "";
+});
+
+const loadLopHoc = async () => {
+  const res = await getAll("/lop-hoc");
+  lopHocList.value = res.data;
 };
 
 const loadMonHoc = async () => {
@@ -195,106 +166,115 @@ const loadMonHoc = async () => {
   monHocList.value = res.data;
 };
 
-const resetForm = () => {
-  form.value = {
-    mabd: null,
-    mahv: "",
-    mamh: "",
-    diem: "",
-    ghichu: "",
-  };
+const onLopChange = () => {
+  students.value = [];
+  loaded.value = false;
 };
 
-const openModal = () => {
-  Modal.getOrCreateInstance(
-    document.getElementById("bangDiemModal")
-  ).show();
+const onMonChange = () => {
+  students.value = [];
+  loaded.value = false;
 };
 
-const closeModal = () => {
-  Modal.getOrCreateInstance(
-    document.getElementById("bangDiemModal")
-  ).hide();
-};
-
-const openAdd = () => {
-  isEdit.value = false;
-  resetForm();
-  openModal();
-};
-
-const openEdit = (row) => {
-  isEdit.value = true;
-
-  form.value = {
-    mabd: row.mabd,
-    mahv: row.mahv,
-    mamh: row.mamh,
-    diem: row.diem,
-    ghichu: row.ghichu,
-  };
-
-  openModal();
-};
-
-const saveData = async () => {
-  if (!form.value.mahv) {
-    alert("Vui lòng chọn học viên");
-    return;
-  }
-
-  if (!form.value.mamh) {
-    alert("Vui lòng chọn môn học");
-    return;
-  }
-
-  if (form.value.diem === "") {
-    alert("Vui lòng nhập điểm");
-    return;
-  }
-
+const loadStudents = async () => {
+  if (!selectedLop.value || !selectedMon.value) return;
+  loading.value = true;
+  loaded.value = false;
   try {
-    const data = {
-      mabd: form.value.mabd,
-      hocVien: {
-        mahv: Number(form.value.mahv),
-      },
-      monHoc: {
-        mamh: Number(form.value.mamh),
-      },
-      diem: Number(form.value.diem),
-      ghichu: form.value.ghichu,
-    };
+    const lopRes = await getAll("/lop-hoc");
+    const lop = lopRes.data.find((x) => String(x.malop) === String(selectedLop.value));
+    if (!lop || !lop.khoaHoc) {
+      students.value = [];
+      loaded.value = true;
+      return;
+    }
+    const makh = lop.khoaHoc.makh;
 
-    if (isEdit.value) {
-      await updateData(
-        "/bang-diem-thuong-xuyen",
-        form.value.mabd,
-        data
-      );
+    const dkRes = await getAll("/dang-ky-khoa-hoc");
+    const mahvList = dkRes.data
+      .filter((dk) => dk.khoaHoc && dk.khoaHoc.makh === makh)
+      .map((dk) => dk.hocVien?.mahv)
+      .filter(Boolean);
 
-      alert("Cập nhật thành công");
-    } else {
-      await createData(
-        "/bang-diem-thuong-xuyen",
-        data
-      );
+    const hvRes = await getAll("/hoc-vien");
+    const hocVienMap = {};
+    hvRes.data.forEach((hv) => (hocVienMap[hv.mahv] = hv));
 
-      alert("Thêm thành công");
+    const bdRes = await getAll("/bang-diem-thuong-xuyen");
+    const bdMap = {};
+    bdRes.data.forEach((bd) => {
+      if (
+        bd.malop === Number(selectedLop.value) &&
+        bd.monHoc?.mamh === Number(selectedMon.value)
+      ) {
+        bdMap[bd.hocVien?.mahv] = bd;
+      }
+    });
+
+    let list = mahvList.map((mahv) => {
+      const hv = hocVienMap[mahv] || { mahv, hoten: "HV " + mahv };
+      const existing = bdMap[mahv];
+      return {
+        mahv,
+        hoten: hv.hoten,
+        cccd: hv.cccd,
+        mabd: existing ? existing.mabd : null,
+        diem: existing ? existing.diem : null,
+        ghichu: existing ? existing.ghichu || "" : "",
+      };
+    });
+
+    if (isHV.value && myMahv.value) {
+      list = list.filter((s) => String(s.mahv) === String(myMahv.value));
     }
 
-    closeModal();
-    await loadData();
-
+    students.value = list;
+    loaded.value = true;
   } catch (e) {
-    console.log(e);
-    alert("Lưu thất bại");
+    console.error(e);
+    alert("Không tải được danh sách học viên");
+  } finally {
+    loading.value = false;
+  }
+};
+
+const saveAll = async () => {
+  if (!selectedLop.value || !selectedMon.value) return;
+  saving.value = true;
+  try {
+    for (const sv of students.value) {
+      const data = {
+        hocVien: { mahv: Number(sv.mahv) },
+        monHoc: { mamh: Number(selectedMon.value) },
+        diem: sv.diem === "" || sv.diem === null ? null : Number(sv.diem),
+        ghichu: sv.ghichu || "",
+        malop: Number(selectedLop.value),
+        ngayCham: new Date().toISOString().slice(0, 10),
+      };
+      if (sv.mabd) {
+        await updateData("/bang-diem-thuong-xuyen", sv.mabd, { ...data, mabd: sv.mabd });
+      } else {
+        await createData("/bang-diem-thuong-xuyen", data);
+      }
+    }
+    alert("Lưu bảng điểm thành công");
+  } catch (e) {
+    console.error(e);
+    alert("Lưu bảng điểm thất bại");
+  } finally {
+    saving.value = false;
   }
 };
 
 onMounted(async () => {
-  await loadHocVien();
+  await loadMyProfile();
+  await loadLopHoc();
   await loadMonHoc();
-  await loadData();
 });
 </script>
+
+<style scoped>
+.diem-input {
+  max-width: 130px;
+}
+</style>

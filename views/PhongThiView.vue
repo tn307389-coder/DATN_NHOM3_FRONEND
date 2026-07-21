@@ -31,50 +31,54 @@
 
           <div class="modal-body">
 
-            <div class="mb-3">
-              <label class="form-label">
-                Tên phòng
-              </label>
+              <div class="mb-3">
+                <label class="form-label">
+                  Tên phòng <span class="text-danger">*</span>
+                </label>
 
-              <input
-                class="form-control"
-                v-model="form.tenphong"
-                placeholder="Nhập tên phòng">
-            </div>
+                <input
+                  class="form-control"
+                  v-model="form.tenphong"
+                  placeholder="Nhập tên phòng"
+                  required>
+              </div>
 
-            <div class="mb-3">
-              <label class="form-label">
-                Sức chứa
-              </label>
+              <div class="mb-3">
+                <label class="form-label">
+                  Sức chứa <span class="text-danger">*</span>
+                </label>
 
-              <input
-                type="number"
-                class="form-control"
-                v-model="form.succhua">
-            </div>
+                <input
+                  type="number"
+                  class="form-control"
+                  v-model="form.succhua"
+                  required>
+              </div>
 
-            <div class="mb-3">
-              <label class="form-label">
-                Địa điểm
-              </label>
+              <div class="mb-3">
+                <label class="form-label">
+                  Địa điểm <span class="text-danger">*</span>
+                </label>
 
-              <input
-                class="form-control"
-                v-model="form.diadiem">
-            </div>
+                <input
+                  class="form-control"
+                  v-model="form.diadiem"
+                  required>
+              </div>
 
-            <div class="mb-3">
-              <label class="form-label">
-                Trạng thái
-              </label>
+              <div class="mb-3">
+                <label class="form-label">
+                  Trạng thái <span class="text-danger">*</span>
+                </label>
 
-              <select
-                class="form-select"
-                v-model="form.trangthai">
+                <select
+                  class="form-select"
+                  v-model="form.trangthai"
+                  required>
 
-                <option value="">
-                  -- Chọn --
-                </option>
+                  <option value="">
+                    -- Chọn --
+                  </option>
 
                 <option>
                   Hoạt động
@@ -132,6 +136,7 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
   { key: "maphongthi", label: "Mã" },
@@ -204,14 +209,17 @@ const openEdit = (row) => {
   openModal();
 };
 
-const saveData = async () => {
-  if (!form.value.tenphong) {
-    alert("Vui lòng nhập tên phòng");
-    return;
-  }
+const requiredFields = [
+  { key: "tenphong", label: "Tên phòng" },
+  { key: "succhua", label: "Sức chứa" },
+  { key: "diadiem", label: "Địa điểm" },
+  { key: "trangthai", label: "Trạng thái" },
+];
 
-  if (!form.value.succhua) {
-    alert("Vui lòng nhập sức chứa");
+const saveData = async () => {
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 

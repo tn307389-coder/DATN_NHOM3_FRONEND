@@ -30,43 +30,46 @@
 
           <div class="modal-body">
 
-            <div class="mb-3">
-              <label class="form-label">
-                Tiêu đề
-              </label>
+              <div class="mb-3">
+                <label class="form-label">
+                  Tiêu đề <span class="text-danger">*</span>
+                </label>
 
-              <input
-                class="form-control"
-                v-model="form.tieude">
-            </div>
+                <input
+                  class="form-control"
+                  v-model="form.tieude"
+                  required>
+              </div>
 
-            <div class="mb-3">
+              <div class="mb-3">
 
-              <label class="form-label">
-                Nội dung
-              </label>
+                <label class="form-label">
+                  Nội dung <span class="text-danger">*</span>
+                </label>
 
-              <textarea
-                rows="5"
-                class="form-control"
-                v-model="form.noidung">
-              </textarea>
+                <textarea
+                  rows="5"
+                  class="form-control"
+                  v-model="form.noidung"
+                  required>
+                </textarea>
 
-            </div>
+              </div>
 
-            <div class="mb-3">
+              <div class="mb-3">
 
-              <label class="form-label">
-                Đối tượng
-              </label>
+                <label class="form-label">
+                  Đối tượng <span class="text-danger">*</span>
+                </label>
 
-              <select
-                class="form-select"
-                v-model="form.doituong">
+                <select
+                  class="form-select"
+                  v-model="form.doituong"
+                  required>
 
-                <option value="">
-                  -- Chọn --
-                </option>
+                  <option value="">
+                    -- Chọn --
+                  </option>
 
                 <option>
                   Học viên
@@ -122,6 +125,7 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 
 const columns = [
   { key: "matb", label: "Mã" },
@@ -181,7 +185,18 @@ const openEdit = (row) => {
   openModal();
 };
 
+const requiredFields = [
+  { key: "tieude", label: "Tiêu đề" },
+  { key: "noidung", label: "Nội dung" },
+  { key: "doituong", label: "Đối tượng" },
+];
+
 const saveData = async () => {
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
+    return;
+  }
 
   const data = {
     matb: form.value.matb,

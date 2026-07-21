@@ -8,6 +8,9 @@
       id-key="maphong"
       :columns="columns"
       :rows="rows"
+      :addable="!isHV"
+      :editable="!isHV"
+      :deletable="!isHV"
       @reload="loadData"
       @add="openAdd"
       @edit="openEdit"
@@ -30,27 +33,29 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Tên phòng</label>
+              <label class="form-label">Tên phòng <span class="text-danger">*</span></label>
               <input
                 v-model="form.tenphong"
                 class="form-control"
                 placeholder="Ví dụ: Phòng 101"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Sức chứa</label>
+              <label class="form-label">Sức chứa <span class="text-danger">*</span></label>
               <input
                 v-model="form.succhua"
                 type="number"
                 class="form-control"
                 placeholder="Nhập sức chứa"
+                required
               />
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Trạng thái</label>
-              <select v-model="form.trangthai" class="form-select">
+              <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+              <select v-model="form.trangthai" class="form-select" required>
                 <option value="">-- Chọn trạng thái --</option>
                 <option value="Đang sử dụng">Đang sử dụng</option>
                 <option value="Trống">Trống</option>
@@ -83,6 +88,10 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
+import { useMyScope } from "../composables/useMyScope";
+
+const { isHV, myMalop, loadMyScope } = useMyScope();
 
 const columns = [
   { key: "maphong", label: "Mã phòng" },
@@ -105,7 +114,20 @@ const form = ref({
 const loadData = async () => {
   try {
     const res = await getAll("/phong-hoc");
-    rows.value = res.data;
+    let list = res.data;
+    if (isHV.value && myMalop.value.length) {
+      const lopSet = myMalop.value.map(String);
+      const lich = (await getAll("/lich-hoc")).data || [];
+      const myPhong = new Set(
+        lich
+          .filter((l) => l.lopHoc && lopSet.includes(String(l.lopHoc.malop)))
+          .map((l) => l.phongHoc?.maphong)
+          .filter(Boolean)
+          .map(String)
+      );
+      list = list.filter((p) => myPhong.has(String(p.maphong)));
+    }
+    rows.value = list;
   } catch (error) {
     console.log(error);
     alert("Không thể tải dữ liệu phòng học");
@@ -145,9 +167,16 @@ const openEdit = (row) => {
   openModal();
 };
 
+const requiredFields = [
+  { key: "tenphong", label: "Tên phòng" },
+  { key: "succhua", label: "Sức chứa" },
+  { key: "trangthai", label: "Trạng thái" },
+];
+
 const saveData = async () => {
-  if (!form.value.tenphong) {
-    alert("Vui lòng nhập tên phòng");
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 
@@ -173,7 +202,8 @@ const saveData = async () => {
   }
 };
 
-onMounted(() => {
-  loadData();
+onMounted(async () => {
+  await loadMyScope();
+  await loadData();
 });
 </script>

@@ -8,6 +8,9 @@
       id-key="macathi"
       :columns="columns"
       :rows="rows"
+      :addable="!isHV"
+      :editable="!isHV"
+      :deletable="!isHV"
       @reload="loadData"
       @add="openAdd"
       @edit="openEdit"
@@ -33,34 +36,37 @@
 
             <div class="mb-3">
               <label class="form-label">
-                Tên ca thi
+                Tên ca thi <span class="text-danger">*</span>
               </label>
 
               <input
                 class="form-control"
-                v-model="form.tencathi">
+                v-model="form.tencathi"
+                required>
             </div>
 
             <div class="mb-3">
               <label class="form-label">
-                Giờ bắt đầu
+                Giờ bắt đầu <span class="text-danger">*</span>
               </label>
 
               <input
                 type="time"
                 class="form-control"
-                v-model="form.giobatdau">
+                v-model="form.giobatdau"
+                required>
             </div>
 
             <div class="mb-3">
               <label class="form-label">
-                Giờ kết thúc
+                Giờ kết thúc <span class="text-danger">*</span>
               </label>
 
               <input
                 type="time"
                 class="form-control"
-                v-model="form.gioketthuc">
+                v-model="form.gioketthuc"
+                required>
             </div>
 
           </div>
@@ -101,6 +107,10 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
+import { useMyScope } from "../composables/useMyScope";
+
+const { isHV, myMakh, loadMyScope } = useMyScope();
 
 const columns = [
   { key: "macathi", label: "Mã" },
@@ -122,7 +132,20 @@ const form = ref({
 const loadData = async () => {
   try {
     const res = await getAll("/ca-thi");
-    rows.value = res.data;
+    let list = res.data;
+    if (isHV.value && myMakh.value.length) {
+      const khSet = myMakh.value.map(String);
+      const lich = (await getAll("/lich-thi")).data || [];
+      const myCa = new Set(
+        lich
+          .filter((l) => l.khoaHoc && khSet.includes(String(l.khoaHoc.makhoahoc)))
+          .map((l) => l.caThi?.macathi)
+          .filter(Boolean)
+          .map(String)
+      );
+      list = list.filter((c) => myCa.has(String(c.macathi)));
+    }
+    rows.value = list;
   } catch (e) {
     console.log(e);
     alert("Không tải được dữ liệu");
@@ -162,9 +185,16 @@ const openEdit = (row) => {
   openModal();
 };
 
+const requiredFields = [
+  { key: "tencathi", label: "Tên ca thi" },
+  { key: "giobatdau", label: "Giờ bắt đầu" },
+  { key: "gioketthuc", label: "Giờ kết thúc" },
+];
+
 const saveData = async () => {
-  if (!form.value.tencathi) {
-    alert("Vui lòng nhập tên ca");
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
 
@@ -192,7 +222,8 @@ const saveData = async () => {
   }
 };
 
-onMounted(() => {
-  loadData();
+onMounted(async () => {
+  await loadMyScope();
+  await loadData();
 });
 </script>

@@ -23,8 +23,8 @@
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Học viên</label>
-              <select v-model="form.mahv" class="form-select">
+              <label class="form-label">Học viên <span class="text-danger">*</span></label>
+              <select v-model="form.mahv" class="form-select" required>
                 <option value="">-- Chọn học viên --</option>
                 <option
                   v-for="hv in hocVienList"
@@ -36,8 +36,8 @@
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Giáo viên</label>
-              <select v-model="form.magv" class="form-select">
+              <label class="form-label">Giáo viên <span class="text-danger">*</span></label>
+              <select v-model="form.magv" class="form-select" required>
                 <option value="">-- Chọn giáo viên --</option>
                 <option
                   v-for="gv in giaoVienList"
@@ -49,8 +49,8 @@
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Xe tập lái</label>
-              <select v-model="form.maxetl" class="form-select">
+              <label class="form-label">Xe tập lái <span class="text-danger">*</span></label>
+              <select v-model="form.maxetl" class="form-select" required>
                 <option value="">-- Chọn xe tập lái --</option>
                 <option
                   v-for="xtl in xeTapLaiList"
@@ -62,20 +62,22 @@
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Ngày phân công</label>
+              <label class="form-label">Ngày phân công <span class="text-danger">*</span></label>
               <input
                 v-model="form.ngayphancong"
                 type="date"
                 class="form-control"
+                required
               />
             </div>
             <div class="mb-3">
-              <label class="form-label">Ghi chú</label>
+              <label class="form-label">Ghi chú <span class="text-danger">*</span></label>
               <textarea
                 v-model="form.ghichu"
                 class="form-control"
                 rows="3"
                 placeholder="Nhập ghi chú"
+                required
               ></textarea>
             </div>
           </div>
@@ -101,6 +103,7 @@ import {
   createData,
   updateData,
 } from "../services/crudService";
+import { requiredError } from "../services/validation";
 const columns = [
   { key: "mapc", label: "Mã PC" },
   { key: "hocvien", label: "Học viên" },
@@ -192,17 +195,17 @@ const openEdit = (row) => {
   };
   openModal();
 };
+const requiredFields = [
+  { key: "mahv", label: "Học viên" },
+  { key: "magv", label: "Giáo viên" },
+  { key: "maxetl", label: "Xe tập lái" },
+  { key: "ngayphancong", label: "Ngày phân công" },
+  { key: "ghichu", label: "Ghi chú" },
+];
 const saveData = async () => {
-  if (!form.value.mahv) {
-    alert("Vui lòng chọn học viên");
-    return;
-  }
-  if (!form.value.magv) {
-    alert("Vui lòng chọn giáo viên");
-    return;
-  }
-  if (!form.value.maxetl) {
-    alert("Vui lòng chọn xe tập lái");
+  const err = requiredError(form.value, requiredFields);
+  if (err) {
+    alert(err);
     return;
   }
   try {
