@@ -36,12 +36,12 @@ const showRegister = ref(false);
 const registerLoading = ref(false);
 const registerError = ref("");
 const registerSuccess = ref("");
+const authTab = ref("login");
 
 const registerForm = ref({
   hoten: "",
   ngaysinh: "",
   gioitinh: "",
-  cccd: "",
   sodienthoai: "",
   email: "",
   diachi: "",
@@ -67,6 +67,12 @@ watch(showRegister, (val) => {
   }
 });
 
+watch(authTab, () => {
+  error.value = "";
+  registerError.value = "";
+  registerSuccess.value = "";
+});
+
 const loadKhoaHocPublic = async () => {
   try {
     const res = await api.get("/khoa-hoc");
@@ -84,7 +90,6 @@ const submitRegister = async () => {
     { key: "hoten", label: "Họ và tên" },
     { key: "ngaysinh", label: "Ngày sinh" },
     { key: "gioitinh", label: "Giới tính" },
-    { key: "cccd", label: "CCCD" },
     { key: "sodienthoai", label: "Số điện thoại" },
     { key: "email", label: "Email" },
     { key: "diachi", label: "Địa chỉ" },
@@ -104,7 +109,6 @@ const submitRegister = async () => {
       hoten: f.hoten,
       ngaysinh: f.ngaysinh || null,
       gioitinh: f.gioitinh,
-      cccd: f.cccd,
       sodienthoai: f.sodienthoai,
       email: f.email,
       diachi: f.diachi,
@@ -116,13 +120,12 @@ const submitRegister = async () => {
         hoten: "",
         ngaysinh: "",
         gioitinh: "",
-        cccd: "",
         sodienthoai: "",
         email: "",
         diachi: "",
         makh: "",
       };
-      setTimeout(() => (showRegister.value = false), 1800);
+      setTimeout(() => (showLogin.value = false), 1800);
     } else {
       registerError.value = res.data?.message || "Đăng ký thất bại";
     }
@@ -164,11 +167,7 @@ export function useSite() {
           res.data.data.tenvaitro ||
           "Người dùng";
         authVersion.value++;
-        if (res.data.data.maVaiTro === "GV" || res.data.data.maVaiTro === "HV") {
-          router.push("/login");
-        } else {
-          router.push(roleHome(res.data.data.maVaiTro));
-        }
+        router.push(roleHome(res.data.data.maVaiTro));
       } else {
         error.value = res.data.message;
       }
@@ -180,7 +179,8 @@ export function useSite() {
 
   const openRegister = () => {
     if (!khoaHocList.value.length) loadKhoaHocPublic();
-    showRegister.value = true;
+    authTab.value = "register";
+    showLogin.value = true;
   };
 
   return {
@@ -200,6 +200,7 @@ export function useSite() {
     registerError,
     registerSuccess,
     registerForm,
+    authTab,
     goPortal,
     handleLogin,
     openRegister,

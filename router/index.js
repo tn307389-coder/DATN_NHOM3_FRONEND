@@ -33,6 +33,8 @@ import HoSoCuaToiView from "../views/HoSoCuaToiView.vue";
 import DuyetAnhView from "../views/DuyetAnhView.vue";
 import LichCuaToiView from "../views/LichCuaToiView.vue";
 import LichSuBaoTriXeView from "../views/LichSuBaoTriXeView.vue";
+import GvPortalView from "../views/GvPortalView.vue";
+import HvPortalView from "../views/HvPortalView.vue";
 
 // Trang công khai (website)
 import GioiThieuView from "../views/GioiThieuView.vue";
@@ -107,6 +109,8 @@ const routes = [
   { path: "/duyet-anh", component: DuyetAnhView },
   { path: "/lich-cua-toi", component: LichCuaToiView },
   { path: "/lich-su-bao-tri-xe", component: LichSuBaoTriXeView },
+  { path: "/gv-portal", component: GvPortalView },
+  { path: "/hv-portal", component: HvPortalView },
 ];
 
 const router = createRouter({
@@ -121,8 +125,7 @@ router.beforeEach((to, from, next) => {
   if (publicPaths.includes(to.path)) {
     // Nếu đã đăng nhập mà vào trang login thì về trang chủrole
     if (to.path === "/login" && token) {
-      const r = currentRole();
-      next(r === "GV" || r === "HV" ? "/login" : roleHome(r));
+      next(roleHome(currentRole()));
     } else {
       next();
     }

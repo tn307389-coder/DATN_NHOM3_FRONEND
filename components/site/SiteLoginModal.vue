@@ -41,7 +41,7 @@
       </form>
 
       <div class="text-center mt-3">
-        <small class="text-muted">Tài khoản demo: admin / 123456</small>
+        <small class="text-muted">TK demo: admin / admin123 (quản trị) — hocvien1 / 123456 (học viên) — giaovien1 / 123456 (giáo viên)</small>
       </div>
     </div>
   </div>

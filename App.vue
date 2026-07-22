@@ -1,11 +1,5 @@
 <template>
-  <div v-if="isMember" class="site-layout">
-    <SiteNavbar />
-    <router-view />
-    <ToastContainer />
-  </div>
-
-  <div v-else-if="isAnonymous" class="site-layout">
+  <div v-if="isAnonymous" class="site-layout">
     <SiteNavbar />
     <router-view />
     <ToastContainer />
@@ -77,8 +71,10 @@ const user = computed(() => {
   }
 });
 
-const isMember = computed(() => ["GV", "HV"].includes(user.value.maVaiTro));
-const isAnonymous = computed(() => !user.value || !user.value.maVaiTro);
+const isAnonymous = computed(() => {
+  authVersion.value;
+  return !user.value || !user.value.maVaiTro;
+});
 const readOnly = computed(() => getPageMode(user.value.maVaiTro, route.path) === "view");
 provide("readOnly", readOnly);
 provide("theme", theme);
