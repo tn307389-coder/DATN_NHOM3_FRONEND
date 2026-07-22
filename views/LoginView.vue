@@ -339,8 +339,9 @@
         © 2026 DriveHub. Bản quyền thuộc về Trung tâm Đào tạo Lái xe.
       </div>
     </footer>
+  </div>
 
-    <!-- Modal đăng nhập -->
+    <!-- Modal đăng nhập / đăng ký (gộp chung) -->
     <div
       class="login-modal-overlay"
       v-if="showLogin"
@@ -349,13 +350,26 @@
       <div class="login-modal">
         <button class="modal-close" @click="showLogin = false">&times;</button>
 
-        <div class="text-center mb-4">
+        <div class="text-center mb-3">
           <img src="/logo1.jpg" alt="Logo" class="login-logo" />
-          <h3 class="mt-3">Đăng nhập hệ thống</h3>
-          <p class="text-muted mb-0">Vui lòng đăng nhập để tiếp tục</p>
         </div>
 
-        <form @submit.prevent="handleLogin">
+        <!-- Tabs -->
+        <div class="d-flex mb-4 auth-tabs">
+          <button
+            class="auth-tab flex-fill text-center py-2 fw-bold rounded-3"
+            :class="authTab === 'login' ? 'active' : 'text-muted'"
+            @click="authTab = 'login'"
+          >Đăng nhập</button>
+          <button
+            class="auth-tab flex-fill text-center py-2 fw-bold rounded-3"
+            :class="authTab === 'register' ? 'active' : 'text-muted'"
+            @click="authTab = 'register'"
+          >Đăng ký</button>
+        </div>
+
+        <!-- Tab Login -->
+        <form v-if="authTab === 'login'" @submit.prevent="handleLogin">
           <div class="mb-3">
             <label class="form-label">Tên tài khoản hoặc CCCD</label>
             <input
@@ -377,57 +391,28 @@
             />
           </div>
 
-          <div v-if="error" class="alert alert-danger py-2">
-            {{ error }}
-          </div>
+          <div v-if="error" class="alert alert-danger py-2">{{ error }}</div>
 
-          <button type="submit" class="btn btn-primary btn-lg w-100">
-            Đăng nhập
-          </button>
+          <button type="submit" class="btn btn-primary btn-lg w-100">Đăng nhập</button>
+
+          <div class="text-center mt-3">
+            <small class="text-muted">
+              Chưa có tài khoản?
+              <a href="#" class="text-primary fw-semibold" @click.prevent="authTab = 'register'">Đăng ký ngay</a>
+            </small>
+          </div>
         </form>
 
-        <div class="text-center mt-3">
-          <small class="text-muted">Tài khoản demo: admin / 123456</small>
-        </div>
-      </div>
-    </div>
-  </div>
-    <!-- Modal đăng ký khóa học (công khai) -->
-    <div
-      class="login-modal-overlay"
-      v-if="showRegister"
-      @click.self="showRegister = false"
-    >
-      <div class="login-modal register-modal">
-        <button class="modal-close" @click="showRegister = false">&times;</button>
-
-        <div class="text-center mb-3">
-          <h3 class="mt-2">Đăng ký khóa học</h3>
-          <p class="text-muted mb-0">
-            Điền thông tin để đăng ký, chúng tôi sẽ duyệt và liên hệ bạn
-          </p>
-        </div>
-
-        <form @submit.prevent="submitRegister">
+        <!-- Tab Register -->
+        <form v-if="authTab === 'register'" @submit.prevent="submitRegister">
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
-              <input
-                v-model="registerForm.hoten"
-                type="text"
-                class="form-control"
-                placeholder="Nguyễn Văn A"
-                required
-              />
+              <input v-model="registerForm.hoten" type="text" class="form-control" placeholder="Nguyễn Văn A" required />
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label">Ngày sinh <span class="text-danger">*</span></label>
-              <input
-                v-model="registerForm.ngaysinh"
-                type="date"
-                class="form-control"
-                required
-              />
+              <input v-model="registerForm.ngaysinh" type="date" class="form-control" required />
             </div>
           </div>
 
@@ -441,96 +426,64 @@
               </select>
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label">CCCD <span class="text-danger">*</span></label>
-              <input
-                v-model="registerForm.cccd"
-                type="text"
-                class="form-control"
-                placeholder="012345678901"
-                required
-              />
+              <label class="form-label">Gmail <span class="text-danger">*</span></label>
+              <input v-model="registerForm.email" type="email" class="form-control" placeholder="user@gmail.com" required />
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-              <input
-                v-model="registerForm.sodienthoai"
-                type="text"
-                class="form-control"
-                placeholder="0912..."
-                required
-              />
+              <input v-model="registerForm.sodienthoai" type="text" class="form-control" placeholder="0912..." required />
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label">Email <span class="text-danger">*</span></label>
-              <input
-                v-model="registerForm.email"
-                type="email"
-                class="form-control"
-                placeholder="email@drivehub.vn"
-                required
-              />
+              <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+              <input v-model="registerForm.diachi" type="text" class="form-control" placeholder="Quận/Huyện, Tỉnh/TP" required />
             </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
-            <input
-              v-model="registerForm.diachi"
-              type="text"
-              class="form-control"
-              placeholder="Quận/Huyện, Tỉnh/TP"
-              required
-            />
           </div>
 
           <div class="mb-3">
             <label class="form-label">Khóa học đăng ký <span class="text-danger">*</span></label>
             <select v-model="registerForm.makh" class="form-select" required>
               <option value="">-- Chọn khóa học --</option>
-              <option
-                v-for="kh in khoaHocList"
-                :key="kh.makh"
-                :value="kh.makh"
-              >
-                {{ kh.tenkhoahoc }}
-              </option>
+              <option v-for="kh in khoaHocList" :key="kh.makh" :value="kh.makh">{{ kh.tenkhoahoc }}</option>
             </select>
           </div>
 
-          <div v-if="registerError" class="alert alert-danger py-2">
-            {{ registerError }}
-          </div>
-          <div v-if="registerSuccess" class="alert alert-success py-2">
-            {{ registerSuccess }}
-          </div>
+          <div v-if="registerError" class="alert alert-danger py-2">{{ registerError }}</div>
+          <div v-if="registerSuccess" class="alert alert-success py-2">{{ registerSuccess }}</div>
 
-          <button
-            type="submit"
-            class="btn btn-primary btn-lg w-100"
-            :disabled="registerLoading"
-          >
+          <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="registerLoading">
             {{ registerLoading ? "Đang gửi..." : "Gửi đăng ký" }}
           </button>
+
+          <div class="text-center mt-3">
+            <small class="text-muted">
+              Đã có tài khoản?
+              <a href="#" class="text-primary fw-semibold" @click.prevent="authTab = 'login'">Đăng nhập</a>
+            </small>
+          </div>
         </form>
+
+        <div class="text-center mt-3">
+          <small class="text-muted">TK demo: admin / admin123 (quản trị) — hocvien1 / 123456 (học viên) — giaovien1 / 123456 (giáo viên)</small>
       </div>
     </div>
+  </div>
 </template>
-
 <script setup>
 import { ref, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import api from "../services/api";
 import { roleHome } from "../services/permissions";
+import { useSite } from "../composables/useSite";
 
 const router = useRouter();
+const { showLogin, authVersion, authTab, registerForm, registerLoading, registerError, registerSuccess, khoaHocList, submitRegister, openRegister, loadKhoaHocPublic } = useSite();
 
 const username = ref("");
 const password = ref("");
 const error = ref("");
-const showLogin = ref(false);
 const userInput = ref(null);
 
 // Người dùng hiện tại (đọc khi component được mount)
@@ -570,11 +523,8 @@ const handleLogin = async () => {
       localStorage.setItem("user", JSON.stringify(res.data.data));
 
       showLogin.value = false;
-      if (res.data.maVaiTro === "GV" || res.data.maVaiTro === "HV") {
-        router.push("/login"); // GV/HV ở lại trang web ngoài (có TopMenu)
-      } else {
-        router.push(roleHome(res.data.maVaiTro));
-      }
+      authVersion.value++;
+      router.push(roleHome(res.data.data.maVaiTro));
     } else {
       error.value = res.data.message;
     }
@@ -584,106 +534,8 @@ const handleLogin = async () => {
   }
 };
 
-// Đăng ký khóa học công khai (trang web)
-const khoaHocList = ref([]);
-const showRegister = ref(false);
-const registerLoading = ref(false);
-const registerError = ref("");
-const registerSuccess = ref("");
-
-const registerForm = ref({
-  hoten: "",
-  ngaysinh: "",
-  gioitinh: "",
-  cccd: "",
-  sodienthoai: "",
-  email: "",
-  diachi: "",
-  makh: "",
-});
-
-watch(showRegister, (val) => {
-  if (val) {
-    document.body.style.overflow = "hidden";
-    registerError.value = "";
-    registerSuccess.value = "";
-  } else {
-    document.body.style.overflow = "";
-  }
-});
-
-const loadKhoaHocPublic = async () => {
-  try {
-    const res = await api.get("/khoa-hoc");
-    khoaHocList.value = res.data;
-  } catch (e) {
-    console.log(e);
-  }
-};
-
-const openRegister = () => {
-  showRegister.value = true;
-};
-
-const submitRegister = async () => {
-  registerError.value = "";
-  registerSuccess.value = "";
-  const f = registerForm.value;
-
-  const requiredFields = [
-    { key: "hoten", label: "Họ và tên" },
-    { key: "ngaysinh", label: "Ngày sinh" },
-    { key: "gioitinh", label: "Giới tính" },
-    { key: "cccd", label: "CCCD" },
-    { key: "sodienthoai", label: "Số điện thoại" },
-    { key: "email", label: "Email" },
-    { key: "diachi", label: "Địa chỉ" },
-    { key: "makh", label: "Khóa học" },
-  ];
-  const missing = requiredFields
-    .filter((rf) => !String(registerForm.value[rf.key] ?? "").trim())
-    .map((rf) => rf.label);
-  if (missing.length) {
-    registerError.value = "Vui lòng điền đầy đủ các thông tin: " + missing.join(", ");
-    return;
-  }
-
-  registerLoading.value = true;
-  try {
-    const res = await api.post("/dang-ky-khoa-hoc/public", {
-      hoten: f.hoten,
-      ngaysinh: f.ngaysinh || null,
-      gioitinh: f.gioitinh,
-      cccd: f.cccd,
-      sodienthoai: f.sodienthoai,
-      email: f.email,
-      diachi: f.diachi,
-      makh: Number(f.makh),
-    });
-
-    if (res.data && res.data.success) {
-      registerSuccess.value = res.data.message || "Đăng ký thành công";
-      registerForm.value = {
-        hoten: "",
-        ngaysinh: "",
-        gioitinh: "",
-        cccd: "",
-        sodienthoai: "",
-        email: "",
-        diachi: "",
-        makh: "",
-      };
-      setTimeout(() => (showRegister.value = false), 1800);
-    } else {
-      registerError.value = res.data?.message || "Đăng ký thất bại";
-    }
-  } catch (err) {
-    registerError.value = err.response?.data?.message || "Đăng ký thất bại";
-    console.error(err);
-  } finally {
-    registerLoading.value = false;
-  }
-};
+// Đăng ký khóa học công khai — dùng từ useSite
+loadKhoaHocPublic();
 
 loadKhoaHocPublic();
 </script>
@@ -1421,7 +1273,7 @@ loadKhoaHocPublic();
 .login-modal {
   position: relative;
   width: 100%;
-  max-width: 420px;
+  max-width: 500px;
   background: #fff;
   padding: 36px;
   border-radius: 16px;
@@ -1499,5 +1351,21 @@ loadKhoaHocPublic();
   .hero-features {
     grid-template-columns: 1fr;
   }
+}
+
+.auth-tabs {
+  background: #f1f5f9;
+  padding: 4px;
+}
+.auth-tab {
+  border: none;
+  background: transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.auth-tab.active {
+  background: #fff;
+  color: #0d6efd !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 </style>

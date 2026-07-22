@@ -80,6 +80,7 @@ import { requiredError } from "../services/validation";
 const columns = [
   { key: "makh", label: "Mã KH" },
   { key: "tenkhoahoc", label: "Tên khóa học" },
+  { key: "soLuongHocVien", label: "Số HV" },
   { key: "tencth", label: "Chương trình" },
   { key: "ngaybatdau", label: "Ngày bắt đầu" },
   { key: "ngayketthuc", label: "Ngày kết thúc" },
@@ -102,10 +103,7 @@ const form = ref({
 const loadData = async () => {
   try {
     const res = await getAll("/khoa-hoc");
-    rows.value = (res.data || []).map((r) => ({
-      ...r,
-      tencth: r.chuongTrinhHoc ? r.chuongTrinhHoc.tencth : "",
-    }));
+    rows.value = res.data || [];
   } catch (error) {
     console.log(error);
     alert("Không thể tải dữ liệu khóa học");

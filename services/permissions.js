@@ -6,6 +6,8 @@ export const ROLE_HV = "HV";
 // Toàn bộ trang điều hướng (tên + icon + path)
 export const MENU = [
   { path: "/dashboard", icon: "📊", name: "Dashboard" },
+  { path: "/gv-portal", icon: "📊", name: "Bảng tin" },
+  { path: "/hv-portal", icon: "📊", name: "Bảng tin" },
   { path: "/tai-khoan", icon: "👤", name: "Tài khoản" },
   { path: "/hoc-vien", icon: "👨‍🎓", name: "Học viên" },
   { path: "/ho-so-hoc-vien", icon: "📁", name: "Hồ sơ học viên" },
@@ -66,6 +68,7 @@ const nvPages = [
 ];
 
 const gvView = [
+  "/gv-portal",
   "/giao-vien",
   "/chuong-trinh-hoc",
   "/lop-hoc",
@@ -86,6 +89,7 @@ const gvEdit = [
 ];
 
 const hvView = [
+  "/hv-portal",
   "/chuong-trinh-hoc",
   "/quan-ly-khoa-hoc",
   "/lop-hoc",
@@ -115,8 +119,9 @@ hvView.forEach((p) => (ROLE_PAGES.HV[p] = "view"));
 ["ADMIN", "NV", "GV", "HV"].forEach((r) => (ROLE_PAGES[r]["/ho-so-cua-toi"] = "view"));
 
 // Danh sách đường dẫn được phép của vai trò (để lọc menu + guard)
+const adminExclude = ["/gv-portal", "/hv-portal"];
 export function allowedPaths(role) {
-  if (role === ROLE_ADMIN) return MENU.map((m) => m.path);
+  if (role === ROLE_ADMIN) return MENU.map((m) => m.path).filter((p) => !adminExclude.includes(p));
   return Object.keys(ROLE_PAGES[role] || {});
 }
 
@@ -132,6 +137,8 @@ export function canAccess(role, path) {
 // Trang đích sau khi đăng nhập
 export function roleHome(role) {
   if (role === ROLE_ADMIN) return "/dashboard";
+  if (role === ROLE_GV) return "/gv-portal";
+  if (role === ROLE_HV) return "/hv-portal";
   const paths = allowedPaths(role);
   return paths.length ? paths[0] : "/login";
 }
