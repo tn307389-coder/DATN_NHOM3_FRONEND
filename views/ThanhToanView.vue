@@ -107,20 +107,16 @@
               <div class="col-md-6">
                 <label class="form-label fw-semibold small"><i class="bi bi-credit-card me-1"></i>Phương thức <span class="text-danger">*</span></label>
                 <select v-model="form.phuongthuc" class="form-select" :class="errors.phuongthuc ? 'is-invalid' : ''">
-                  <option value="">-- Chọn PT --</option>
-                  <option value="Tiền mặt">Tiền mặt</option>
-                  <option value="Chuyển khoản">Chuyển khoản</option>
-                  <option value="Ví điện tử">Ví điện tử</option>
+                <option value="">-- Chọn PT --</option>
+                <option v-for="item in ptThanhToanOptions" :key="item.ma" :value="item.ma">{{ item.ten }}</option>
                 </select>
                 <div v-if="errors.phuongthuc" class="invalid-feedback">{{ errors.phuongthuc }}</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold small"><i class="bi bi-flag me-1"></i>Trạng thái <span class="text-danger">*</span></label>
                 <select v-model="form.trangthai" class="form-select" :class="errors.trangthai ? 'is-invalid' : ''">
-                  <option value="">-- Chọn TT --</option>
-                  <option value="Đã thanh toán">Đã thanh toán</option>
-                  <option value="Chưa thanh toán">Chưa thanh toán</option>
-                  <option value="Thanh toán một phần">Thanh toán một phần</option>
+                <option value="">-- Chọn TT --</option>
+                <option v-for="item in trangThaiTtOptions" :key="item.ma" :value="item.ma">{{ item.ten }}</option>
                 </select>
                 <div v-if="errors.trangthai" class="invalid-feedback">{{ errors.trangthai }}</div>
               </div>
@@ -143,6 +139,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
+import api from "../services/api";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
 
@@ -155,6 +152,9 @@ const columns = [
   { key: "phuongthuc", label: "PT" },
   { key: "trangthai", label: "Trạng thái" },
 ];
+
+const ptThanhToanOptions = ref([]);
+const trangThaiTtOptions = ref([]);
 
 const rows = ref([]);
 const hocVienList = ref([]);
@@ -243,7 +243,7 @@ const saveData = async () => {
 };
 
 onMounted(async () => {
-  await Promise.all([loadHocVien(), loadDangKy()]);
+  await Promise.all([loadHocVien(), loadDangKy(), loadDanhMuc()]);
   await loadData();
 });
 </script>

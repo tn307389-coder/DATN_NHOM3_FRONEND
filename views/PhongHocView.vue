@@ -90,9 +90,7 @@
               <label class="form-label fw-semibold small"><i class="bi bi-flag me-1"></i>Trạng thái <span class="text-danger">*</span></label>
               <select v-model="form.trangthai" class="form-select" :class="errors.trangthai ? 'is-invalid' : ''">
                 <option value="">-- Chọn trạng thái --</option>
-                <option value="Đang sử dụng">Đang sử dụng</option>
-                <option value="Trống">Trống</option>
-                <option value="Bảo trì">Bảo trì</option>
+                <option v-for="item in trangThaiPhongOptions" :key="item.ma" :value="item.ma">{{ item.ten }}</option>
               </select>
               <div v-if="errors.trangthai" class="invalid-feedback">{{ errors.trangthai }}</div>
             </div>
@@ -114,6 +112,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
+import api from "../services/api";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
 import { useMyScope } from "../composables/useMyScope";
@@ -133,12 +132,18 @@ const saving = ref(false);
 
 const form = ref({ maphong: null, tenphong: "", succhua: "", trangthai: "" });
 const errors = ref({});
+const trangThaiPhongOptions = ref([]);
 
 const filterCount = (s) => rows.value.filter((r) => r.trangthai === s).length;
 
 const trangThaiBadge = (t) => {
   const map = { "Đang sử dụng": "bg-info bg-opacity-10 text-info", "Trống": "bg-success bg-opacity-10 text-success", "Bảo trì": "bg-warning bg-opacity-10 text-warning" };
   return map[t] || "bg-secondary bg-opacity-10 text-secondary";
+};
+
+const loadTrangThaiPhong = async () => {
+  try { const res = await api.get("/danh-muc/trang-thai-phong"); trangThaiPhongOptions.value = res.data || []; }
+  catch (e) { console.log(e); window.$toast?.add("Không thể tải trạng thái phòng", "error"); }
 };
 
 const loadData = async () => {
@@ -192,6 +197,7 @@ const saveData = async () => {
 
 onMounted(async () => {
   await loadMyScope();
+  await loadTrangThaiPhong();
   await loadData();
 });
 </script>

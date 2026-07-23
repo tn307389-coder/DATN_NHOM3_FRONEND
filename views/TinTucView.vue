@@ -62,16 +62,12 @@
     </section>
 
     <SiteFooter />
-    <SiteLoginModal />
-    <SiteRegisterModal />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import SiteFooter from "../components/site/SiteFooter.vue";
-import SiteLoginModal from "../components/site/SiteLoginModal.vue";
-import SiteRegisterModal from "../components/site/SiteRegisterModal.vue";
 import api from "../services/api";
 
 const news = ref([]);

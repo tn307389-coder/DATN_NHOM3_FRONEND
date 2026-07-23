@@ -106,9 +106,7 @@
               <label class="form-label fw-semibold small"><i class="bi bi-flag me-1"></i>Trạng thái <span class="text-danger">*</span></label>
               <select v-model="form.trangthai" class="form-select" :class="errors.trangthai ? 'is-invalid' : ''">
                 <option value="">-- Chọn trạng thái --</option>
-                <option value="Đang học">Đang học</option>
-                <option value="Đã kết thúc">Đã kết thúc</option>
-                <option value="Tạm dừng">Tạm dừng</option>
+                <option v-for="item in trangThaiLopOptions" :key="item.ma" :value="item.ma">{{ item.ten }}</option>
               </select>
               <div v-if="errors.trangthai" class="invalid-feedback">{{ errors.trangthai }}</div>
             </div>
@@ -130,6 +128,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
+import api from "../services/api";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
 
@@ -152,6 +151,7 @@ const saving = ref(false);
 
 const form = ref({ malop: null, tenlop: "", makh: "", magv: "", ngaybatdau: "", ngayketthuc: "", trangthai: "" });
 const errors = ref({});
+const trangThaiLopOptions = ref([]);
 
 const filterCount = (status) => rows.value.filter((r) => r.trangthai === status).length;
 
@@ -186,6 +186,11 @@ const loadKhoaHoc = async () => {
 const loadGiaoVien = async () => {
   try { giaoVienList.value = (await getAll("/giao-vien")).data || []; }
   catch (e) { console.log(e); window.$toast?.add("Không thể tải giáo viên", "error"); }
+};
+
+const loadTrangThaiLop = async () => {
+  try { const res = await api.get("/danh-muc/trang-thai-lop"); trangThaiLopOptions.value = res.data || []; }
+  catch (e) { console.log(e); }
 };
 
 const resetForm = () => {
@@ -237,7 +242,7 @@ const saveData = async () => {
 };
 
 onMounted(async () => {
-  await Promise.all([loadKhoaHoc(), loadGiaoVien()]);
+  await Promise.all([loadKhoaHoc(), loadGiaoVien(), loadTrangThaiLop()]);
   await loadData();
 });
 </script>

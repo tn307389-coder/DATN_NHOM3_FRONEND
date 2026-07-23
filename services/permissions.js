@@ -39,6 +39,7 @@ export const MENU = [
   { path: "/duyet-anh", icon: "🖼️", name: "Duyệt ảnh" },
   { path: "/lich-cua-toi", icon: "📅", name: "Lịch của tôi" },
   { path: "/lich-su-bao-tri-xe", icon: "🔧", name: "Bảo trì xe" },
+  { path: "/quan-ly-tin-tuc", icon: "📰", name: "Tin tức" },
 ];
 
 const nvPages = [
@@ -65,6 +66,7 @@ const nvPages = [
   "/duyet-anh",
   "/lich-cua-toi",
   "/lich-su-bao-tri-xe",
+  "/quan-ly-tin-tuc",
 ];
 
 const gvView = [

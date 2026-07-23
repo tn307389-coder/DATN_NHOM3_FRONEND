@@ -48,12 +48,27 @@ const registerForm = ref({
   makh: "",
 });
 
+// OTP state
+const otpSent = ref(false);
+const otpVerified = ref(false);
+const otpCode = ref("");
+const otpSending = ref(false);
+const otpVerifying = ref(false);
+const otpTimer = ref(0);
+let otpInterval = null;
+
 watch(showLogin, (val) => {
   if (val) {
     nextTick(() => userInput.value?.focus());
     document.body.style.overflow = "hidden";
   } else {
     document.body.style.overflow = "";
+    // Reset OTP khi đóng modal
+    otpSent.value = false;
+    otpVerified.value = false;
+    otpCode.value = "";
+    if (otpInterval) { clearInterval(otpInterval); otpInterval = null; }
+    otpTimer.value = 0;
   }
 });
 
@@ -71,6 +86,12 @@ watch(authTab, () => {
   error.value = "";
   registerError.value = "";
   registerSuccess.value = "";
+  // Reset OTP khi chuyển tab
+  otpSent.value = false;
+  otpVerified.value = false;
+  otpCode.value = "";
+  if (otpInterval) { clearInterval(otpInterval); otpInterval = null; }
+  otpTimer.value = 0;
 });
 
 const loadKhoaHocPublic = async () => {
@@ -100,6 +121,11 @@ const submitRegister = async () => {
     .map((rf) => rf.label);
   if (missing.length) {
     registerError.value = "Vui lòng điền đầy đủ các thông tin: " + missing.join(", ");
+    return;
+  }
+
+  if (!otpVerified.value) {
+    registerError.value = "Vui lòng xác thực OTP trước khi gửi đăng ký";
     return;
   }
 
@@ -183,28 +209,87 @@ export function useSite() {
     showLogin.value = true;
   };
 
+  const handleGoogleLogin = async (idToken) => {
+    try {
+      const res = await api.post("/login/google", { idToken });
+      if (res.data.success) {
+        localStorage.setItem("token", res.data.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.data));
+        showLogin.value = false;
+        loggedIn.value = true;
+        role.value = res.data.data.maVaiTro;
+        displayName.value = res.data.data.hoten || res.data.data.tenTaiKhoan || "Người dùng";
+        authVersion.value++;
+        router.push(roleHome(res.data.data.maVaiTro));
+      } else {
+        error.value = res.data.message;
+      }
+    } catch (err) {
+      error.value = err.response?.data?.message || "Đăng nhập Google thất bại";
+    }
+  };
+
+  // OTP functions
+  const sendOtp = async () => {
+    const email = registerForm.value.email;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      registerError.value = "Vui lòng nhập email hợp lệ trước khi gửi OTP";
+      return;
+    }
+    otpSending.value = true;
+    registerError.value = "";
+    try {
+      const res = await api.post("/dang-ky-khoa-hoc/send-otp", { email });
+      if (res.data.success) {
+        otpSent.value = true;
+        otpTimer.value = 60;
+        if (otpInterval) clearInterval(otpInterval);
+        otpInterval = setInterval(() => {
+          otpTimer.value--;
+          if (otpTimer.value <= 0) { clearInterval(otpInterval); otpInterval = null; }
+        }, 1000);
+        registerSuccess.value = "Mã OTP đã gửi đến email của bạn";
+      } else {
+        registerError.value = res.data.message;
+      }
+    } catch (e) {
+      registerError.value = e.response?.data?.message || "Gửi OTP thất bại";
+    } finally {
+      otpSending.value = false;
+    }
+  };
+
+  const verifyOtp = async () => {
+    if (!otpCode.value || otpCode.value.length < 6) {
+      registerError.value = "Vui lòng nhập mã OTP";
+      return;
+    }
+    otpVerifying.value = true;
+    registerError.value = "";
+    try {
+      const res = await api.post("/dang-ky-khoa-hoc/verify-otp", {
+        email: registerForm.value.email,
+        otp: otpCode.value,
+      });
+      if (res.data.success) {
+        otpVerified.value = true;
+        registerSuccess.value = "Xác thực OTP thành công!";
+        if (otpInterval) { clearInterval(otpInterval); otpInterval = null; }
+      } else {
+        registerError.value = res.data.message;
+      }
+    } catch (e) {
+      registerError.value = e.response?.data?.message || "Xác thực OTP thất bại";
+    } finally {
+      otpVerifying.value = false;
+    }
+  };
+
   return {
-    username,
-    password,
-    error,
-    showLogin,
-    userInput,
-    loggedIn,
-    role,
-    displayName,
-    authVersion,
-    logout,
-    khoaHocList,
-    showRegister,
-    registerLoading,
-    registerError,
-    registerSuccess,
-    registerForm,
-    authTab,
-    goPortal,
-    handleLogin,
-    openRegister,
-    submitRegister,
-    loadKhoaHocPublic,
+    username, password, error, showLogin, userInput,
+    loggedIn, role, displayName, authVersion, logout,
+    khoaHocList, showRegister, registerLoading, registerError, registerSuccess, registerForm,
+    authTab, goPortal, handleLogin, handleGoogleLogin, openRegister, submitRegister, loadKhoaHocPublic,
+    otpSent, otpVerified, otpCode, otpSending, otpVerifying, otpTimer, sendOtp, verifyOtp,
   };
 }

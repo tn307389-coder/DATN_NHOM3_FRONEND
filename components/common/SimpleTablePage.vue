@@ -68,7 +68,23 @@
           </table>
         </div>
 
-        <div v-if="filteredRows.length === 0" class="text-center py-5">
+        <div v-if="loading" class="text-center py-5">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="text-muted mb-0">Đang tải dữ liệu...</p>
+        </div>
+
+        <div v-else-if="error" class="text-center py-5">
+          <i class="bi bi-exclamation-triangle display-1 text-warning"></i>
+          <p class="text-warning mt-2 mb-1">Không thể tải dữ liệu</p>
+          <p class="text-muted small mb-2">{{ error }}</p>
+          <button class="btn btn-outline-primary btn-sm rounded-pill" @click="$emit('reload')">
+            <i class="bi bi-arrow-clockwise me-1"></i> Thử lại
+          </button>
+        </div>
+
+        <div v-else-if="filteredRows.length === 0" class="text-center py-5">
           <slot name="empty-state">
             <i class="bi bi-inbox display-1 text-muted"></i>
             <p class="text-muted mt-2 mb-0">Không có dữ liệu</p>
@@ -100,6 +116,8 @@ const props = defineProps({
   editable: { type: Boolean, default: true },
   deletable: { type: Boolean, default: true },
   addable: { type: Boolean, default: true },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: "" },
 });
 
 const emit = defineEmits(["add", "edit", "reload"]);

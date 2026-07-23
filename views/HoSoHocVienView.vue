@@ -142,7 +142,7 @@
             <div class="row g-4">
               <div class="col-md-4 text-center">
                 <div class="border-2 border-dashed rounded-3 p-3 bg-light" style="border-color:#cbd5e1">
-                  <img v-if="detail.anhCanhCan" :src="photoUrl(detail.anhCanhCan)" alt="Ảnh căn cước" class="img-fluid rounded" style="max-height:200px;width:100%;object-fit:cover" />
+                  <img v-if="detail.anhCanhCuoc" :src="photoUrl(detail.anhCanhCuoc)" alt="Ảnh căn cước" class="img-fluid rounded" style="max-height:200px;width:100%;object-fit:cover" />
                   <div v-else class="py-4 text-muted">
                     <i class="bi bi-person-fill d-block fs-1 mb-1"></i>
                     <small>Chưa có ảnh</small>

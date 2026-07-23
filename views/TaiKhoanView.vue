@@ -162,32 +162,19 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
+import api from "../services/api";
 import { getAllTaiKhoan, addTaiKhoan, updateTaiKhoan, deleteTaiKhoan } from "../services/taiKhoanService";
 
-const roles = [
-  { maVaiTro: "ADMIN", tenVaiTro: "Quản trị viên" },
-  { maVaiTro: "GV", tenVaiTro: "Giáo viên" },
-  { maVaiTro: "HV", tenVaiTro: "Học viên" },
-  { maVaiTro: "NV", tenVaiTro: "Nhân viên" },
-];
-
+const roles = ref([]);
 const taiKhoanList = ref([]);
 const keyword = ref("");
 const roleFilter = ref("");
 const isEdit = ref(false);
 const saving = ref(false);
-
 const form = ref({ matk: null, tendangnhap: "", matkhau: "", hoten: "", email: "", maVaiTro: "", trangthai: true });
 const errors = ref({});
-
 const activeCount = computed(() => taiKhoanList.value.filter((i) => i.trangthai === "ACTIVE").length);
 const lockedCount = computed(() => taiKhoanList.value.filter((i) => i.trangthai !== "ACTIVE").length);
-
-const roleBadge = (ma) => {
-  const map = { ADMIN: "bg-danger bg-opacity-10 text-danger", GV: "bg-success bg-opacity-10 text-success", HV: "bg-primary bg-opacity-10 text-primary", NV: "bg-info bg-opacity-10 text-info" };
-  return map[ma] || "bg-secondary bg-opacity-10 text-secondary";
-};
-
 const filteredTaiKhoan = computed(() => {
   return taiKhoanList.value.filter((item) => {
     const kw = !keyword.value || (item.tendangnhap?.toLowerCase().includes(keyword.value.toLowerCase()) || item.hoten?.toLowerCase().includes(keyword.value.toLowerCase()));
@@ -196,11 +183,19 @@ const filteredTaiKhoan = computed(() => {
   });
 });
 
+const roleBadge = (maVaiTro) => {
+  const map = { ADMIN: "bg-danger bg-opacity-10 text-danger", NV: "bg-info bg-opacity-10 text-info", GV: "bg-warning bg-opacity-10 text-warning", HV: "bg-success bg-opacity-10 text-success" };
+  return map[maVaiTro] || "bg-secondary bg-opacity-10 text-secondary";
+};
+
 const loadTaiKhoan = async () => {
-  try {
-    const res = await getAllTaiKhoan();
-    taiKhoanList.value = res.data;
-  } catch (e) { console.error(e); window.$toast?.add("Không thể tải dữ liệu tài khoản", "error"); }
+  try { const res = await getAllTaiKhoan(); taiKhoanList.value = res.data; }
+  catch (e) { console.error(e); window.$toast?.add("Không thể tải dữ liệu tài khoản", "error"); }
+};
+
+const loadRoles = async () => {
+  try { const res = await api.get("/danh-muc/vai-tro"); roles.value = (res.data || []).map((i) => ({ maVaiTro: i.ma, tenVaiTro: i.ten })); }
+  catch (e) { console.error(e); }
 };
 
 const resetForm = () => {
@@ -274,7 +269,10 @@ const removeTaiKhoan = async (item) => {
   }
 };
 
-onMounted(loadTaiKhoan);
+onMounted(async () => {
+  await loadRoles();
+  await loadTaiKhoan();
+});
 </script>
 
 <style scoped>
