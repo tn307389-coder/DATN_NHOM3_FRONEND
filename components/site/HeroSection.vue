@@ -2,7 +2,7 @@
   <section id="top" class="hero">
     <div class="container hero-grid">
       <div class="hero-text">
-        <span class="hero-badge">⭐ Trung tâm đào tạo & sát hạch lái xe uy tín #1</span>
+        <span class="hero-badge"><i class="bi bi-star-fill"></i> Trung tâm đào tạo & sát hạch lái xe uy tín #1</span>
         <h1>
           Học lái xe dễ dàng,<br />
           <span class="hl">lấy bằng nhanh chóng</span>
@@ -21,10 +21,10 @@
         </div>
 
         <ul class="hero-features">
-          <li>🚗 Đào tạo các hạng A1 – E</li>
-          <li>📅 Lịch học & điểm danh trực tuyến</li>
-          <li>📝 Thi sát hạch & tra cứu kết quả</li>
-          <li>🪪 Quản lý hồ sơ & cấp lại GPLX</li>
+          <li><i class="bi bi-car-front-fill"></i> Đào tạo các hạng A1 – E</li>
+          <li><i class="bi bi-calendar-check-fill"></i> Lịch học & điểm danh trực tuyến</li>
+          <li><i class="bi bi-file-text-fill"></i> Thi sát hạch & tra cứu kết quả</li>
+          <li><i class="bi bi-person-badge-fill"></i> Quản lý hồ sơ & cấp lại GPLX</li>
         </ul>
       </div>
 

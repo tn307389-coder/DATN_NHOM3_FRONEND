@@ -13,7 +13,6 @@ import PhanCongView from "../views/PhanCongView.vue";
 import LichHocView from "../views/LichHocView.vue";
 import ThiSatHachView from "../views/ThiSatHachView.vue";
 import TraGPLXView from "../views/TraGPLXView.vue";
-import LoginView from "../views/LoginView.vue";
 import HangGPLXView from "../views/HangGPLXView.vue";
 import XeView from "../views/XeView.vue";
 import KhoaHocView from "../views/KhoaHocView.vue";
@@ -33,6 +32,7 @@ import HoSoCuaToiView from "../views/HoSoCuaToiView.vue";
 import DuyetAnhView from "../views/DuyetAnhView.vue";
 import LichCuaToiView from "../views/LichCuaToiView.vue";
 import LichSuBaoTriXeView from "../views/LichSuBaoTriXeView.vue";
+import TinTucManagerView from "../views/TinTucManagerView.vue";
 import GvPortalView from "../views/GvPortalView.vue";
 import HvPortalView from "../views/HvPortalView.vue";
 
@@ -43,12 +43,14 @@ import KhoaHocPublicView from "../views/KhoaHocPublicView.vue";
 import BangGiaView from "../views/BangGiaView.vue";
 import TinTucView from "../views/TinTucView.vue";
 import LienHeView from "../views/LienHeView.vue";
+import TrangChuView from "../views/TrangChuView.vue";
 
 import { canAccess, roleHome } from "../services/permissions";
 
 function currentRole() {
   try {
-    return JSON.parse(localStorage.getItem("user") || "{}").maVaiTro;
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    return user.maVaiTro || null;
   } catch (e) {
     return null;
   }
@@ -67,8 +69,8 @@ const publicPaths = [
 ];
 
 const routes = [
-  { path: "/login", component: LoginView },
-  { path: "/trang-chu", component: LoginView },
+  { path: "/login", redirect: "/trang-chu" },
+  { path: "/trang-chu", component: TrangChuView },
   { path: "/gioi-thieu", component: GioiThieuView },
   { path: "/hang-gplx", component: HangGplxPublicView },
   { path: "/khoa-hoc", component: KhoaHocPublicView },
@@ -109,6 +111,7 @@ const routes = [
   { path: "/duyet-anh", component: DuyetAnhView },
   { path: "/lich-cua-toi", component: LichCuaToiView },
   { path: "/lich-su-bao-tri-xe", component: LichSuBaoTriXeView },
+  { path: "/quan-ly-tin-tuc", component: TinTucManagerView },
   { path: "/gv-portal", component: GvPortalView },
   { path: "/hv-portal", component: HvPortalView },
 ];
@@ -118,38 +121,36 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const token = localStorage.getItem("token");
 
   // Trang công khai: cho phép truy cập không cần đăng nhập
   if (publicPaths.includes(to.path)) {
-    // Nếu đã đăng nhập mà vào trang login thì về trang chủrole
+    // Nếu đã đăng nhập mà vào trang login thì về trang chủ role
     if (to.path === "/login" && token) {
-      next(roleHome(currentRole()));
-    } else {
-      next();
+      return roleHome(currentRole());
     }
     return;
   }
 
   if (!token) {
-    next("/login");
-    return;
+    return "/trang-chu";
   }
 
   const role = currentRole();
+  if (!role) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    return "/trang-chu";
+  }
 
   if (to.path === "/") {
-    next(roleHome(role));
-    return;
+    return roleHome(role);
   }
 
   if (!canAccess(role, to.path)) {
-    next(roleHome(role));
-    return;
+    return roleHome(role);
   }
-
-  next();
 });
 
 export default router;

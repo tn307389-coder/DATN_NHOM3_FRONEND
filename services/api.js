@@ -22,13 +22,12 @@ api.interceptors.request.use(
 // Xử lý khi token hết hạn / không hợp lệ
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
+  async (error) => {
+    if (error.response && error.response.status === 401 && localStorage.getItem("token")) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      if (location.pathname !== "/login") {
-        location.href = "/login";
-      }
+      const { default: router } = await import("../router");
+      router.push("/trang-chu");
     }
     return Promise.reject(error);
   }

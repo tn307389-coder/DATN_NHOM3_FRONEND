@@ -23,22 +23,22 @@
           học lái xe an toàn, bài bản và hiệu quả.
         </p>
         <ul class="tick-list">
-          <li><i class="bi bi-patch-check-fill"></i> Giáo trình chuẩn Bộ Giao thông Vận tải</li>
-          <li><i class="bi bi-patch-check-fill"></i> Xe tập lái đời mới, bảo hiểm toàn diện</li>
-          <li><i class="bi bi-patch-check-fill"></i> Lịch học linh hoạt, ca sáng – chiều – tối</li>
-          <li><i class="bi bi-patch-check-fill"></i> Hỗ trợ thủ tục thi và cấp bằng tận nơi</li>
+          <li><i class="bi bi-patch-check-fill gold-text"></i> Giáo trình chuẩn Bộ Giao thông Vận tải</li>
+          <li><i class="bi bi-patch-check-fill gold-text"></i> Xe tập lái đời mới, bảo hiểm toàn diện</li>
+          <li><i class="bi bi-patch-check-fill gold-text"></i> Lịch học linh hoạt, ca sáng – chiều – tối</li>
+          <li><i class="bi bi-patch-check-fill gold-text"></i> Hỗ trợ thủ tục thi và cấp bằng tận nơi</li>
         </ul>
         <div class="about-cards">
           <div class="mini-card">
-            <div class="mini-ic">🎯</div>
+            <div class="mini-ic"><i class="bi bi-trophy-fill"></i></div>
             <h4>Tỷ lệ đậu cao</h4>
           </div>
           <div class="mini-card">
-            <div class="mini-ic">🕒</div>
+            <div class="mini-ic"><i class="bi bi-clock-fill"></i></div>
             <h4>Linh hoạt thời gian</h4>
           </div>
           <div class="mini-card">
-            <div class="mini-ic">💡</div>
+            <div class="mini-ic"><i class="bi bi-chat-heart-fill"></i></div>
             <h4>Hỗ trợ tận tâm</h4>
           </div>
         </div>

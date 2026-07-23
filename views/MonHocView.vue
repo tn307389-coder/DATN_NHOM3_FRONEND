@@ -74,9 +74,7 @@
               <label class="form-label fw-semibold small"><i class="bi bi-tag me-1"></i>Loại môn <span class="text-danger">*</span></label>
               <select v-model="form.loaimonhoc" class="form-select" :class="errors.loaimonhoc ? 'is-invalid' : ''">
                 <option value="">-- Chọn loại môn --</option>
-                <option value="Lý thuyết">Lý thuyết</option>
-                <option value="Thực hành">Thực hành</option>
-                <option value="Mô phỏng">Mô phỏng</option>
+                <option v-for="item in loaiMonOptions" :key="item.ma" :value="item.ma">{{ item.ten }}</option>
               </select>
               <div v-if="errors.loaimonhoc" class="invalid-feedback">{{ errors.loaimonhoc }}</div>
             </div>
@@ -108,6 +106,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
+import api from "../services/api";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
 
@@ -122,6 +121,7 @@ const columns = [
 const rows = ref([]);
 const isEdit = ref(false);
 const saving = ref(false);
+const loaiMonOptions = ref([]);
 
 const form = ref({ mamh: null, tenmonhoc: "", loaimonhoc: "", sotiet: "", ghichu: "" });
 const errors = ref({});
@@ -134,10 +134,13 @@ const loaiBadge = (v) => {
 };
 
 const loadData = async () => {
-  try {
-    const res = await getAll("/mon-hoc");
-    rows.value = res.data || [];
-  } catch (e) { console.log(e); window.$toast?.add("Không thể tải dữ liệu môn học", "error"); }
+  try { rows.value = (await getAll("/mon-hoc")).data || []; }
+  catch (e) { console.log(e); window.$toast?.add("Không thể tải dữ liệu môn học", "error"); }
+};
+
+const loadLoaiMon = async () => {
+  try { const res = await api.get("/danh-muc/loai-mon"); loaiMonOptions.value = res.data || []; }
+  catch (e) { console.log(e); }
 };
 
 const resetForm = () => {
@@ -173,7 +176,10 @@ const saveData = async () => {
   finally { saving.value = false; }
 };
 
-onMounted(loadData);
+onMounted(async () => {
+  await loadLoaiMon();
+  await loadData();
+});
 </script>
 
 <style scoped>

@@ -86,9 +86,7 @@
               <label class="form-label fw-semibold small"><i class="bi bi-flag me-1"></i>Trạng thái <span class="text-danger">*</span></label>
               <select v-model="form.trangthai" class="form-select" :class="errors.trangthai ? 'is-invalid' : ''">
                 <option value="">-- Chọn --</option>
-                <option value="Hoạt động">Hoạt động</option>
-                <option value="Bảo trì">Bảo trì</option>
-                <option value="Ngừng sử dụng">Ngừng sử dụng</option>
+                <option v-for="item in trangThaiPhongThiOptions" :key="item.ma" :value="item.ma">{{ item.ten }}</option>
               </select>
               <div v-if="errors.trangthai" class="invalid-feedback">{{ errors.trangthai }}</div>
             </div>
@@ -110,6 +108,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
+import api from "../services/api";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
 
@@ -127,6 +126,7 @@ const saving = ref(false);
 
 const form = ref({ maphongthi: null, tenphong: "", succhua: "", diadiem: "", trangthai: "" });
 const errors = ref({});
+const trangThaiPhongThiOptions = ref([]);
 
 const filterCount = (s) => rows.value.filter((r) => r.trangthai === s).length;
 
@@ -138,6 +138,11 @@ const trangThaiBadge = (t) => {
 const loadData = async () => {
   try { rows.value = (await getAll("/phong-thi")).data || []; }
   catch (e) { console.log(e); window.$toast?.add("Không thể tải dữ liệu", "error"); }
+};
+
+const loadTrangThaiPhongThi = async () => {
+  try { const res = await api.get("/danh-muc/trang-thai-phong-thi"); trangThaiPhongThiOptions.value = res.data || []; }
+  catch (e) { console.log(e); }
 };
 
 const resetForm = () => { form.value = { maphongthi: null, tenphong: "", succhua: "", diadiem: "", trangthai: "" }; errors.value = {}; };
@@ -170,7 +175,10 @@ const saveData = async () => {
   finally { saving.value = false; }
 };
 
-onMounted(loadData);
+onMounted(async () => {
+  await loadTrangThaiPhongThi();
+  await loadData();
+});
 </script>
 
 <style scoped>

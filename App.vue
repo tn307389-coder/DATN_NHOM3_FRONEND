@@ -22,21 +22,199 @@
     </div>
     <ToastContainer />
   </div>
+
+  <!-- Login / Register modal (global) -->
+  <div class="login-modal-overlay" v-if="showLogin" @click.self="showLogin = false">
+    <div class="login-modal">
+      <button class="modal-close" @click="showLogin = false">&times;</button>
+
+      <div class="text-center mb-3">
+        <img src="/logo1.jpg" alt="Logo" class="login-logo" />
+      </div>
+
+      <div class="d-flex mb-4 auth-tabs">
+        <button class="auth-tab flex-fill text-center py-2 fw-bold rounded-3"
+          :class="authTab === 'login' ? 'active' : ''"
+          @click="authTab = 'login'">Đăng nhập</button>
+        <button class="auth-tab flex-fill text-center py-2 fw-bold rounded-3"
+          :class="authTab === 'register' ? 'active' : ''"
+          @click="authTab = 'register'">Đăng ký</button>
+      </div>
+
+      <!-- Login -->
+      <form v-if="authTab === 'login'" @submit.prevent="handleLogin">
+        <div class="mb-3">
+          <label class="form-label">Tên tài khoản</label>
+          <input ref="userInput" v-model="username" type="text" class="form-control form-control-lg"
+            placeholder="Nhập tên tài khoản" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Mật khẩu</label>
+          <input v-model="password" type="password" class="form-control form-control-lg"
+            placeholder="Nhập mật khẩu" />
+        </div>
+        <div class="form-check mb-3">
+          <input v-model="remember" type="checkbox" class="form-check-input" id="remember" />
+          <label class="form-check-label" for="remember" style="color:var(--text-secondary)">Ghi nhớ mật khẩu</label>
+        </div>
+        <div v-if="error" class="alert alert-danger py-2">{{ error }}</div>
+        <button type="submit" class="btn btn-primary btn-lg w-100">Đăng nhập</button>
+        <div class="text-center mt-3 mb-2">
+          <small style="color:var(--text-muted)">─ hoặc ─</small>
+        </div>
+        <div ref="googleBtnRef" class="w-100 d-flex justify-content-center"></div>
+        <div class="text-center mt-3">
+          <small style="color:var(--text-muted)">
+            Chưa có tài khoản?
+            <a href="#" style="color:var(--accent)" class="fw-semibold" @click.prevent="authTab = 'register'">Đăng ký ngay</a>
+          </small>
+        </div>
+      </form>
+
+      <!-- Register -->
+      <form v-if="authTab === 'register'" @submit.prevent="submitRegister">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+            <input v-model="registerForm.hoten" type="text" class="form-control" placeholder="Nguyễn Văn A" required />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Ngày sinh <span class="text-danger">*</span></label>
+            <input v-model="registerForm.ngaysinh" type="date" class="form-control" required />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Giới tính <span class="text-danger">*</span></label>
+            <select v-model="registerForm.gioitinh" class="form-select" required>
+              <option value="">-- Chọn --</option>
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Gmail <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input v-model="registerForm.email" type="email" class="form-control" placeholder="user@gmail.com" :disabled="otpVerified" />
+              <button class="btn btn-outline-primary" type="button" @click="sendOtp" :disabled="otpSending || otpVerified || !registerForm.email">
+                <span v-if="otpSending" class="spinner-border spinner-border-sm"></span>
+                <span v-else-if="otpTimer > 0 && otpSent">{{ otpTimer }}s</span>
+                <span v-else-if="otpVerified"><i class="bi bi-check-lg"></i></span>
+                <span v-else>Gửi OTP</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-if="otpSent && !otpVerified" class="row">
+          <div class="col-md-6 offset-md-6 mb-3">
+            <label class="form-label">Mã OTP</label>
+            <div class="input-group">
+              <input v-model="otpCode" class="form-control" placeholder="Nhập mã 6 số" maxlength="6" />
+              <button class="btn btn-outline-success" type="button" @click="verifyOtp" :disabled="otpVerifying || otpCode.length < 6">
+                <span v-if="otpVerifying" class="spinner-border spinner-border-sm"></span>
+                <span v-else>Xác thực</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-if="otpVerified" class="row">
+          <div class="col-md-6 offset-md-6 mb-3">
+            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+              <i class="bi bi-check-circle me-1"></i>Đã xác thực OTP
+            </span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+            <input v-model="registerForm.sodienthoai" type="text" class="form-control" placeholder="0912..." required />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+            <input v-model="registerForm.diachi" type="text" class="form-control" placeholder="Quận/Huyện, Tỉnh/TP" required />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Khóa học đăng ký <span class="text-danger">*</span></label>
+          <select v-model="registerForm.makh" class="form-select" required>
+            <option value="">-- Chọn khóa học --</option>
+            <option v-for="kh in khoaHocList" :key="kh.makh" :value="kh.makh">{{ kh.tenkhoahoc }}</option>
+          </select>
+        </div>
+        <div v-if="registerError" class="alert alert-danger py-2">{{ registerError }}</div>
+        <div v-if="registerSuccess" class="alert alert-success py-2">{{ registerSuccess }}</div>
+        <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="registerLoading">
+          {{ registerLoading ? "Đang gửi..." : "Gửi đăng ký" }}
+        </button>
+        <div class="text-center mt-3">
+          <small style="color:var(--text-muted)">
+            Đã có tài khoản?
+            <a href="#" style="color:var(--accent)" class="fw-semibold" @click.prevent="authTab = 'login'">Đăng nhập</a>
+          </small>
+        </div>
+      </form>
+
+      <div class="text-center mt-3">
+        <small style="color:var(--text-muted)">TK demo: admin / admin123 (quản trị) — hocvien1 / 123456 (học viên) — giaovien1 / 123456 (giáo viên)</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tra cứu modal (global) -->
+  <div class="login-modal-overlay" v-if="showTraCuu" @click.self="showTraCuu = false">
+    <div class="login-modal" style="max-width:600px">
+      <button class="modal-close" @click="showTraCuu = false">&times;</button>
+      <div class="text-center mb-3">
+        <img src="/logo1.jpg" alt="Logo" class="login-logo" />
+        <h5 class="fw-bold mt-2" style="color:#fff">Tra cứu đăng ký khóa học</h5>
+        <p style="color:var(--text-muted)" class="small">Nhập email đã đăng ký để tra cứu</p>
+      </div>
+      <div class="input-group mb-3">
+        <input v-model="traCuuEmail" class="form-control" placeholder="Nhập email của bạn" @keyup.enter="traCuu" />
+        <button class="btn btn-primary" @click="traCuu" :disabled="traCuuLoading">
+          <span v-if="traCuuLoading" class="spinner-border spinner-border-sm"></span>
+          <i v-else class="bi bi-search me-1"></i>Tìm
+        </button>
+      </div>
+      <div v-if="traCuuError" class="alert alert-danger py-2 small">{{ traCuuError }}</div>
+      <div v-if="traCuuData !== null && traCuuData.length === 0" class="text-center py-3" style="color:var(--text-muted)">
+        <i class="bi bi-inbox fs-3 d-block mb-1"></i>Không tìm thấy đăng ký nào
+      </div>
+      <div v-if="traCuuData && traCuuData.length > 0" class="table-responsive">
+        <table class="table align-middle mb-0" style="color:var(--text-secondary)">
+          <thead style="background:rgba(255,255,255,0.04)">
+            <tr><th class="fw-semibold">#</th><th class="fw-semibold">Khóa học</th><th class="fw-semibold">Ngày ĐK</th><th class="fw-semibold">Trạng thái</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, i) in traCuuData" :key="item.madk">
+              <td>{{ i + 1 }}</td>
+              <td class="fw-medium">{{ item.tenKhoaHoc }}</td>
+              <td>{{ formatDate(item.ngaydangky) }}</td>
+              <td><span class="badge rounded-pill px-3 py-2" :class="trangThaiBadge(item.trangthai)">{{ item.trangthai }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { computed, provide, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { computed, nextTick, provide, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import api from "./services/api";
+import { getPageMode, roleHome } from "./services/permissions";
 import Header from "./components/layout/Header.vue";
 import Sidebar from "./components/layout/Sidebar.vue";
 import Footer from "./components/layout/Footer.vue";
 import SiteNavbar from "./components/site/SiteNavbar.vue";
 import ToastContainer from "./components/common/ToastContainer.vue";
 import { useSite } from "./composables/useSite";
-import { getPageMode } from "./services/permissions";
 
 const route = useRoute();
-const { role, authVersion } = useSite();
+const router = useRouter();
+const { role, authVersion, showLogin, loggedIn, displayName, authTab, registerForm, registerLoading, registerError, registerSuccess, khoaHocList, submitRegister, loadKhoaHocPublic,
+  otpSent, otpVerified, otpCode, otpSending, otpVerifying, otpTimer, sendOtp, verifyOtp, handleGoogleLogin } = useSite();
 
 // Dark mode state
 const isDarkMode = ref(false);
@@ -45,16 +223,17 @@ const theme = computed(() => isDarkMode.value ? "dark" : "light");
 // Toggle dark mode
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value;
-  document.documentElement.setAttribute("data-bs-theme", theme.value);
+  if (!isAnonymous.value) {
+    document.documentElement.setAttribute("data-bs-theme", theme.value);
+  }
   localStorage.setItem("theme", theme.value);
 };
 
-// Load theme on startup
+// Load theme preference on startup
 if (typeof localStorage !== "undefined") {
   const savedTheme = localStorage.getItem("theme");
   if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
     isDarkMode.value = true;
-    document.documentElement.setAttribute("data-bs-theme", "dark");
   }
 }
 
@@ -75,10 +254,19 @@ const isAnonymous = computed(() => {
   authVersion.value;
   return !user.value || !user.value.maVaiTro;
 });
+
+// Apply data-bs-theme only for logged-in users (admin layout)
+const applyTheme = () => {
+  if (!isAnonymous.value && isDarkMode.value) {
+    document.documentElement.setAttribute("data-bs-theme", "dark");
+  } else {
+    document.documentElement.removeAttribute("data-bs-theme");
+  }
+};
+
+watch([isAnonymous, isDarkMode], applyTheme, { immediate: true });
 const readOnly = computed(() => getPageMode(user.value.maVaiTro, route.path) === "view");
 provide("readOnly", readOnly);
-provide("theme", theme);
-provide("toggleTheme", toggleTheme);
 
 // Mobile sidebar toggle
 const toggleSidebar = () => {
@@ -95,6 +283,121 @@ const handleResize = () => {
 if (typeof window !== 'undefined') {
   window.addEventListener('resize', handleResize);
 }
+
+// ===== Login state & handlers =====
+const username = ref("");
+const password = ref("");
+const error = ref("");
+const userInput = ref(null);
+const remember = ref(localStorage.getItem("remember") === "true");
+
+if (remember.value) {
+  username.value = localStorage.getItem("saved_username") || "";
+  password.value = localStorage.getItem("saved_password") || "";
+}
+
+const googleBtnRef = ref(null);
+const renderGoogleBtn = () => {
+  if (typeof google === "undefined" || !google.accounts) {
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setTimeout(renderGoogleBtn, 300);
+    document.head.appendChild(script);
+    return;
+  }
+  if (!googleBtnRef.value) return;
+  google.accounts.id.initialize({
+    client_id: "132583341812-jae6b284l1j3gvkgelkjps8vdgsv08s7.apps.googleusercontent.com",
+    callback: (response) => {
+      if (response.credential) handleGoogleLogin(response.credential);
+    },
+  });
+  google.accounts.id.renderButton(googleBtnRef.value, {
+    type: "standard", shape: "pill", theme: "outline", size: "large", text: "signin_with",
+    width: googleBtnRef.value.offsetWidth || 300,
+  });
+};
+
+watch(showLogin, async (val) => {
+  if (val) {
+    await nextTick();
+    await nextTick();
+    renderGoogleBtn();
+    userInput.value?.focus();
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+});
+
+const handleLogin = async () => {
+  if (!username.value || !password.value) {
+    error.value = "Vui lòng nhập đầy đủ thông tin";
+    return;
+  }
+  try {
+    const res = await api.post("/login", { tendangnhap: username.value, matkhau: password.value });
+    if (res.data.success) {
+      localStorage.setItem("token", res.data.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.data));
+      showLogin.value = false;
+      loggedIn.value = true;
+      role.value = res.data.data.maVaiTro;
+      displayName.value = res.data.data.hoten || res.data.data.tenTaiKhoan || res.data.data.tenvaitro || "Người dùng";
+      authVersion.value++;
+      if (remember.value) {
+        localStorage.setItem("saved_username", username.value);
+        localStorage.setItem("saved_password", password.value);
+        localStorage.setItem("remember", "true");
+      } else {
+        localStorage.removeItem("saved_username");
+        localStorage.removeItem("saved_password");
+        localStorage.removeItem("remember");
+      }
+      router.push(roleHome(res.data.data.maVaiTro));
+    } else {
+      error.value = res.data.message;
+    }
+  } catch (err) {
+    error.value = err.response?.data?.message || "Đăng nhập thất bại";
+  }
+};
+
+// Tra cứu đăng ký
+const showTraCuu = ref(false);
+const traCuuEmail = ref("");
+const traCuuLoading = ref(false);
+const traCuuError = ref("");
+const traCuuData = ref(null);
+
+const openTraCuu = () => { showTraCuu.value = true; traCuuError.value = ""; traCuuData.value = null; };
+
+const traCuu = async () => {
+  if (!traCuuEmail.value.trim()) { traCuuError.value = "Vui lòng nhập email"; return; }
+  traCuuLoading.value = true;
+  traCuuError.value = "";
+  traCuuData.value = null;
+  try {
+    const res = await api.post("/dang-ky-khoa-hoc/tra-cuu", { email: traCuuEmail.value });
+    if (res.data.success) traCuuData.value = res.data.data || [];
+    else traCuuError.value = res.data.message;
+  } catch (e) { traCuuError.value = "Tra cứu thất bại"; }
+  finally { traCuuLoading.value = false; }
+};
+
+const formatDate = (d) => {
+  if (!d) return "—";
+  return new Date(d + "T00:00:00").toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+};
+
+const trangThaiBadge = (s) => {
+  const map = { "Chờ duyệt": "bg-warning bg-opacity-10 text-warning", "Đã duyệt": "bg-info bg-opacity-10 text-info", "Đang học": "bg-success bg-opacity-10 text-success", "Hoàn thành": "bg-primary bg-opacity-10 text-primary", "Đã hủy": "bg-danger bg-opacity-10 text-danger" };
+  return map[s] || "bg-secondary bg-opacity-10 text-secondary";
+};
+
+loadKhoaHocPublic();
 </script>
 
 <style scoped>

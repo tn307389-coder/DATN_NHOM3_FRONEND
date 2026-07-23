@@ -74,7 +74,7 @@
                 <div class="card-body p-3">
                   <div class="d-flex align-items-center gap-2 mb-1">
                     <i class="bi bi-person-circle text-muted"></i>
-                    <span class="fw-semibold small">{{ userName(item.matk) || 'TK #' + item.matk }}</span>
+                    <span class="fw-semibold small">{{ userName(item.taiKhoan?.matk) || 'TK #' + item.taiKhoan?.matk }}</span>
                   </div>
                   <div class="d-flex gap-2 mt-2">
                     <button v-if="item.trangthai === 'CHO_DUYET'" class="btn btn-sm btn-success rounded-pill flex-fill px-3" @click="duyet(item.id)">
@@ -103,7 +103,7 @@
             <img :src="previewItem.url" class="img-fluid w-100" style="max-height:70vh;object-fit:contain" />
           </div>
           <div class="modal-footer justify-content-between border-top-0 px-4 py-3">
-            <span class="text-muted small">{{ userName(previewItem.matk) || 'TK #' + previewItem.matk }}</span>
+            <span class="text-muted small">{{ userName(previewItem.taiKhoan?.matk) || 'TK #' + previewItem.taiKhoan?.matk }}</span>
             <span class="badge rounded-pill px-3 py-2" :class="statusBadge(previewItem.trangthai)">{{ statusText(previewItem.trangthai) }}</span>
           </div>
         </div>

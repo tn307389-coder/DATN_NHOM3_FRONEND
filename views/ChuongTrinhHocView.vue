@@ -48,7 +48,7 @@
                 <label class="form-label fw-semibold small"><i class="bi bi-mortarboard me-1"></i>Hạng bằng <span class="text-danger">*</span></label>
                 <select v-model="form.hangbang" class="form-select" :class="errors.hangbang ? 'is-invalid' : ''">
                   <option value="">-- Chọn hạng bằng --</option>
-                  <option v-for="h in hangBangOptions" :key="h" :value="h">{{ h }}</option>
+                  <option v-for="h in hangBangOptions" :key="h.ma" :value="h.ma">{{ h.ten }}</option>
                 </select>
                 <div v-if="errors.hangbang" class="invalid-feedback">{{ errors.hangbang }}</div>
               </div>
@@ -86,10 +86,11 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
+import api from "../services/api";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
 
-const hangBangOptions = ["A1", "A2", "B1", "B2", "C", "D", "E"];
+const hangBangOptions = ref([]);
 
 const columns = [
   { key: "macth", label: "Mã CT" },
@@ -159,5 +160,8 @@ const saveData = async () => {
   finally { saving.value = false; }
 };
 
-onMounted(loadData);
+onMounted(async () => {
+  await loadHangBang();
+  await loadData();
+});
 </script>
