@@ -15,7 +15,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-images fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng ảnh</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongAnh }}</h3><small class="opacity-75">Tổng ảnh</small></div>
           </div>
         </div>
       </div>
@@ -23,7 +23,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-clock fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('CHO_DUYET') }}</h3><small class="opacity-75">Chờ duyệt</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ choDuyetCount }}</h3><small class="opacity-75">Chờ duyệt</small></div>
           </div>
         </div>
       </div>
@@ -31,7 +31,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-check-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('DA_DUYET') }}</h3><small class="opacity-75">Đã duyệt</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ daDuyetCount }}</h3><small class="opacity-75">Đã duyệt</small></div>
           </div>
         </div>
       </div>
@@ -39,7 +39,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#dc3545,#b82d3f)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-x-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('TU_CHOI') }}</h3><small class="opacity-75">Từ chối</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tuChoiCount }}</h3><small class="opacity-75">Từ chối</small></div>
           </div>
         </div>
       </div>
@@ -113,7 +113,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
 import api from "../services/api";
 
@@ -122,7 +122,10 @@ const loading = ref(false);
 const userMap = ref({});
 const previewItem = ref(null);
 
-const filterCount = (s) => rows.value.filter((r) => r.trangthai === s).length;
+const tongAnh = computed(() => rows.value.length);
+const choDuyetCount = computed(() => rows.value.filter((r) => r.trangthai === 'CHO_DUYET').length);
+const daDuyetCount = computed(() => rows.value.filter((r) => r.trangthai === 'DA_DUYET').length);
+const tuChoiCount = computed(() => rows.value.filter((r) => r.trangthai === 'TU_CHOI').length);
 
 const statusText = (t) => t === "CHO_DUYET" ? "Chờ duyệt" : t === "DA_DUYET" ? "Đã duyệt" : "Từ chối";
 const statusBadge = (t) => t === "CHO_DUYET" ? "bg-warning bg-opacity-10 text-warning" : t === "DA_DUYET" ? "bg-success bg-opacity-10 text-success" : "bg-danger bg-opacity-10 text-danger";

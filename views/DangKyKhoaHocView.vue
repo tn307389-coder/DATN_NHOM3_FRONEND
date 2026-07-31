@@ -147,6 +147,20 @@
             </div>
 
             <div class="mb-3">
+              <label class="form-label">Hạng GPLX <span class="text-danger">*</span></label>
+              <select v-model="form.maHang" class="form-select" required>
+                <option value="">-- Chọn hạng GPLX --</option>
+                <option
+                  v-for="hg in hangGplxList"
+                  :key="hg.id"
+                  :value="hg.id"
+                >
+                  {{ hg.maHang }} - {{ hg.tenHang }}
+                </option>
+              </select>
+            </div>
+
+            <div class="mb-3">
               <label class="form-label">Khóa học <span class="text-danger">*</span></label>
               <select v-model="form.makh" class="form-select" required>
                 <option value="">-- Chọn khóa học --</option>
@@ -221,6 +235,7 @@ const columns = [
   { key: "madk", label: "Mã ĐK" },
   { key: "hocvien", label: "Học viên" },
   { key: "cccd", label: "CCCD" },
+  { key: "hanggplx", label: "Hạng GPLX" },
   { key: "khoahoc", label: "Khóa học" },
   { key: "ngaydangky", label: "Ngày đăng ký" },
   { key: "trangthai", label: "Trạng thái" },
@@ -229,6 +244,7 @@ const columns = [
 const rows = ref([]);
 const hocVienList = ref([]);
 const khoaHocList = ref([]);
+const hangGplxList = ref([]);
 
 const statusFilter = ref("");
 const courseFilter = ref("");
@@ -261,6 +277,7 @@ const isEdit = ref(false);
 const form = ref({
   madk: null,
   mahv: "",
+  maHang: "",
   makh: "",
   ngaydangky: "",
   trangthai: "",
@@ -274,13 +291,24 @@ const loadData = async () => {
       ...item,
       hocvien: item.hocVien?.hoten || "",
       cccd: item.hocVien?.cccd || "",
-      khoahoc: item.khoaHoc?.tenkhoahoc || "",
+      hanggplx: item.hangGPLX?.tenHang || "",
       mahv: item.hocVien?.mahv || "",
+      maHang: item.hangGPLX?.id || "",
       makh: item.khoaHoc?.makh || "",
     }));
   } catch (error) {
     console.log(error);
     alert("Không thể tải dữ liệu đăng ký khóa học");
+  }
+};
+
+const loadHangGplx = async () => {
+  try {
+    const res = await getAll("/hang-gplx");
+    hangGplxList.value = res.data;
+  } catch (error) {
+    console.log(error);
+    alert("Không thể tải dữ liệu hạng GPLX");
   }
 };
 
@@ -308,6 +336,7 @@ const resetForm = () => {
   form.value = {
     madk: null,
     mahv: "",
+    maHang: "",
     makh: "",
     ngaydangky: "",
     trangthai: "Chờ duyệt",
@@ -338,6 +367,7 @@ const openEdit = (row) => {
   form.value = {
     madk: row.madk,
     mahv: row.mahv,
+    maHang: row.maHang || "",
     makh: row.makh,
     ngaydangky: row.ngaydangky,
     trangthai: row.trangthai,
@@ -349,6 +379,7 @@ const openEdit = (row) => {
 const buildPayload = () => ({
   madk: form.value.madk,
   hocVien: { mahv: Number(form.value.mahv) },
+  hangGPLX: form.value.maHang ? { id: Number(form.value.maHang) } : null,
   khoaHoc: { makh: Number(form.value.makh) },
   ngaydangky: form.value.ngaydangky,
   trangthai: form.value.trangthai,
@@ -356,6 +387,7 @@ const buildPayload = () => ({
 
 const requiredFields = [
   { key: "mahv", label: "Học viên" },
+  { key: "maHang", label: "Hạng GPLX" },
   { key: "makh", label: "Khóa học" },
   { key: "ngaydangky", label: "Ngày đăng ký" },
   { key: "trangthai", label: "Trạng thái" },
@@ -394,6 +426,7 @@ const approve = async (row) => {
     await updateData("/dang-ky-khoa-hoc", row.madk, {
       madk: row.madk,
       hocVien: { mahv: Number(row.mahv) },
+      hangGPLX: row.maHang ? { id: Number(row.maHang) } : null,
       khoaHoc: { makh: Number(row.makh) },
       ngaydangky: row.ngaydangky,
       trangthai: "Đã duyệt",
@@ -407,6 +440,7 @@ const approve = async (row) => {
 };
 
 onMounted(async () => {
+  await loadHangGplx();
   await loadHocVien();
   await loadKhoaHoc();
   await loadData();

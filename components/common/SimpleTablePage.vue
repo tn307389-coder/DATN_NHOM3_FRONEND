@@ -1,10 +1,6 @@
 <template>
   <div>
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-      <div>
-        <h2 class="mb-1">{{ title }}</h2>
-        <p class="text-muted mb-0">{{ subtitle }}</p>
-      </div>
+    <div class="d-flex flex-wrap justify-content-end mb-4 gap-2">
       <button v-if="canAdd" class="btn btn-primary rounded-pill px-4 shadow-sm" @click="$emit('add')">
         <i class="bi bi-plus-lg me-1"></i> Thêm mới
       </button>
@@ -106,7 +102,7 @@ import { computed, inject, ref } from "vue";
 import { deleteData } from "../../services/crudService";
 
 const props = defineProps({
-  title: { type: String, required: true },
+  title: { type: String, default: "" },
   subtitle: { type: String, default: "" },
   searchPlaceholder: { type: String, default: "Tìm kiếm..." },
   columns: { type: Array, required: true },

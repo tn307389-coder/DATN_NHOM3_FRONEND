@@ -10,16 +10,36 @@
       <div class="pricing-grid">
         <div class="price-card">
           <div class="price-head">
-            <span class="price-tag">Hạng B1</span>
-            <h3>Học viên mới</h3>
-            <p class="price-sub">Ô tô số tự động</p>
+            <span class="price-tag">A1</span>
+            <h3>Hạng A1</h3>
+            <p class="price-sub">10 buổi LT, 20 buổi TH</p>
           </div>
           <div class="price-body">
             <div class="price-row">
-              <span class="price-old">8.500.000đ</span>
-              <span class="price-now">6.900.000đ</span>
+              <span class="price-now">2.500.000₫</span>
             </div>
-            <p class="price-note">Tiết kiệm 1.600.000đ</p>
+            <p class="price-note">Trọn gói, không phát sinh</p>
+            <ul class="price-feats">
+              <li><i class="bi bi-check-circle-fill"></i> Lý thuyết + thực hành trọn gói</li>
+              <li><i class="bi bi-check-circle-fill"></i> Xe đời mới, bảo hiểm full</li>
+              <li><i class="bi bi-check-circle-fill"></i> Thi thử lý thuyết online</li>
+              <li><i class="bi bi-check-circle-fill"></i> Hỗ trợ thi & cấp bằng</li>
+            </ul>
+            <button class="btn-price" @click="openRegister()">ĐĂNG KÝ</button>
+          </div>
+        </div>
+
+        <div class="price-card">
+          <div class="price-head">
+            <span class="price-tag">B1</span>
+            <h3>Hạng B1</h3>
+            <p class="price-sub">10 buổi LT, 30 buổi TH</p>
+          </div>
+          <div class="price-body">
+            <div class="price-row">
+              <span class="price-now">6.500.000₫</span>
+            </div>
+            <p class="price-note">Trọn gói, không phát sinh</p>
             <ul class="price-feats">
               <li><i class="bi bi-check-circle-fill"></i> Lý thuyết + thực hành trọn gói</li>
               <li><i class="bi bi-check-circle-fill"></i> Xe đời mới, bảo hiểm full</li>
@@ -32,21 +52,20 @@
 
         <div class="price-card featured">
           <div class="price-head">
-            <span class="price-tag hot">Phổ biến nhất</span>
+            <span class="price-tag hot">B2</span>
             <h3>Hạng B2</h3>
-            <p class="price-sub">Ô tô số sàn & số tự động</p>
+            <p class="price-sub">10 buổi LT, 35 buổi TH</p>
           </div>
           <div class="price-body">
             <div class="price-row">
-              <span class="price-old">9.500.000đ</span>
-              <span class="price-now">7.500.000đ</span>
+              <span class="price-now">7.500.000₫</span>
             </div>
-            <p class="price-note">Tiết kiệm 2.000.000đ</p>
+            <p class="price-note">Trọn gói, không phát sinh</p>
             <ul class="price-feats">
-              <li><i class="bi bi-check-circle-fill"></i> Lộ trình 3 tháng hoàn chỉnh</li>
-              <li><i class="bi bi-check-circle-fill"></i> Giáo viên kèm sát sao</li>
-              <li><i class="bi bi-check-circle-fill"></i> Sa hình & đường trường</li>
-              <li><i class="bi bi-check-circle-fill"></i> Hỗ trợ thi sát hạch tận nơi</li>
+              <li><i class="bi bi-check-circle-fill"></i> Lý thuyết + thực hành trọn gói</li>
+              <li><i class="bi bi-check-circle-fill"></i> Xe đời mới, bảo hiểm full</li>
+              <li><i class="bi bi-check-circle-fill"></i> Thi thử lý thuyết online</li>
+              <li><i class="bi bi-check-circle-fill"></i> Hỗ trợ thi & cấp bằng</li>
             </ul>
             <button class="btn-price" @click="openRegister()">ĐĂNG KÝ</button>
           </div>
@@ -54,21 +73,20 @@
 
         <div class="price-card">
           <div class="price-head">
-            <span class="price-tag">Hạng C1</span>
-            <h3>Nâng hạng / Tải</h3>
-            <p class="price-sub">Xe tải & nâng hạng</p>
+            <span class="price-tag">C</span>
+            <h3>Hạng C</h3>
+            <p class="price-sub">10 buổi LT, 40 buổi TH</p>
           </div>
           <div class="price-body">
             <div class="price-row">
-              <span class="price-old">14.000.000đ</span>
-              <span class="price-now">11.500.000đ</span>
+              <span class="price-now">9.500.000₫</span>
             </div>
-            <p class="price-note">Tiết kiệm 2.500.000đ</p>
+            <p class="price-note">Trọn gói, không phát sinh</p>
             <ul class="price-feats">
-              <li><i class="bi bi-check-circle-fill"></i> Nâng hạng B2 lên C</li>
-              <li><i class="bi bi-check-circle-fill"></i> Miễn giảm học phần</li>
-              <li><i class="bi bi-check-circle-fill"></i> Lịch học linh hoạt</li>
-              <li><i class="bi bi-check-circle-fill"></i> Hồ sơ đơn giản</li>
+              <li><i class="bi bi-check-circle-fill"></i> Lý thuyết + thực hành trọn gói</li>
+              <li><i class="bi bi-check-circle-fill"></i> Xe đời mới, bảo hiểm full</li>
+              <li><i class="bi bi-check-circle-fill"></i> Thi thử lý thuyết online</li>
+              <li><i class="bi bi-check-circle-fill"></i> Hỗ trợ thi & cấp bằng</li>
             </ul>
             <button class="btn-price" @click="openRegister()">ĐĂNG KÝ</button>
           </div>
@@ -82,5 +100,6 @@
 
 <script setup>
 import { useSite } from "../../composables/useSite";
+
 const { openRegister } = useSite();
 </script>

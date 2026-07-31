@@ -6,6 +6,7 @@ let stompClient = null;
 
 export function useWebSocket() {
   const connect = () => {
+    if (stompClient && isConnected.value) { disconnect(); }
     const token = localStorage.getItem("token");
     if (!token) return;
 
@@ -24,7 +25,7 @@ export function useWebSocket() {
 
   const doConnect = (token) => {
     try {
-      const socket = new SockJS("http://localhost:8080/ws");
+      const socket = new SockJS("http://localhost:8081/ws");
       stompClient = Stomp.over(socket);
 
       stompClient.connect({ Authorization: `Bearer ${token}`, login: token }, () => {
@@ -82,13 +83,11 @@ export function useWebSocket() {
     document.head.appendChild(sockjs);
   };
 
-  onMounted(() => {
-    connect();
-  });
+  // Auto-connect on mount if token exists (called by App.vue on demand instead)
+  // onMounted(() => { connect(); });
+  // onUnmounted(() => { disconnect(); });
 
-  onUnmounted(() => {
-    disconnect();
-  });
+
 
   return {
     isConnected,

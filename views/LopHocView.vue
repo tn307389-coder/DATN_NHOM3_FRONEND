@@ -6,7 +6,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-tags fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng lớp</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongLop }}</h3><small class="opacity-75">Tổng lớp</small></div>
           </div>
         </div>
       </div>
@@ -14,7 +14,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-check-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Đang học') }}</h3><small class="opacity-75">Đang học</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ dangHocCount }}</h3><small class="opacity-75">Đang học</small></div>
           </div>
         </div>
       </div>
@@ -22,7 +22,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#dc3545,#b82d3f)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-x-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Đã kết thúc') }}</h3><small class="opacity-75">Kết thúc</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ ketThucCount }}</h3><small class="opacity-75">Kết thúc</small></div>
           </div>
         </div>
       </div>
@@ -82,26 +82,31 @@
               </select>
               <div v-if="errors.makh" class="invalid-feedback">{{ errors.makh }}</div>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold small"><i class="bi bi-person-workspace me-1"></i>Giáo viên <span class="text-danger">*</span></label>
-              <select v-model="form.magv" class="form-select" :class="errors.magv ? 'is-invalid' : ''">
-                <option value="">-- Chọn giáo viên --</option>
-                <option v-for="gv in giaoVienList" :key="gv.magv" :value="gv.magv">{{ gv.hoten }} - {{ gv.hangday }}</option>
-              </select>
-              <div v-if="errors.magv" class="invalid-feedback">{{ errors.magv }}</div>
-            </div>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label fw-semibold small"><i class="bi bi-calendar me-1"></i>Ngày bắt đầu <span class="text-danger">*</span></label>
-                <input v-model="form.ngaybatdau" type="date" class="form-control" :class="errors.ngaybatdau ? 'is-invalid' : ''" />
-                <div v-if="errors.ngaybatdau" class="invalid-feedback">{{ errors.ngaybatdau }}</div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold small"><i class="bi bi-calendar-check me-1"></i>Ngày kết thúc <span class="text-danger">*</span></label>
-                <input v-model="form.ngayketthuc" type="date" class="form-control" :class="errors.ngayketthuc ? 'is-invalid' : ''" />
-                <div v-if="errors.ngayketthuc" class="invalid-feedback">{{ errors.ngayketthuc }}</div>
-              </div>
-            </div>
+             <div class="mb-3">
+               <label class="form-label fw-semibold small"><i class="bi bi-person-workspace me-1"></i>Giáo viên <span class="text-danger">*</span></label>
+               <select v-model="form.magv" class="form-select" :class="errors.magv ? 'is-invalid' : ''">
+                 <option value="">-- Chọn giáo viên --</option>
+                 <option v-for="gv in giaoVienList" :key="gv.magv" :value="gv.magv">{{ gv.hoten }} - {{ gv.hangday }}</option>
+               </select>
+               <div v-if="errors.magv" class="invalid-feedback">{{ errors.magv }}</div>
+             </div>
+             <div class="row g-3">
+               <div class="col-md-4">
+                 <label class="form-label fw-semibold small"><i class="bi bi-people me-1"></i>Sĩ số <span class="text-danger">*</span></label>
+                 <input v-model="form.soluong" type="number" class="form-control" placeholder="Nhập sĩ số" :class="errors.soluong ? 'is-invalid' : ''" />
+                 <div v-if="errors.soluong" class="invalid-feedback">{{ errors.soluong }}</div>
+               </div>
+               <div class="col-md-6">
+                 <label class="form-label fw-semibold small"><i class="bi bi-calendar me-1"></i>Ngày bắt đầu <span class="text-danger">*</span></label>
+                 <input v-model="form.ngaybatdau" type="date" class="form-control" :class="errors.ngaybatdau ? 'is-invalid' : ''" />
+                 <div v-if="errors.ngaybatdau" class="invalid-feedback">{{ errors.ngaybatdau }}</div>
+               </div>
+               <div class="col-md-6">
+                 <label class="form-label fw-semibold small"><i class="bi bi-calendar-check me-1"></i>Ngày kết thúc <span class="text-danger">*</span></label>
+                 <input v-model="form.ngayketthuc" type="date" class="form-control" :class="errors.ngayketthuc ? 'is-invalid' : ''" />
+                 <div v-if="errors.ngayketthuc" class="invalid-feedback">{{ errors.ngayketthuc }}</div>
+               </div>
+             </div>
             <div class="mt-3">
               <label class="form-label fw-semibold small"><i class="bi bi-flag me-1"></i>Trạng thái <span class="text-danger">*</span></label>
               <select v-model="form.trangthai" class="form-select" :class="errors.trangthai ? 'is-invalid' : ''">
@@ -126,7 +131,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { Modal } from "bootstrap";
 import api from "../services/api";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
@@ -149,9 +154,13 @@ const giaoVienList = ref([]);
 const isEdit = ref(false);
 const saving = ref(false);
 
-const form = ref({ malop: null, tenlop: "", makh: "", magv: "", ngaybatdau: "", ngayketthuc: "", trangthai: "" });
+const form = ref({ malop: null, tenlop: "", makh: "", magv: "", soluong: "", ngaybatdau: "", ngayketthuc: "", trangthai: "" });
 const errors = ref({});
 const trangThaiLopOptions = ref([]);
+
+const tongLop = computed(() => rows.value.length);
+const dangHocCount = computed(() => rows.value.filter((r) => r.trangthai === 'Đang học').length);
+const ketThucCount = computed(() => rows.value.filter((r) => r.trangthai === 'Đã kết thúc').length);
 
 const filterCount = (status) => rows.value.filter((r) => r.trangthai === status).length;
 
@@ -194,7 +203,7 @@ const loadTrangThaiLop = async () => {
 };
 
 const resetForm = () => {
-  form.value = { malop: null, tenlop: "", makh: "", magv: "", ngaybatdau: "", ngayketthuc: "", trangthai: "" };
+  form.value = { malop: null, tenlop: "", makh: "", magv: "", soluong: "", ngaybatdau: "", ngayketthuc: "", trangthai: "" };
   errors.value = {};
 };
 
@@ -203,6 +212,7 @@ const validate = () => {
   if (!form.value.tenlop?.trim()) e.tenlop = "Tên lớp không được để trống";
   if (!form.value.makh) e.makh = "Chưa chọn khóa học";
   if (!form.value.magv) e.magv = "Chưa chọn giáo viên";
+  if (!form.value.soluong || Number(form.value.soluong) <= 0) e.soluong = "Sĩ số phải lớn hơn 0";
   if (!form.value.ngaybatdau) e.ngaybatdau = "Chưa chọn ngày bắt đầu";
   if (!form.value.ngayketthuc) e.ngayketthuc = "Chưa chọn ngày kết thúc";
   if (!form.value.trangthai) e.trangthai = "Chưa chọn trạng thái";
@@ -218,7 +228,7 @@ const closeModal = () => Modal.getOrCreateInstance(document.getElementById("lopH
 const openAdd = () => { isEdit.value = false; resetForm(); openModal(); };
 const openEdit = (row) => {
   isEdit.value = true;
-  form.value = { malop: row.malop, tenlop: row.tenlop, makh: row.makh, magv: row.magv, ngaybatdau: row.ngaybatdau, ngayketthuc: row.ngayketthuc, trangthai: row.trangthai };
+  form.value = { malop: row.malop, tenlop: row.tenlop, makh: row.makh, magv: row.magv, soluong: row.soluong, ngaybatdau: row.ngaybatdau, ngayketthuc: row.ngayketthuc, trangthai: row.trangthai };
   errors.value = {};
   openModal();
 };
@@ -231,6 +241,7 @@ const saveData = async () => {
       malop: form.value.malop, tenlop: form.value.tenlop,
       khoaHoc: { makh: Number(form.value.makh) },
       giaoVien: { magv: Number(form.value.magv) },
+      soluong: form.value.soluong ? Number(form.value.soluong) : null,
       ngaybatdau: form.value.ngaybatdau, ngayketthuc: form.value.ngayketthuc, trangthai: form.value.trangthai,
     };
     if (isEdit.value) { await updateData("/lop-hoc", form.value.malop, data); window.$toast?.add("Cập nhật thành công", "success"); }

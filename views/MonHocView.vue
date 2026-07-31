@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-book fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng môn</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongMon }}</h3><small class="opacity-75">Tổng môn</small></div>
           </div>
         </div>
       </div>
@@ -13,7 +13,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0dcaf0,#0aa2c0)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-journal fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Lý thuyết') }}</h3><small class="opacity-75">Lý thuyết</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ lyThuyetCount }}</h3><small class="opacity-75">Lý thuyết</small></div>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-steering fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Thực hành') }}</h3><small class="opacity-75">Thực hành</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ thucHanhCount }}</h3><small class="opacity-75">Thực hành</small></div>
           </div>
         </div>
       </div>
@@ -104,7 +104,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
 import api from "../services/api";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
@@ -126,7 +126,9 @@ const loaiMonOptions = ref([]);
 const form = ref({ mamh: null, tenmonhoc: "", loaimonhoc: "", sotiet: "", ghichu: "" });
 const errors = ref({});
 
-const filterCount = (loai) => rows.value.filter((r) => r.loaimonhoc === loai).length;
+const tongMon = computed(() => rows.value.length);
+const lyThuyetCount = computed(() => rows.value.filter((r) => r.loaimonhoc === 'Lý thuyết').length);
+const thucHanhCount = computed(() => rows.value.filter((r) => r.loaimonhoc === 'Thực hành').length);
 
 const loaiBadge = (v) => {
   const map = { "Lý thuyết": "bg-primary bg-opacity-10 text-primary", "Thực hành": "bg-success bg-opacity-10 text-success", "Mô phỏng": "bg-warning bg-opacity-10 text-warning" };

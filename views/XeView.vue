@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-truck fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng xe</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongXe }}</h3><small class="opacity-75">Tổng xe</small></div>
           </div>
         </div>
       </div>
@@ -13,7 +13,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0dcaf0,#0aa2c0)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-check-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Đang sử dụng') }}</h3><small class="opacity-75">Đang sử dụng</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ dangSuDungCount }}</h3><small class="opacity-75">Đang sử dụng</small></div>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-door-open fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Trống') }}</h3><small class="opacity-75">Trống</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ trongCount }}</h3><small class="opacity-75">Trống</small></div>
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-tools fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Bảo trì') }}</h3><small class="opacity-75">Bảo trì</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ baoTriCount }}</h3><small class="opacity-75">Bảo trì</small></div>
           </div>
         </div>
       </div>
@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Modal } from "bootstrap";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
@@ -147,7 +147,10 @@ const saving = ref(false);
 const form = ref({ maxe: null, bienso: "", loaixe: "", hangxe: "", namsanxuat: "", trangthai: "" });
 const errors = ref({});
 
-const filterCount = (s) => rows.value.filter((r) => r.trangthai === s).length;
+const tongXe = computed(() => rows.value.length);
+const dangSuDungCount = computed(() => rows.value.filter((r) => r.trangthai === 'Đang sử dụng').length);
+const trongCount = computed(() => rows.value.filter((r) => r.trangthai === 'Trống').length);
+const baoTriCount = computed(() => rows.value.filter((r) => r.trangthai === 'Bảo trì').length);
 
 const trangThaiBadge = (t) => {
   const map = { "Đang sử dụng": "bg-info bg-opacity-10 text-info", "Trống": "bg-success bg-opacity-10 text-success", "Bảo trì": "bg-warning bg-opacity-10 text-warning" };

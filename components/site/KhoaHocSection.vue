@@ -8,66 +8,41 @@
       </div>
 
       <div class="cards-grid course-grid">
-        <div class="course-card">
+        <div v-if="loading" class="course-card" v-for="i in 4" :key="i">
           <div class="course-top">
-            <div class="course-ic">🚦</div>
-            <span class="course-tag">Cơ bản</span>
+            <div class="course-ic skeleton"></div>
+            <span class="course-tag skeleton-text"></span>
           </div>
-          <h4>Học viên mới</h4>
-          <p>
-            Trọn gói lý thuyết + thực hành, phù hợp người chưa biết lái.
-          </p>
-          <ul>
-            <li>Giáo trình chuẩn Bộ GTVT</li>
-            <li>Thi thử lý thuyết online</li>
-            <li>Thực hành sa hình & đường trường</li>
-          </ul>
+          <h4 class="skeleton-text"></h4>
+          <p class="skeleton-text short"></p>
           <div class="course-foot">
-            <span class="course-meta"><i class="bi bi-clock"></i> 3 tháng</span>
-            <button class="btn-outline" @click="openRegister()">
-              Đăng ký tư vấn
-            </button>
+            <span class="course-meta skeleton-text"></span>
+            <button class="btn-primary disabled" disabled>Đăng ký ngay</button>
           </div>
         </div>
-        <div class="course-card highlight">
-          <div class="ribbon">Phổ biến</div>
+
+        <div v-else-if="!khoaHocList.length" class="course-card">
           <div class="course-top">
-            <div class="course-ic">🚗</div>
-            <span class="course-tag">Bán chạy</span>
+            <div class="course-ic">📚</div>
+            <span class="course-tag">--</span>
           </div>
-          <h4>Lái xe B2</h4>
-          <p>Khóa học toàn diện hạng B2 – lựa chọn của đa số học viên.</p>
-          <ul>
-            <li>3 tháng hoàn thành</li>
-            <li>Xe đời mới, bảo hiểm full</li>
-            <li>Hỗ trợ thi sát hạch</li>
-          </ul>
-          <div class="course-foot">
-            <span class="course-meta"><i class="bi bi-cash"></i> Từ 5.5tr</span>
-            <button class="btn-primary" @click="openRegister()">
-              Đăng ký ngay
-            </button>
-          </div>
+          <h4>Chưa có khóa học</h4>
+          <p>Dữ liệu đang được cập nhật.</p>
         </div>
-        <div class="course-card">
+
+        <div v-else class="course-card" v-for="kh in khoaHocList" :key="kh.makh">
           <div class="course-top">
-            <div class="course-ic">⬆️</div>
-            <span class="course-tag">Nâng hạng</span>
+            <div class="course-ic">{{ getIcon(kh.hangBang) }}</div>
+            <span class="course-tag">{{ kh.hangBang }}</span>
           </div>
-          <h4>Nâng hạng</h4>
-          <p>
-            Nâng hạng bằng hiện tại (B2 lên C, A1 lên A2...) nhanh chóng.
-          </p>
+          <h4>{{ kh.tenkhoahoc }}</h4>
+          <p>{{ kh.tencth }}</p>
           <ul>
-            <li>Miễn giảm học phần</li>
-            <li>Lịch học linh hoạt</li>
-            <li>Hồ sơ đơn giản</li>
+            <li>Trạng thái: <strong>{{ kh.trangthai === 'OPEN' ? 'Đang mở' : 'Nghỉ' }}</strong></li>
+            <li>Số học viên: {{ kh.soLuongHocVien }}</li>
           </ul>
           <div class="course-foot">
-            <span class="course-meta"><i class="bi bi-clock"></i> 1.5 tháng</span>
-            <button class="btn-outline" @click="openRegister()">
-              Đăng ký tư vấn
-            </button>
+            <button class="btn-primary" @click="openRegister()">Đăng ký ngay</button>
           </div>
         </div>
       </div>
@@ -76,6 +51,19 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue";
 import { useSite } from "../../composables/useSite";
-const { openRegister } = useSite();
+
+const { khoaHocList, openRegister, loadKhoaHocPublic } = useSite();
+const loading = ref(true);
+
+const getIcon = (hang) => {
+  const map = { A1: "🛵", A2: "🛵", B1: "🚗", B2: "🚘", "B2+": "🚘", C: "🚛", D: "🚐", E: "🚛", F: "🚛" };
+  return map[hang] || "🚗";
+};
+
+onMounted(() => {
+  loading.value = true;
+  loadKhoaHocPublic().finally(() => { loading.value = false; });
+});
 </script>

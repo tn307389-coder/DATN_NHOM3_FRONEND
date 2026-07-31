@@ -8,7 +8,7 @@
               <i class="bi bi-people-fill fs-3"></i>
             </div>
             <div>
-              <h3 class="mb-0 fw-bold">{{ rows.length }}</h3>
+              <h3 class="mb-0 fw-bold">{{ tongHocVien }}</h3>
               <small class="opacity-75">Tổng học viên</small>
             </div>
           </div>
@@ -210,6 +210,7 @@ const requiredFields = [
   { key: "diachi", label: "Địa chỉ" },
 ];
 
+const tongHocVien = computed(() => rows.value.length);
 const maleCount = computed(() => rows.value.filter((r) => r.gioitinh === "Nam").length);
 const femaleCount = computed(() => rows.value.filter((r) => r.gioitinh === "Nữ").length);
 const todayCount = computed(() => {
