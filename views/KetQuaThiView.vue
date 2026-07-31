@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-trophy fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng kết quả</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongKetQua }}</h3><small class="opacity-75">Tổng kết quả</small></div>
           </div>
         </div>
       </div>
@@ -13,7 +13,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-check-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Đạt') }}</h3><small class="opacity-75">Đạt</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ datCount }}</h3><small class="opacity-75">Đạt</small></div>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#dc3545,#b82d3f)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-x-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Không đạt') }}</h3><small class="opacity-75">Không đạt</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ khongDatCount }}</h3><small class="opacity-75">Không đạt</small></div>
           </div>
         </div>
       </div>
@@ -120,7 +120,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { Modal } from "bootstrap";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
@@ -140,10 +140,12 @@ const lichThiList = ref([]);
 const isEdit = ref(false);
 const saving = ref(false);
 
-const form = ref({ makq: null, mahv: "", malichthi: "", diem: "", ketqua: "", ghichu: "" });
+const form = ref({ makq: null, mahv: "", malichthi: "", ngaythi: "", diem: "", ketqua: "", ghichu: "" });
 const errors = ref({});
 
-const filterCount = (s) => rows.value.filter((r) => r.ketqua === s).length;
+const tongKetQua = computed(() => rows.value.length);
+const datCount = computed(() => rows.value.filter((r) => r.ketqua === 'Đạt').length);
+const khongDatCount = computed(() => rows.value.filter((r) => r.ketqua === 'Không đạt').length);
 
 const loadData = async () => {
   try {

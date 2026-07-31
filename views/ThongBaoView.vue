@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-bell fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng TB</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ filterCount.all }}</h3><small class="opacity-75">Tổng TB</small></div>
           </div>
         </div>
       </div>
@@ -13,7 +13,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-mortarboard fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Học viên') }}</h3><small class="opacity-75">HV</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ filterCount.hocVien }}</h3><small class="opacity-75">HV</small></div>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-person-workspace fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Giáo viên') }}</h3><small class="opacity-75">GV</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ filterCount.giaoVien }}</h3><small class="opacity-75">GV</small></div>
           </div>
         </div>
       </div>
@@ -102,17 +102,10 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { Modal } from "bootstrap";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
-
-const columns = [
-  { key: "matb", label: "Mã" },
-  { key: "tieude", label: "Tiêu đề" },
-  { key: "doituong", label: "Đối tượng" },
-  { key: "ngaytao", label: "Ngày tạo" },
-];
 
 const rows = ref([]);
 const isEdit = ref(false);
@@ -121,13 +114,24 @@ const saving = ref(false);
 const form = ref({ matb: null, tieude: "", noidung: "", doituong: "" });
 const errors = ref({});
 
-const filterCount = (s) => rows.value.filter((r) => r.doituong === s).length;
+const columns = [
+  { key: "matb", label: "Mã" },
+  { key: "tieude", label: "Tiêu đề" },
+  { key: "doituong", label: "Đối tượng" },
+  { key: "ngaytao", label: "Ngày tạo" },
+];
 
 const formatDateTime = (d) => {
   if (!d) return "";
   const date = new Date(d);
   return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 };
+
+const filterCount = computed(() => ({
+  all: rows.value.length,
+  hocVien: rows.value.filter((r) => r.doituong === 'Học viên').length,
+  giaoVien: rows.value.filter((r) => r.doituong === 'Giáo viên').length,
+}));
 
 const doiTuongBadge = (t) => {
   const map = { "Tất cả": "bg-primary bg-opacity-10 text-primary", "Học viên": "bg-success bg-opacity-10 text-success", "Giáo viên": "bg-warning bg-opacity-10 text-warning" };

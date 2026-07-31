@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-calendar-week fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng lịch</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongLich }}</h3><small class="opacity-75">Tổng lịch</small></div>
           </div>
         </div>
       </div>
@@ -277,6 +277,7 @@ const batch = ref({ malop: "", mamh: "", magv: "", maphong: "", macahoc: "", nga
 const errBatch = ref({});
 
 const todayStr = new Date().toISOString().slice(0, 10);
+const tongLich = computed(() => rows.value.length);
 const todayCount = computed(() => rows.value.filter((r) => r.ngayhoc === todayStr).length);
 const weekCount = computed(() => {
   const now = new Date();

@@ -24,7 +24,7 @@
   </div>
 
   <!-- Login / Register modal (global) -->
-  <div class="login-modal-overlay" v-if="showLogin" @click.self="showLogin = false">
+  <div class="login-modal-overlay" v-if="showLogin && route.path !== '/login'" @click.self="showLogin = false">
     <div class="login-modal">
       <button class="modal-close" @click="showLogin = false">&times;</button>
 
@@ -138,29 +138,36 @@
           <label class="form-label">Khóa học đăng ký <span class="text-danger">*</span></label>
           <select v-model="registerForm.makh" class="form-select" required>
             <option value="">-- Chọn khóa học --</option>
-            <option v-for="kh in khoaHocList" :key="kh.makh" :value="kh.makh">{{ kh.tenkhoahoc }}</option>
+            <option v-for="kh in khoaHocList" :key="kh.makh" :value="kh.makh">{{ kh.tenkhoahoc }} [{{ kh.hangBang }}]</option>
           </select>
-        </div>
-        <div v-if="registerError" class="alert alert-danger py-2">{{ registerError }}</div>
-        <div v-if="registerSuccess" class="alert alert-success py-2">{{ registerSuccess }}</div>
-        <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="registerLoading">
-          {{ registerLoading ? "Đang gửi..." : "Gửi đăng ký" }}
-        </button>
-        <div class="text-center mt-3">
-          <small style="color:var(--text-muted)">
-            Đã có tài khoản?
-            <a href="#" style="color:var(--accent)" class="fw-semibold" @click.prevent="authTab = 'login'">Đăng nhập</a>
-          </small>
-        </div>
-      </form>
+         </div>
+         <div class="mb-3">
+           <label class="form-label">Hạng GPLX</label>
+           <select v-model="registerForm.maHang" class="form-select">
+             <option value="">-- Chọn hạng GPLX --</option>
+             <option v-for="hg in hangGPLXList" :key="hg.id" :value="hg.maHang">{{ hg.tenHang }}</option>
+           </select>
+         </div>
+         <div v-if="registerError" class="alert alert-danger py-2">{{ registerError }}</div>
+         <div v-if="registerSuccess" class="alert alert-success py-2">{{ registerSuccess }}</div>
+         <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="registerLoading">
+           {{ registerLoading ? "Đang gửi..." : "Gửi đăng ký" }}
+         </button>
+         <div class="text-center mt-3">
+           <small style="color:var(--text-muted)">
+             Đã có tài khoản?
+             <a href="#" style="color:var(--accent)" class="fw-semibold" @click.prevent="authTab = 'login'">Đăng nhập</a>
+           </small>
+         </div>
+       </form>
 
-      <div class="text-center mt-3">
-        <small style="color:var(--text-muted)">TK demo: admin / admin123 (quản trị) — hocvien1 / 123456 (học viên) — giaovien1 / 123456 (giáo viên)</small>
-      </div>
-    </div>
-  </div>
+       <div class="text-center mt-3">
+         <small style="color:var(--text-muted)">TK demo: admin / admin123 (quản trị) — hocvien1 / 123456 (học viên) — giaovien1 / 123456 (giáo viên)</small>
+       </div>
+     </div>
+   </div>
 
-  <!-- Tra cứu modal (global) -->
+   <!-- Tra cứu modal (global) -->
   <div class="login-modal-overlay" v-if="showTraCuu" @click.self="showTraCuu = false">
     <div class="login-modal" style="max-width:600px">
       <button class="modal-close" @click="showTraCuu = false">&times;</button>
@@ -200,7 +207,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, provide, ref, watch } from "vue";
+import { computed, nextTick, onMounted, provide, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import api from "./services/api";
 import { getPageMode, roleHome } from "./services/permissions";
@@ -210,11 +217,13 @@ import Footer from "./components/layout/Footer.vue";
 import SiteNavbar from "./components/site/SiteNavbar.vue";
 import ToastContainer from "./components/common/ToastContainer.vue";
 import { useSite } from "./composables/useSite";
+import { useWebSocket } from "./composables/useWebSocket";
 
 const route = useRoute();
 const router = useRouter();
-const { role, authVersion, showLogin, loggedIn, displayName, authTab, registerForm, registerLoading, registerError, registerSuccess, khoaHocList, submitRegister, loadKhoaHocPublic,
-  otpSent, otpVerified, otpCode, otpSending, otpVerifying, otpTimer, sendOtp, verifyOtp, handleGoogleLogin } = useSite();
+const { role, authVersion, showLogin, loggedIn, displayName, authTab, registerForm, registerLoading, registerError, registerSuccess, khoaHocList, hangGPLXList, submitRegister, loadKhoaHocPublic, loadHangGPLX,
+  otpSent, otpVerified, otpCode, otpSending, otpVerifying, otpTimer, sendOtp, verifyOtp, handleGoogleLogin, renderGoogleButton } = useSite();
+const { connect: wsConnect, disconnect: wsDisconnect } = useWebSocket();
 
 // Dark mode state
 const isDarkMode = ref(false);
@@ -297,27 +306,9 @@ if (remember.value) {
 }
 
 const googleBtnRef = ref(null);
+
 const renderGoogleBtn = () => {
-  if (typeof google === "undefined" || !google.accounts) {
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => setTimeout(renderGoogleBtn, 300);
-    document.head.appendChild(script);
-    return;
-  }
-  if (!googleBtnRef.value) return;
-  google.accounts.id.initialize({
-    client_id: "132583341812-jae6b284l1j3gvkgelkjps8vdgsv08s7.apps.googleusercontent.com",
-    callback: (response) => {
-      if (response.credential) handleGoogleLogin(response.credential);
-    },
-  });
-  google.accounts.id.renderButton(googleBtnRef.value, {
-    type: "standard", shape: "pill", theme: "outline", size: "large", text: "signin_with",
-    width: googleBtnRef.value.offsetWidth || 300,
-  });
+  renderGoogleButton(googleBtnRef, handleGoogleLogin);
 };
 
 watch(showLogin, async (val) => {
@@ -357,6 +348,7 @@ const handleLogin = async () => {
         localStorage.removeItem("remember");
       }
       router.push(roleHome(res.data.data.maVaiTro));
+      wsConnect();
     } else {
       error.value = res.data.message;
     }
@@ -398,6 +390,15 @@ const trangThaiBadge = (s) => {
 };
 
 loadKhoaHocPublic();
+loadHangGPLX();
+
+// WebSocket: connect if already logged in, disconnect on logout
+onMounted(() => {
+  if (loggedIn.value) wsConnect();
+});
+watch(loggedIn, (val) => {
+  if (!val) wsDisconnect();
+});
 </script>
 
 <style scoped>

@@ -8,7 +8,7 @@
               <i class="bi bi-person-workspace fs-3"></i>
             </div>
             <div>
-              <h3 class="mb-0 fw-bold">{{ rows.length }}</h3>
+              <h3 class="mb-0 fw-bold">{{ tongGiaoVien }}</h3>
               <small class="opacity-75">Tổng giáo viên</small>
             </div>
           </div>
@@ -21,7 +21,7 @@
               <i class="bi bi-mortarboard fs-3"></i>
             </div>
             <div>
-              <h3 class="mb-0 fw-bold">{{ rows.filter(r => r.hangday === 'B2').length }}</h3>
+              <h3 class="mb-0 fw-bold">{{ b2Count }}</h3>
               <small class="opacity-75">Dạy B2</small>
             </div>
           </div>
@@ -335,6 +335,8 @@ const requiredFields = [
   { key: "diachi", label: "Địa chỉ" },
 ];
 
+const tongGiaoVien = computed(() => rows.value.length);
+const b2Count = computed(() => rows.value.filter((r) => r.hangday === 'B2').length);
 const maleCount = computed(() => rows.value.filter((r) => r.gioitinh === "Nam").length);
 const femaleCount = computed(() => rows.value.filter((r) => r.gioitinh === "Nữ").length);
 

@@ -6,19 +6,19 @@
         <div class="section-head">
           <span class="eyebrow">Tin Tức</span>
           <h2>Tin tức & Thông báo</h2>
-          <p> DriveHub.</p>
+          <p>Cập nhật tin tức mới nhất từ DriveHub</p>
         </div>
 
-        <div v-if="loading" class="text-center text-muted py-5">Xin cảm ơn...</div>
+        <div v-if="loading" class="text-center text-muted py-5">Đang tải dữ liệu...</div>
 
         <div v-else-if="!news.length" class="text-center text-muted py-5">
-          Nhóm#3 xin lỗi, hiện tại chưa có tin tức nào.
+          Hiện tại chưa có tin tức nào.
         </div>
 
         <!-- Chi tiáº¿t bĂ i viáº¿t -->
         <div v-else-if="selected" class="news-detail">
           <button class="btn btn-link px-0 mb-3" @click="selected = null">
-            &larr; Quay láº¡i danh sĂ¡ch
+            &larr; Quay lại danh sách
           </button>
           <h1 class="mb-2">{{ selected.tieude }}</h1>
           <div class="news-date mb-3">
@@ -35,7 +35,7 @@
           <div class="news-detail-content">{{ selected.noidung }}</div>
         </div>
 
-        <!-- Danh sĂ¡ch -->
+        <!-- Danh sách -->
         <div v-else class="news-grid">
           <div
             v-for="item in news"

@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-receipt fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng GD</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongGd }}</h3><small class="opacity-75">Tổng GD</small></div>
           </div>
         </div>
       </div>
@@ -13,7 +13,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-check-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Đã thanh toán') }}</h3><small class="opacity-75">Đã TT</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ daThanhToanCount }}</h3><small class="opacity-75">Đã TT</small></div>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#dc3545,#b82d3f)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-x-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Chưa thanh toán') }}</h3><small class="opacity-75">Chưa TT</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ chuaThanhToanCount }}</h3><small class="opacity-75">Chưa TT</small></div>
           </div>
         </div>
       </div>
@@ -165,7 +165,9 @@ const saving = ref(false);
 const form = ref({ matt: null, mahv: "", madk: "", ngaythanhtoan: "", sotien: "", phuongthuc: "", trangthai: "" });
 const errors = ref({});
 
-const filterCount = (s) => rows.value.filter((r) => r.trangthai === s).length;
+const tongGd = computed(() => rows.value.length);
+const daThanhToanCount = computed(() => rows.value.filter((r) => r.trangthai === 'Đã thanh toán').length);
+const chuaThanhToanCount = computed(() => rows.value.filter((r) => r.trangthai === 'Chưa thanh toán').length);
 
 const totalAmount = computed(() => {
   const total = rows.value.reduce((sum, r) => sum + (Number(r.sotien) || 0), 0);
@@ -243,7 +245,7 @@ const saveData = async () => {
 };
 
 onMounted(async () => {
-  await Promise.all([loadHocVien(), loadDangKy(), loadDanhMuc()]);
+  await Promise.all([loadHocVien(), loadDangKy()]);
   await loadData();
 });
 </script>

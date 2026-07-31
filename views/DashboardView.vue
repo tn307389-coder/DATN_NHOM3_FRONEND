@@ -1,11 +1,6 @@
 <template>
   <div class="container-fluid">
-    <h2 class="mb-4">Dashboard</h2>
-
-    <p class="text-muted">
-      Chào mừng đến hệ thống quản lý trung tâm GPLX DriveHub
-    </p>
-
+    <h2 class="mb-4"></h2>
     <!-- Cards Tổng quan -->
     <div class="row g-3 mb-4">
       <div class="col-md-3">

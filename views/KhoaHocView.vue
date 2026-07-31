@@ -34,7 +34,7 @@
                 <select v-model="form.macth" class="form-select" required>
                   <option value="">-- Chọn chương trình --</option>
                   <option v-for="cth in chuongTrinhList" :key="cth.macth" :value="cth.macth">
-                    {{ cth.tencth }}
+                    {{ cth.tenchuongtrinh }}
                   </option>
                 </select>
               </div>

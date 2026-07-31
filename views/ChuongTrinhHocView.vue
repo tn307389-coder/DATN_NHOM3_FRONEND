@@ -48,7 +48,7 @@
                 <label class="form-label fw-semibold small"><i class="bi bi-mortarboard me-1"></i>Hạng bằng <span class="text-danger">*</span></label>
                 <select v-model="form.hangbang" class="form-select" :class="errors.hangbang ? 'is-invalid' : ''">
                   <option value="">-- Chọn hạng bằng --</option>
-                  <option v-for="h in hangBangOptions" :key="h.ma" :value="h.ma">{{ h.ten }}</option>
+                  <option v-for="h in hangBangOptions" :key="h.id" :value="h.id">{{ h.tenHang }}</option>
                 </select>
                 <div v-if="errors.hangbang" class="invalid-feedback">{{ errors.hangbang }}</div>
               </div>
@@ -111,6 +111,13 @@ const errors = ref({});
 const hangBangBadge = (h) => {
   const map = { A1: "bg-light text-secondary", A2: "bg-secondary bg-opacity-10 text-secondary", B1: "bg-primary bg-opacity-10 text-primary", B2: "bg-info bg-opacity-10 text-info", C: "bg-success bg-opacity-10 text-success", D: "bg-warning bg-opacity-10 text-warning", E: "bg-danger bg-opacity-10 text-danger" };
   return map[h] || "bg-light text-muted";
+};
+
+const loadHangBang = async () => {
+  try {
+    const res = await getAll("/hang-gplx");
+    hangBangOptions.value = res.data || [];
+  } catch (e) { console.log(e); }
 };
 
 const loadData = async () => {

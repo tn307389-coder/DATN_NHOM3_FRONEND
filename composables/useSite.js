@@ -32,6 +32,7 @@ const logout = () => {
 };
 
 const khoaHocList = ref([]);
+const hangGPLXList = ref([]);
 const showRegister = ref(false);
 const registerLoading = ref(false);
 const registerError = ref("");
@@ -46,6 +47,7 @@ const registerForm = ref({
   email: "",
   diachi: "",
   makh: "",
+  maHang: "",
 });
 
 // OTP state
@@ -103,6 +105,15 @@ const loadKhoaHocPublic = async () => {
   }
 };
 
+const loadHangGPLX = async () => {
+  try {
+    const res = await api.get("/hang-gplx");
+    hangGPLXList.value = res.data;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 const submitRegister = async () => {
   registerError.value = "";
   registerSuccess.value = "";
@@ -115,6 +126,7 @@ const submitRegister = async () => {
     { key: "email", label: "Email" },
     { key: "diachi", label: "Địa chỉ" },
     { key: "makh", label: "Khóa học" },
+    { key: "maHang", label: "Hạng GPLX" },
   ];
   const missing = requiredFields
     .filter((rf) => !String(f[rf.key] ?? "").trim())
@@ -139,6 +151,7 @@ const submitRegister = async () => {
       email: f.email,
       diachi: f.diachi,
       makh: Number(f.makh),
+      maHang: f.maHang || null,
     });
     if (res.data && res.data.success) {
       registerSuccess.value = res.data.message || "Đăng ký thành công";
@@ -150,6 +163,7 @@ const submitRegister = async () => {
         email: "",
         diachi: "",
         makh: "",
+        maHang: "",
       };
       setTimeout(() => (showLogin.value = false), 1800);
     } else {
@@ -160,6 +174,111 @@ const submitRegister = async () => {
     console.error(err);
   } finally {
     registerLoading.value = false;
+  }
+};
+
+let googleScriptPromise = null;
+
+const waitGoogleAccounts = (maxWait = 3000, interval = 50) => {
+  return new Promise((resolve) => {
+    let waited = 0;
+    const check = () => {
+      if (typeof google !== "undefined" && google.accounts) {
+        resolve();
+        return;
+      }
+      waited += interval;
+      if (waited >= maxWait) {
+        resolve();
+        return;
+      }
+      setTimeout(check, interval);
+    };
+    check();
+  });
+};
+
+const loadGoogleScript = () => {
+  if (googleScriptPromise) return googleScriptPromise;
+  if (typeof google !== "undefined" && google.accounts) {
+    googleScriptPromise = Promise.resolve();
+    return googleScriptPromise;
+  }
+  googleScriptPromise = new Promise((resolve) => {
+    const existing = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (existing) {
+      const tryResolve = () => {
+        if (typeof google !== "undefined" && google.accounts) {
+          resolve();
+          return;
+        }
+        setTimeout(tryResolve, 50);
+      };
+      existing.addEventListener("load", tryResolve);
+      existing.addEventListener("error", () => resolve());
+      if (existing.readyState === "complete" || existing.readyState === "loaded") {
+        tryResolve();
+      }
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.onload = () => {
+      const tryResolve = () => {
+        if (typeof google !== "undefined" && google.accounts) {
+          resolve();
+          return;
+        }
+        setTimeout(tryResolve, 50);
+      };
+      tryResolve();
+    };
+    script.onerror = () => resolve();
+    document.head.appendChild(script);
+  });
+  return googleScriptPromise;
+};
+
+const renderGoogleButton = async (containerRef, onCredential, retries = 5) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await loadGoogleScript();
+    } catch (e) {
+      console.error("Failed to load Google script", e);
+    }
+    if (!containerRef.value) {
+      await new Promise((r) => setTimeout(r, 200));
+      continue;
+    }
+    if (typeof google === "undefined" || !google.accounts) {
+      await new Promise((r) => setTimeout(r, 200));
+      continue;
+    }
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+    try {
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (response) => {
+          if (response.credential && onCredential) {
+            onCredential(response.credential);
+          }
+        },
+      });
+      google.accounts.id.renderButton(containerRef.value, {
+        type: "standard",
+        shape: "pill",
+        theme: "outline",
+        size: "large",
+        text: "signin_with",
+        width: containerRef.value.offsetWidth || 300,
+      });
+      return;
+    } catch (e) {
+      console.error("Failed to render Google button, retry", i + 1, e);
+      await new Promise((r) => setTimeout(r, 200));
+    }
   }
 };
 
@@ -205,6 +324,7 @@ export function useSite() {
 
   const openRegister = () => {
     if (!khoaHocList.value.length) loadKhoaHocPublic();
+    if (!hangGPLXList.value.length) loadHangGPLX();
     authTab.value = "register";
     showLogin.value = true;
   };
@@ -288,8 +408,9 @@ export function useSite() {
   return {
     username, password, error, showLogin, userInput,
     loggedIn, role, displayName, authVersion, logout,
-    khoaHocList, showRegister, registerLoading, registerError, registerSuccess, registerForm,
-    authTab, goPortal, handleLogin, handleGoogleLogin, openRegister, submitRegister, loadKhoaHocPublic,
+    khoaHocList, hangGPLXList, showRegister, registerLoading, registerError, registerSuccess, registerForm,
+    authTab, goPortal, handleLogin, handleGoogleLogin, openRegister, submitRegister, loadKhoaHocPublic, loadHangGPLX,
     otpSent, otpVerified, otpCode, otpSending, otpVerifying, otpTimer, sendOtp, verifyOtp,
+    loadGoogleScript, renderGoogleButton,
   };
 }

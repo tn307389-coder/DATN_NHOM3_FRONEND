@@ -6,7 +6,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-folder fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng hồ sơ</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongHoSo }}</h3><small class="opacity-75">Tổng hồ sơ</small></div>
           </div>
         </div>
       </div>
@@ -14,7 +14,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-check-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Đã duyệt') }}</h3><small class="opacity-75">Đã duyệt</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ daDuyetCount }}</h3><small class="opacity-75">Đã duyệt</small></div>
           </div>
         </div>
       </div>
@@ -22,7 +22,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-clock fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Đang xử lý') }}</h3><small class="opacity-75">Đang xử lý</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ dangXuLyCount }}</h3><small class="opacity-75">Đang xử lý</small></div>
           </div>
         </div>
       </div>
@@ -30,7 +30,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#dc3545,#b82d3f)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-x-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Từ chối') }}</h3><small class="opacity-75">Từ chối</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tuChoiCount }}</h3><small class="opacity-75">Từ chối</small></div>
           </div>
         </div>
       </div>
@@ -229,7 +229,10 @@ const filteredRows = computed(() => {
   return rows.value.filter((r) => r.tinhtrang === filterTab.value);
 });
 
-const filterCount = (status) => rows.value.filter((r) => r.tinhtrang === status).length;
+const tongHoSo = computed(() => rows.value.length);
+const daDuyetCount = computed(() => rows.value.filter((r) => r.tinhtrang === 'Đã duyệt').length);
+const dangXuLyCount = computed(() => rows.value.filter((r) => r.tinhtrang === 'Đang xử lý').length);
+const tuChoiCount = computed(() => rows.value.filter((r) => r.tinhtrang === 'Từ chối').length);
 
 const formatDate = (d) => {
   if (!d) return "";

@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-credit-card-2-front fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng GPLX</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongGplx }}</h3><small class="opacity-75">Tổng GPLX</small></div>
           </div>
         </div>
       </div>
@@ -13,7 +13,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-check-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('ĐÃ TRẢ') }}</h3><small class="opacity-75">Đã trả</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ daTraCount }}</h3><small class="opacity-75">Đã trả</small></div>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-clock fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('CHỜ') }}</h3><small class="opacity-75">Chờ trả</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ choCount }}</h3><small class="opacity-75">Chờ trả</small></div>
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll } from "../services/crudService";
 
@@ -80,7 +80,9 @@ const columns = [
 
 const rows = ref([]);
 
-const filterCount = (s) => rows.value.filter((r) => r.trangthai?.toUpperCase().includes(s)).length;
+const tongGplx = computed(() => rows.value.length);
+const daTraCount = computed(() => rows.value.filter((r) => r.trangthai?.toUpperCase().includes('ĐÃ TRẢ')).length);
+const choCount = computed(() => rows.value.filter((r) => r.trangthai?.toUpperCase().includes('CHỜ')).length);
 
 const formatDate = (d) => {
   if (!d) return "";

@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-tools fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ list.length }}</h3><small class="opacity-75">Tổng bảo trì</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongBaoTri }}</h3><small class="opacity-75">Tổng bảo trì</small></div>
           </div>
         </div>
       </div>
@@ -13,7 +13,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-check-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('HOAN_THANH') }}</h3><small class="opacity-75">Hoàn thành</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ hoanThanhCount }}</h3><small class="opacity-75">Hoàn thành</small></div>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-clock fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('DANG_XU_LY') }}</h3><small class="opacity-75">Đang XL</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ dangXuLyCount }}</h3><small class="opacity-75">Đang XL</small></div>
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0dcaf0,#0aa2c0)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-calendar-check fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('HEN_THOI_GIAN') }}</h3><small class="opacity-75">Hẹn giờ</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ henGioCount }}</h3><small class="opacity-75">Hẹn giờ</small></div>
           </div>
         </div>
       </div>
@@ -199,7 +199,10 @@ const filteredList = computed(() => {
   return list.value.filter((item) => item.xe?.bienso?.toLowerCase().includes(kw));
 });
 
-const filterCount = (s) => list.value.filter((r) => r.trangThai === s).length;
+const tongBaoTri = computed(() => list.value.length);
+const hoanThanhCount = computed(() => list.value.filter((r) => r.trangThai === 'HOAN_THANH').length);
+const dangXuLyCount = computed(() => list.value.filter((r) => r.trangThai === 'DANG_XU_LY').length);
+const henGioCount = computed(() => list.value.filter((r) => r.trangThai === 'HEN_THOI_GIAN').length);
 
 const formatDate = (d) => {
   if (!d) return "—";

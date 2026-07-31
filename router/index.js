@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+  import { createRouter, createWebHistory } from "vue-router";
 
 import DashboardView from "../views/DashboardView.vue";
 import TaiKhoanView from "../views/TaiKhoanView.vue";
@@ -13,6 +13,8 @@ import PhanCongView from "../views/PhanCongView.vue";
 import LichHocView from "../views/LichHocView.vue";
 import ThiSatHachView from "../views/ThiSatHachView.vue";
 import TraGPLXView from "../views/TraGPLXView.vue";
+import LoginView from "../views/LoginView.vue";
+import TrangChuView from "../views/TrangChuView.vue";
 import HangGPLXView from "../views/HangGPLXView.vue";
 import XeView from "../views/XeView.vue";
 import KhoaHocView from "../views/KhoaHocView.vue";
@@ -32,7 +34,6 @@ import HoSoCuaToiView from "../views/HoSoCuaToiView.vue";
 import DuyetAnhView from "../views/DuyetAnhView.vue";
 import LichCuaToiView from "../views/LichCuaToiView.vue";
 import LichSuBaoTriXeView from "../views/LichSuBaoTriXeView.vue";
-import TinTucManagerView from "../views/TinTucManagerView.vue";
 import GvPortalView from "../views/GvPortalView.vue";
 import HvPortalView from "../views/HvPortalView.vue";
 
@@ -43,16 +44,14 @@ import KhoaHocPublicView from "../views/KhoaHocPublicView.vue";
 import BangGiaView from "../views/BangGiaView.vue";
 import TinTucView from "../views/TinTucView.vue";
 import LienHeView from "../views/LienHeView.vue";
-import TrangChuView from "../views/TrangChuView.vue";
 
 import { canAccess, roleHome } from "../services/permissions";
 
 function currentRole() {
   try {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    return user.maVaiTro || null;
+    return JSON.parse(localStorage.getItem("user") || "{}").maVaiTro;
   } catch (e) {
-    return null;
+    return null; 
   }
 }
 
@@ -69,7 +68,7 @@ const publicPaths = [
 ];
 
 const routes = [
-  { path: "/login", redirect: "/trang-chu" },
+  { path: "/login", component: LoginView },
   { path: "/trang-chu", component: TrangChuView },
   { path: "/gioi-thieu", component: GioiThieuView },
   { path: "/hang-gplx", component: HangGplxPublicView },
@@ -78,7 +77,7 @@ const routes = [
   { path: "/tin-tuc", component: TinTucView },
   { path: "/lien-he", component: LienHeView },
 
-  { path: "/", redirect: "/dashboard" },
+  { path: "/", redirect: "/trang-chu" },
   { path: "/dashboard", component: DashboardView },
   { path: "/tai-khoan", component: TaiKhoanView },
   { path: "/hoc-vien", component: HocVienView },
@@ -111,7 +110,6 @@ const routes = [
   { path: "/duyet-anh", component: DuyetAnhView },
   { path: "/lich-cua-toi", component: LichCuaToiView },
   { path: "/lich-su-bao-tri-xe", component: LichSuBaoTriXeView },
-  { path: "/quan-ly-tin-tuc", component: TinTucManagerView },
   { path: "/gv-portal", component: GvPortalView },
   { path: "/hv-portal", component: HvPortalView },
 ];
@@ -121,36 +119,38 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from) => {
+router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
 
   // Trang công khai: cho phép truy cập không cần đăng nhập
   if (publicPaths.includes(to.path)) {
-    // Nếu đã đăng nhập mà vào trang login thì về trang chủ role
+    // Nếu đã đăng nhập mà vào trang login thì về trang chủrole
     if (to.path === "/login" && token) {
-      return roleHome(currentRole());
+      next(roleHome(currentRole()));
+    } else {
+      next();
     }
     return;
   }
 
   if (!token) {
-    return "/trang-chu";
+    next("/login");
+    return;
   }
 
   const role = currentRole();
-  if (!role) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    return "/trang-chu";
-  }
 
   if (to.path === "/") {
-    return roleHome(role);
+    next(roleHome(role));
+    return;
   }
 
   if (!canAccess(role, to.path)) {
-    return roleHome(role);
+    next(roleHome(role));
+    return;
   }
+
+  next();
 });
 
 export default router;

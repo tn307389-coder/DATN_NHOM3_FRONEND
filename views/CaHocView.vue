@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-clock fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng ca</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongCa }}</h3><small class="opacity-75">Tổng ca</small></div>
           </div>
         </div>
       </div>
@@ -13,7 +13,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-sunrise fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Sáng') }}</h3><small class="opacity-75">Ca sáng</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ caSangCount }}</h3><small class="opacity-75">Ca sáng</small></div>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0dcaf0,#0aa2c0)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-sunset fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Chiều') }}</h3><small class="opacity-75">Ca chiều</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ caChieuCount }}</h3><small class="opacity-75">Ca chiều</small></div>
           </div>
         </div>
       </div>
@@ -101,7 +101,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
@@ -123,7 +123,9 @@ const saving = ref(false);
 const form = ref({ macahoc: null, tencahoc: "", giobatdau: "", gioketthuc: "" });
 const errors = ref({});
 
-const filterCount = (keyword) => rows.value.filter((r) => r.tencahoc?.toLowerCase().includes(keyword.toLowerCase())).length;
+const tongCa = computed(() => rows.value.length);
+const caSangCount = computed(() => rows.value.filter((r) => r.tencahoc?.toLowerCase().includes('sáng')).length);
+const caChieuCount = computed(() => rows.value.filter((r) => r.tencahoc?.toLowerCase().includes('chiều')).length);
 
 const loadData = async () => {
   try {

@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-diagram-3 fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng phân công</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongPhanCong }}</h3><small class="opacity-75">Tổng phân công</small></div>
           </div>
         </div>
       </div>
@@ -85,12 +85,12 @@
               <div v-if="errors.magv" class="invalid-feedback">{{ errors.magv }}</div>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold small"><i class="bi bi-truck me-1"></i>Xe tập lái <span class="text-danger">*</span></label>
-              <select v-model="form.maxetl" class="form-select" :class="errors.maxetl ? 'is-invalid' : ''">
-                <option value="">-- Chọn xe tập lái --</option>
-                <option v-for="xtl in xeTapLaiList" :key="xtl.maxetl" :value="xtl.maxetl">{{ xtl.xe?.bienso || '' }} - {{ xtl.hangbang }}</option>
+              <label class="form-label fw-semibold small"><i class="bi bi-truck me-1"></i>Xe <span class="text-danger">*</span></label>
+              <select v-model="form.maxe" class="form-select" :class="errors.maxe ? 'is-invalid' : ''">
+                <option value="">-- Chọn xe --</option>
+                <option v-for="x in xeList" :key="x.maxe" :value="x.maxe">{{ x.bienso }} - {{ x.loaixe }}</option>
               </select>
-              <div v-if="errors.maxetl" class="invalid-feedback">{{ errors.maxetl }}</div>
+              <div v-if="errors.maxe" class="invalid-feedback">{{ errors.maxe }}</div>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold small"><i class="bi bi-calendar me-1"></i>Ngày phân công <span class="text-danger">*</span></label>
@@ -136,13 +136,14 @@ const columns = [
 const rows = ref([]);
 const hocVienList = ref([]);
 const giaoVienList = ref([]);
-const xeTapLaiList = ref([]);
+const xeList = ref([]);
 const isEdit = ref(false);
 const saving = ref(false);
 
-const form = ref({ mapc: null, mahv: "", magv: "", maxetl: "", ngayphancong: "", ghichu: "" });
+const form = ref({ mapc: null, mahv: "", magv: "", maxe: "", ngayphancong: "", ghichu: "" });
 const errors = ref({});
 
+const tongPhanCong = computed(() => rows.value.length);
 const gvCount = computed(() => new Set(rows.value.map((r) => r.giaovien)).size);
 const xeCount = computed(() => new Set(rows.value.map((r) => r.bienso)).size);
 
@@ -167,9 +168,9 @@ const loadData = async () => {
     const res = await getAll("/phan-cong");
     rows.value = (res.data || []).map((item) => ({
       mapc: item.mapc, hocvien: item.hocVien?.hoten || "", giaovien: item.giaoVien?.hoten || "",
-      bienso: item.xeTapLai?.xe?.bienso || "", hangbang: item.xeTapLai?.hangbang || "",
+      bienso: item.xe?.bienso || "", hangbang: item.xe?.hangxe || "",
       ngayphancong: item.ngayphancong, ghichu: item.ghichu,
-      mahv: item.hocVien?.mahv || "", magv: item.giaoVien?.magv || "", maxetl: item.xeTapLai?.maxetl || "",
+      mahv: item.hocVien?.mahv || "", magv: item.giaoVien?.magv || "", maxe: item.xe?.maxe || "",
     }));
   } catch (e) { console.log(e); window.$toast?.add("Không thể tải dữ liệu phân công", "error"); }
 };
@@ -182,13 +183,13 @@ const loadGiaoVien = async () => {
   try { giaoVienList.value = (await getAll("/giao-vien")).data || []; }
   catch (e) { console.log(e); }
 };
-const loadXeTapLai = async () => {
-  try { xeTapLaiList.value = (await getAll("/xe-tap-lai")).data || []; }
+const loadXe = async () => {
+  try { xeList.value = (await getAll("/xe")).data || []; }
   catch (e) { console.log(e); }
 };
 
 const resetForm = () => {
-  form.value = { mapc: null, mahv: "", magv: "", maxetl: "", ngayphancong: "", ghichu: "" };
+  form.value = { mapc: null, mahv: "", magv: "", maxe: "", ngayphancong: "", ghichu: "" };
   errors.value = {};
 };
 
@@ -196,7 +197,7 @@ const validate = () => {
   const e = {};
   if (!form.value.mahv) e.mahv = "Chưa chọn học viên";
   if (!form.value.magv) e.magv = "Chưa chọn giáo viên";
-  if (!form.value.maxetl) e.maxetl = "Chưa chọn xe tập lái";
+  if (!form.value.maxe) e.maxe = "Chưa chọn xe";
   if (!form.value.ngayphancong) e.ngayphancong = "Chưa chọn ngày";
   errors.value = e;
   return Object.keys(e).length === 0;
@@ -208,7 +209,7 @@ const closeModal = () => Modal.getOrCreateInstance(document.getElementById("phan
 const openAdd = () => { isEdit.value = false; resetForm(); openModal(); };
 const openEdit = (row) => {
   isEdit.value = true;
-  form.value = { mapc: row.mapc, mahv: row.mahv, magv: row.magv, maxetl: row.maxetl, ngayphancong: row.ngayphancong, ghichu: row.ghichu };
+  form.value = { mapc: row.mapc, mahv: row.mahv, magv: row.magv, maxe: row.maxe, ngayphancong: row.ngayphancong, ghichu: row.ghichu };
   errors.value = {};
   openModal();
 };
@@ -219,7 +220,7 @@ const saveData = async () => {
   try {
     const data = {
       mapc: form.value.mapc, hocVien: { mahv: Number(form.value.mahv) }, giaoVien: { magv: Number(form.value.magv) },
-      xeTapLai: { maxetl: Number(form.value.maxetl) }, ngayphancong: form.value.ngayphancong, ghichu: form.value.ghichu,
+      xe: { maxe: Number(form.value.maxe) }, ngayphancong: form.value.ngayphancong, ghichu: form.value.ghichu,
     };
     if (isEdit.value) { await updateData("/phan-cong", form.value.mapc, data); window.$toast?.add("Cập nhật thành công", "success"); }
     else { await createData("/phan-cong", data); window.$toast?.add("Thêm phân công thành công", "success"); }
@@ -230,7 +231,7 @@ const saveData = async () => {
 };
 
 onMounted(async () => {
-  await Promise.all([loadHocVien(), loadGiaoVien(), loadXeTapLai()]);
+  await Promise.all([loadHocVien(), loadGiaoVien(), loadXe()]);
   await loadData();
 });
 </script>

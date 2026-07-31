@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-building fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ rows.length }}</h3><small class="opacity-75">Tổng phòng</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ tongPhongThi }}</h3><small class="opacity-75">Tổng phòng</small></div>
           </div>
         </div>
       </div>
@@ -13,7 +13,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#198754,#146c43)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-check-circle fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Hoạt động') }}</h3><small class="opacity-75">Hoạt động</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ hoatDongCount }}</h3><small class="opacity-75">Hoạt động</small></div>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card border-0 shadow-sm rounded-4" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
           <div class="card-body d-flex align-items-center gap-3 p-3 text-white">
             <div class="rounded-3 bg-white bg-opacity-25 p-3"><i class="bi bi-tools fs-4"></i></div>
-            <div><h3 class="mb-0 fw-bold">{{ filterCount('Bảo trì') }}</h3><small class="opacity-75">Bảo trì</small></div>
+            <div><h3 class="mb-0 fw-bold">{{ baoTriCount }}</h3><small class="opacity-75">Bảo trì</small></div>
           </div>
         </div>
       </div>
@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
 import api from "../services/api";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
@@ -128,7 +128,9 @@ const form = ref({ maphongthi: null, tenphong: "", succhua: "", diadiem: "", tra
 const errors = ref({});
 const trangThaiPhongThiOptions = ref([]);
 
-const filterCount = (s) => rows.value.filter((r) => r.trangthai === s).length;
+const tongPhongThi = computed(() => rows.value.length);
+const hoatDongCount = computed(() => rows.value.filter((r) => r.trangthai === 'Hoạt động').length);
+const baoTriCount = computed(() => rows.value.filter((r) => r.trangthai === 'Bảo trì').length);
 
 const trangThaiBadge = (t) => {
   const map = { "Hoạt động": "bg-success bg-opacity-10 text-success", "Bảo trì": "bg-warning bg-opacity-10 text-warning", "Ngừng sử dụng": "bg-danger bg-opacity-10 text-danger" };
