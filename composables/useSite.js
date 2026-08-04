@@ -405,6 +405,39 @@ export function useSite() {
     }
   };
 
+  // ===== Thanh toán QR (yêu cầu đăng nhập - Học viên) =====
+  const khoiTaoThanhToan = async (madk) => {
+    const res = await api.post("/thanh-toan/khoi-tao", { madk });
+    return res.data;
+  };
+
+  const kiemTraTrangThaiThanhToan = async (matt) => {
+    const res = await api.get(`/thanh-toan/${matt}/trang-thai`);
+    return res.data;
+  };
+
+  const layThongTinThanhToan = async (matt) => {
+    const res = await api.get(`/thanh-toan/${matt}/qr`);
+    return res.data;
+  };
+
+  const xacNhanThanhToan = async (matt) => {
+    const res = await api.post(`/thanh-toan/xac-nhan/${matt}`);
+    return res.data;
+  };
+
+  // ===== Email thông báo kỳ đóng học phần (Admin/NV) =====
+  const xemTruocNguoiNhan = async (makh = null) => {
+    const params = makh ? { params: { makh } } : {};
+    const res = await api.get("/email/thong-bao-ky-dong/preview", params);
+    return res.data;
+  };
+
+  const guiThongBaoKyDong = async (data) => {
+    const res = await api.post("/email/thong-bao-ky-dong", data);
+    return res.data;
+  };
+
   return {
     username, password, error, showLogin, userInput,
     loggedIn, role, displayName, authVersion, logout,
@@ -412,5 +445,7 @@ export function useSite() {
     authTab, goPortal, handleLogin, handleGoogleLogin, openRegister, submitRegister, loadKhoaHocPublic, loadHangGPLX,
     otpSent, otpVerified, otpCode, otpSending, otpVerifying, otpTimer, sendOtp, verifyOtp,
     loadGoogleScript, renderGoogleButton,
+    khoiTaoThanhToan, kiemTraTrangThaiThanhToan, xacNhanThanhToan, layThongTinThanhToan,
+    xemTruocNguoiNhan, guiThongBaoKyDong,
   };
 }

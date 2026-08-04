@@ -167,7 +167,13 @@
                   <i class="bi bi-calendar me-1"></i>{{ formatDate(item.ngaydangky) }}
                 </small>
               </div>
-              <span class="badge rounded-pill px-3 py-2" :class="statusBadge(item.trangthai)">{{ item.trangthai }}</span>
+              <div class="d-flex flex-column align-items-end gap-1">
+                <span class="badge rounded-pill px-3 py-2" :class="statusBadge(item.trangthai)">{{ item.trangthai }}</span>
+                <button class="btn btn-success btn-sm rounded-pill px-3" @click="payCourse(item.madk)" :disabled="payingMadk === item.madk">
+                  <span v-if="payingMadk === item.madk" class="spinner-border spinner-border-sm"></span>
+                  <i v-else class="bi bi-qr-code me-1"></i>Thanh toán
+                </button>
+              </div>
             </div>
             <div v-if="item.trangthai === 'Đang học'" class="mt-2">
               <div class="d-flex justify-content-between small mb-1">
@@ -187,13 +193,35 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import api from "../services/api";
+import { useSite } from "../composables/useSite";
+
+const router = useRouter();
+const { khoiTaoThanhToan } = useSite();
 
 const loading = ref(true);
 const profile = ref({});
 const registeredCourses = ref([]);
 const lichHocs = ref([]);
 const lichThis = ref([]);
+const payingMadk = ref(null);
+
+const payCourse = async (madk) => {
+  payingMadk.value = madk;
+  try {
+    const res = await khoiTaoThanhToan(madk);
+    if (res.success) {
+      router.push(`/thanh-toan/${res.data.matt}`);
+    } else {
+      alert(res.message || "Khởi tạo thanh toán thất bại");
+    }
+  } catch (e) {
+    alert("Khởi tạo thanh toán thất bại");
+  } finally {
+    payingMadk.value = null;
+  }
+};
 
 const todayDate = computed(() => {
   const d = new Date();

@@ -92,6 +92,7 @@ const gvEdit = [
 
 const hvView = [
   "/hv-portal",
+  "/thanh-toan",
   "/chuong-trinh-hoc",
   "/quan-ly-khoa-hoc",
   "/lop-hoc",

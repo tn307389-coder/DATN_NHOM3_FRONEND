@@ -45,6 +45,9 @@ import BangGiaView from "../views/BangGiaView.vue";
 import TinTucView from "../views/TinTucView.vue";
 import LienHeView from "../views/LienHeView.vue";
 
+// Thanh toán QR (yêu cầu đăng nhập Học viên)
+import ThanhToanQRView from "../views/ThanhToanQRView.vue";
+
 import { canAccess, roleHome } from "../services/permissions";
 
 function currentRole() {
@@ -112,6 +115,7 @@ const routes = [
   { path: "/lich-su-bao-tri-xe", component: LichSuBaoTriXeView },
   { path: "/gv-portal", component: GvPortalView },
   { path: "/hv-portal", component: HvPortalView },
+  { path: "/thanh-toan/:matt", component: ThanhToanQRView, meta: { roles: ["HV", "ADMIN"] } },
 ];
 
 const router = createRouter({
@@ -121,6 +125,21 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
+  const role = currentRole();
+
+  // Trang có yêu cầu vai trò cụ thể (vd: /thanh-toan/:matt) — chưa login thì không vào được
+  if (to.meta && to.meta.roles) {
+    if (!token) {
+      next("/login");
+      return;
+    }
+    if (!to.meta.roles.includes(role)) {
+      next(roleHome(role));
+      return;
+    }
+    next();
+    return;
+  }
 
   // Trang công khai: cho phép truy cập không cần đăng nhập
   if (publicPaths.includes(to.path)) {
@@ -137,8 +156,6 @@ router.beforeEach((to, from, next) => {
     next("/login");
     return;
   }
-
-  const role = currentRole();
 
   if (to.path === "/") {
     next(roleHome(role));

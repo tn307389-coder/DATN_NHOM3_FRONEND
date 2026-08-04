@@ -14,7 +14,9 @@
           </div>
           <p class="testimonial-text">{{ t.text }}</p>
           <div class="testimonial-author">
-            <img :src="t.avatar" :alt="t.name" class="testimonial-avatar" />
+            <div class="testimonial-avatar" :style="{ background: t.color }">
+              {{ t.initials }}
+            </div>
             <div>
               <div class="testimonial-name">{{ t.name }}</div>
               <div class="testimonial-title">{{ t.title }}</div>
@@ -33,21 +35,24 @@ const testimonials = [
     text: "Học xong B2 tại DriveHub chỉ sau 3 tháng. Giáo viên nhiệt tình, xe tập mới và sạch sẽ. Thi đậu ngay lần đầu!",
     name: "Nguyễn Văn An",
     title: "Học viên khóa B2",
-    avatar: "https://i.pravatar.cc/80?img=11",
+    initials: "NA",
+    color: "linear-gradient(135deg, #d4a853, #c99a3e)",
   },
   {
     stars: 5,
     text: "Mình học A1 ở đây thấy rất bài bản. Lịch học linh hoạt, hỗ trợ đăng ký thi nhanh gọn. Sẽ giới thiệu bạn bè.",
     name: "Trần Thị Mai",
     title: "Học viên khóa A1",
-    avatar: "https://i.pravatar.cc/80?img=5",
+    initials: "TM",
+    color: "linear-gradient(135deg, #0d6efd, #0a58ca)",
   },
   {
     stars: 5,
     text: "Nâng hạng từ B2 lên C, thủ tục đơn giản, giáo viên dạy dễ hiểu. Trung tâm có bãi sa hình rộng, tập thoải mái.",
     name: "Lê Hoàng Nam",
     title: "Học viên nâng hạng C",
-    avatar: "https://i.pravatar.cc/80?img=12",
+    initials: "LN",
+    color: "linear-gradient(135deg, #198754, #146c43)",
   },
 ];
 </script>
