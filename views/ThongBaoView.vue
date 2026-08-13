@@ -27,6 +27,15 @@
       </div>
     </div>
 
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="text-muted small">
+        <i class="bi bi-envelope-paper me-1"></i> Gửi email thông báo kỳ đóng học phần đến học viên
+      </div>
+      <button class="btn btn-primary rounded-pill px-3" @click="openEmailModal">
+        <i class="bi bi-envelope-arrow-up me-1"></i> Gửi email kỳ đóng học phần
+      </button>
+    </div>
+
     <SimpleTablePage
       title="Quản lý thông báo"
       subtitle="Thông báo gửi đến học viên và giáo viên"
@@ -98,6 +107,70 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal gửi email kỳ đóng học phần -->
+    <div class="modal fade" id="emailModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+          <div class="modal-header border-bottom-0 pb-0 bg-primary-subtle">
+            <h5 class="modal-title fw-bold"><i class="bi bi-envelope-arrow-up text-primary me-2"></i>Gửi email kỳ đóng học phần</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small"><i class="bi bi-mortarboard me-1"></i>Khóa học</label>
+                <select v-model="emailForm.makh" class="form-select" @change="previewEmail">
+                  <option value="">-- Tất cả khóa học --</option>
+                  <option v-for="kh in khoaHocList" :key="kh.makh" :value="kh.makh">{{ kh.tenkhoahoc }} [{{ kh.hangBang }}]</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small"><i class="bi bi-calendar-event me-1"></i>Hạn chốt</label>
+                <input v-model="emailForm.hanChot" type="date" class="form-control" />
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small"><i class="bi bi-chat-dots me-1"></i>Nội dung (tùy chọn)</label>
+                <textarea v-model="emailForm.noiDung" class="form-control" rows="4" placeholder="Nhập nội dung bổ sung..."></textarea>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mt-3">
+              <button class="btn btn-outline-primary btn-sm rounded-pill px-3" @click="previewEmail" :disabled="previewing">
+                <span v-if="previewing" class="spinner-border spinner-border-sm"></span>
+                <i v-else class="bi bi-eye me-1"></i>Xem trước người nhận
+              </button>
+              <span v-if="recipients.length > 0" class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                <i class="bi bi-people me-1"></i>{{ recipients.length }} học viên
+              </span>
+            </div>
+
+            <div v-if="recipients.length > 0" class="recipient-box mt-3 p-3 rounded-3">
+              <div class="small text-muted mb-2"><i class="bi bi-envelope me-1"></i>Danh sách Gmail nhận thông báo:</div>
+              <div class="recipient-scroll">
+                <div v-for="r in recipients" :key="r.email" class="recipient-row d-flex justify-content-between py-1 border-bottom">
+                  <span class="small fw-semibold">{{ r.hoten }}</span>
+                  <span class="small text-primary">{{ r.email }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="emailError" class="alert alert-danger py-2 small mt-3 mb-0">{{ emailError }}</div>
+            <div v-if="emailResult" class="alert alert-success py-2 small mt-3 mb-0">
+              <i class="bi bi-check-circle me-1"></i>Đã gửi <strong>{{ emailResult.sent }}</strong> email
+              <span v-if="emailResult.failedCount > 0">, thất bại <strong class="text-danger">{{ emailResult.failedCount }}</strong></span>
+            </div>
+          </div>
+          <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+            <button class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+            <button class="btn btn-primary rounded-pill px-4" @click="sendEmail" :disabled="sending || recipients.length === 0">
+              <span v-if="sending" class="spinner-border spinner-border-sm me-1"></span>
+              <i v-else class="bi bi-send me-1"></i>Gửi email
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -106,10 +179,20 @@ import { onMounted, ref, computed } from "vue";
 import { Modal } from "bootstrap";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
+import { useSite } from "../composables/useSite";
+
+const { khoaHocList, loadKhoaHocPublic, xemTruocNguoiNhan, guiThongBaoKyDong } = useSite();
 
 const rows = ref([]);
 const isEdit = ref(false);
 const saving = ref(false);
+
+const emailForm = ref({ makh: "", hanChot: "", noiDung: "" });
+const recipients = ref([]);
+const previewing = ref(false);
+const sending = ref(false);
+const emailError = ref("");
+const emailResult = ref(null);
 
 const form = ref({ matb: null, tieude: "", noidung: "", doituong: "" });
 const errors = ref({});
@@ -172,10 +255,64 @@ const saveData = async () => {
   finally { saving.value = false; }
 };
 
-onMounted(loadData);
+const openEmailModal = () => {
+  emailForm.value = { makh: "", hanChot: "", noiDung: "" };
+  recipients.value = [];
+  emailError.value = "";
+  emailResult.value = null;
+  if (!khoaHocList.value.length) loadKhoaHocPublic();
+  Modal.getOrCreateInstance(document.getElementById("emailModal")).show();
+};
+
+const previewEmail = async () => {
+  previewing.value = true;
+  emailError.value = "";
+  emailResult.value = null;
+  try {
+    const res = await xemTruocNguoiNhan(emailForm.value.makh || null);
+    if (res.success) {
+      recipients.value = res.recipients || [];
+      if (!recipients.value.length) emailError.value = "Không có học viên nào nhận thông báo";
+    } else {
+      emailError.value = res.message || "Không thể tải danh sách người nhận";
+      recipients.value = [];
+    }
+  } catch (e) {
+    emailError.value = "Không thể tải danh sách người nhận";
+    recipients.value = [];
+  } finally {
+    previewing.value = false;
+  }
+};
+
+const sendEmail = async () => {
+  sending.value = true;
+  emailError.value = "";
+  emailResult.value = null;
+  try {
+    const res = await guiThongBaoKyDong({
+      makh: emailForm.value.makh || null,
+      hanChot: emailForm.value.hanChot || "",
+      noiDung: emailForm.value.noiDung || "",
+    });
+    if (res.success) {
+      emailResult.value = res;
+    } else {
+      emailError.value = res.message || "Gửi email thất bại";
+    }
+  } catch (e) {
+    emailError.value = "Gửi email thất bại";
+  } finally {
+    sending.value = false;
+  }
+};
+
+onMounted(() => { loadData(); loadKhoaHocPublic(); });
 </script>
 
 <style scoped>
 .card { transition: transform 0.2s, box-shadow 0.2s; }
 .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important; }
+.recipient-box { background: #f8fafc; border: 1px solid #e2e8f0; }
+.recipient-scroll { max-height: 200px; overflow-y: auto; }
 </style>

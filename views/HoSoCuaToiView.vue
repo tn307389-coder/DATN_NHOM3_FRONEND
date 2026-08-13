@@ -150,7 +150,11 @@ const onFileChange = async (e) => {
     const res = await api.post("/anh-cho-duyet", fd, { headers: { "Content-Type": "multipart/form-data" } });
     pendingAnh.value = res.data;
     window.$toast?.add("Đã gửi ảnh, chờ quản trị viên duyệt", "success");
-  } catch (err) { console.error(err); window.$toast?.add("Tải ảnh thất bại", "error"); }
+  } catch (err) {
+    console.error(err);
+    const msg = err.response?.data?.message || "Tải ảnh thất bại (dung lượng/chuẩn file không hợp lệ)";
+    window.$toast?.add(msg, "error");
+  }
   finally { e.target.value = ""; }
 };
 
@@ -169,7 +173,11 @@ const saveProfile = async () => {
     const res = await api.put("/tai-khoan/me", { hoten: form.value.hoten, email: form.value.email, soDienThoai: form.value.soDienThoai });
     profile.value = { ...profile.value, ...res.data };
     window.$toast?.add("Lưu thay đổi thành công", "success");
-  } catch (err) { console.error(err); window.$toast?.add("Lưu thất bại", "error"); }
+  } catch (err) {
+    console.error(err);
+    const msg = err.response?.data?.message || "Lưu thất bại";
+    window.$toast?.add(msg, "error");
+  }
   finally { saving.value = false; }
 };
 

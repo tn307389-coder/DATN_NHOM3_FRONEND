@@ -36,6 +36,7 @@ export const MENU = [
   { path: "/thong-bao", icon: "🔔", name: "Thông báo" },
   { path: "/nhat-ky-he-thong", icon: "🧾", name: "Nhật ký hệ thống" },
   { path: "/ho-so-cua-toi", icon: "🙋", name: "Hồ sơ của tôi" },
+  { path: "/dich-vu-hoc-vien", icon: "🛎️", name: "Dịch vụ học viên" },
   { path: "/duyet-anh", icon: "🖼️", name: "Duyệt ảnh" },
   { path: "/lich-cua-toi", icon: "📅", name: "Lịch của tôi" },
   { path: "/lich-su-bao-tri-xe", icon: "🔧", name: "Bảo trì xe" },
@@ -92,6 +93,7 @@ const gvEdit = [
 
 const hvView = [
   "/hv-portal",
+  "/dich-vu-hoc-vien",
   "/chuong-trinh-hoc",
   "/quan-ly-khoa-hoc",
   "/lop-hoc",
@@ -121,7 +123,7 @@ hvView.forEach((p) => (ROLE_PAGES.HV[p] = "view"));
 ["ADMIN", "NV", "GV", "HV"].forEach((r) => (ROLE_PAGES[r]["/ho-so-cua-toi"] = "view"));
 
 // Danh sách đường dẫn được phép của vai trò (để lọc menu + guard)
-const adminExclude = ["/gv-portal", "/hv-portal"];
+const adminExclude = ["/gv-portal", "/hv-portal", "/dich-vu-hoc-vien"];
 export function allowedPaths(role) {
   if (role === ROLE_ADMIN) return MENU.map((m) => m.path).filter((p) => !adminExclude.includes(p));
   return Object.keys(ROLE_PAGES[role] || {});

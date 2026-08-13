@@ -3,6 +3,7 @@
     <SiteNavbar />
     <router-view />
     <ToastContainer />
+    <ChatBox />
   </div>
 
   <div v-else class="app-layout" :class="{ 'dark-mode': theme === 'dark' }">
@@ -215,6 +216,7 @@ import Header from "./components/layout/Header.vue";
 import Sidebar from "./components/layout/Sidebar.vue";
 import Footer from "./components/layout/Footer.vue";
 import SiteNavbar from "./components/site/SiteNavbar.vue";
+import ChatBox from "./components/site/ChatBox.vue";
 import ToastContainer from "./components/common/ToastContainer.vue";
 import { useSite } from "./composables/useSite";
 import { useWebSocket } from "./composables/useWebSocket";

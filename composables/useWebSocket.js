@@ -25,7 +25,8 @@ export function useWebSocket() {
 
   const doConnect = (token) => {
     try {
-      const socket = new SockJS("http://localhost:8081/ws");
+      const wsBase = import.meta.env.VITE_WS_URL || "http://localhost:8081";
+      const socket = new SockJS(wsBase.replace(/\/$/, "") + "/ws");
       stompClient = Stomp.over(socket);
 
       stompClient.connect({ Authorization: `Bearer ${token}`, login: token }, () => {

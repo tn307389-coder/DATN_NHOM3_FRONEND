@@ -34,8 +34,11 @@ vi.mock("../composables/useSite", () => ({
     registerError: { value: "" },
     registerSuccess: { value: "" },
     khoaHocList: { value: [] },
+    hangGPLXList: { value: [] },
     submitRegister: vi.fn(),
     loadKhoaHocPublic: vi.fn(),
+    loadHangGPLX: vi.fn(),
+    renderGoogleButton: vi.fn(),
     otpSent: { value: false },
     otpVerified: { value: false },
     otpCode: { value: "" },
@@ -59,7 +62,7 @@ describe("App", () => {
   it("renders without crashing", () => {
     const wrapper = mount(App, {
       global: {
-        stubs: ["router-view", "SiteNavbar", "Sidebar", "Header", "Footer", "ToastContainer"],
+        stubs: ["router-view", "SiteNavbar", "Sidebar", "Header", "Footer", "ToastContainer", "ChatBox"],
       },
     });
     expect(wrapper.exists()).toBe(true);

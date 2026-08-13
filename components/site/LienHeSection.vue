@@ -17,8 +17,8 @@
           Đội ngũ tư vấn sẽ liên hệ lại trong thời gian sớm nhất để hỗ trợ
           bạn chọn khóa học phù hợp.
         </p>
-        <button class="btn-primary" @click="openRegister()">
-          Đăng ký khóa học
+        <button class="btn-primary" @click="openChat()">
+          Nhắn để được tư vấn
         </button>
       </div>
     </div>
@@ -26,6 +26,6 @@
 </template>
 
 <script setup>
-import { useSite } from "../../composables/useSite";
-const { openRegister } = useSite();
+import { useChat } from "../../composables/useChat";
+const { openChat } = useChat();
 </script>
