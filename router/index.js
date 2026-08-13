@@ -36,6 +36,8 @@ import LichCuaToiView from "../views/LichCuaToiView.vue";
 import LichSuBaoTriXeView from "../views/LichSuBaoTriXeView.vue";
 import GvPortalView from "../views/GvPortalView.vue";
 import HvPortalView from "../views/HvPortalView.vue";
+import DichVuHocVienView from "../views/DichVuHocVienView.vue";
+import TinTucManagerView from "../views/TinTucManagerView.vue";
 
 // Trang công khai (website)
 import GioiThieuView from "../views/GioiThieuView.vue";
@@ -115,6 +117,8 @@ const routes = [
   { path: "/lich-su-bao-tri-xe", component: LichSuBaoTriXeView },
   { path: "/gv-portal", component: GvPortalView },
   { path: "/hv-portal", component: HvPortalView },
+  { path: "/dich-vu-hoc-vien", component: DichVuHocVienView },
+  { path: "/quan-ly-tin-tuc", component: TinTucManagerView },
   { path: "/thanh-toan/:matt", component: ThanhToanQRView, meta: { roles: ["HV", "ADMIN"] } },
 ];
 
