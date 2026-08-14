@@ -59,6 +59,19 @@ const otpVerifying = ref(false);
 const otpTimer = ref(0);
 let otpInterval = null;
 
+// Quên mật khẩu state
+const showForgot = ref(false);
+const forgotStep = ref(1); // 1 = nhập email, 2 = OTP + mật khẩu mới
+const forgotEmail = ref("");
+const forgotOtp = ref("");
+const forgotMatKhauMoi = ref("");
+const forgotError = ref("");
+const forgotSuccess = ref("");
+const forgotLoading = ref(false);
+const forgotOtpSent = ref(false);
+const forgotTimer = ref(0);
+let forgotInterval = null;
+
 watch(showLogin, (val) => {
   if (val) {
     nextTick(() => userInput.value?.focus());
@@ -71,6 +84,20 @@ watch(showLogin, (val) => {
     otpCode.value = "";
     if (otpInterval) { clearInterval(otpInterval); otpInterval = null; }
     otpTimer.value = 0;
+  }
+});
+
+watch(showForgot, (val) => {
+  if (!val) {
+    forgotStep.value = 1;
+    forgotEmail.value = "";
+    forgotOtp.value = "";
+    forgotMatKhauMoi.value = "";
+    forgotError.value = "";
+    forgotSuccess.value = "";
+    forgotOtpSent.value = false;
+    if (forgotInterval) { clearInterval(forgotInterval); forgotInterval = null; }
+    forgotTimer.value = 0;
   }
 });
 
@@ -88,6 +115,7 @@ watch(authTab, () => {
   error.value = "";
   registerError.value = "";
   registerSuccess.value = "";
+  showForgot.value = false;
   // Reset OTP khi chuyển tab
   otpSent.value = false;
   otpVerified.value = false;
@@ -405,6 +433,107 @@ export function useSite() {
     }
   };
 
+  // ===== Quên mật khẩu =====
+  const openForgot = () => {
+    showLogin.value = true;
+    showForgot.value = true;
+    forgotStep.value = 1;
+    forgotEmail.value = "";
+    forgotOtp.value = "";
+    forgotMatKhauMoi.value = "";
+    forgotError.value = "";
+    forgotSuccess.value = "";
+    forgotOtpSent.value = false;
+  };
+
+  const closeForgot = () => {
+    showForgot.value = false;
+  };
+
+  const sendForgotOtp = async () => {
+    if (!forgotEmail.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail.value)) {
+      forgotError.value = "Vui lòng nhập email hợp lệ";
+      return;
+    }
+    forgotLoading.value = true;
+    forgotError.value = "";
+    try {
+      const res = await api.post("/quen-mat-khau/send-otp", { email: forgotEmail.value });
+      if (res.data.success) {
+        forgotOtpSent.value = true;
+        forgotTimer.value = 60;
+        if (forgotInterval) clearInterval(forgotInterval);
+        forgotInterval = setInterval(() => {
+          forgotTimer.value--;
+          if (forgotTimer.value <= 0) { clearInterval(forgotInterval); forgotInterval = null; }
+        }, 1000);
+        forgotSuccess.value = res.data.message || "Đã gửi mã OTP, kiểm tra email của bạn";
+      } else {
+        forgotError.value = res.data.message;
+      }
+    } catch (e) {
+      forgotError.value = e.response?.data?.message || "Gửi OTP thất bại";
+    } finally {
+      forgotLoading.value = false;
+    }
+  };
+
+  const verifyForgotOtp = async () => {
+    if (!forgotOtp.value || forgotOtp.value.length < 6) {
+      forgotError.value = "Vui lòng nhập mã OTP 6 số";
+      return;
+    }
+    forgotLoading.value = true;
+    forgotError.value = "";
+    try {
+      const res = await api.post("/quen-mat-khau/verify-otp", {
+        email: forgotEmail.value,
+        otp: forgotOtp.value,
+      });
+      if (res.data.success) {
+        forgotStep.value = 2;
+        forgotSuccess.value = "Xác thực OTP thành công, hãy đặt mật khẩu mới";
+        if (forgotInterval) { clearInterval(forgotInterval); forgotInterval = null; }
+      } else {
+        forgotError.value = res.data.message;
+      }
+    } catch (e) {
+      forgotError.value = e.response?.data?.message || "Xác thực OTP thất bại";
+    } finally {
+      forgotLoading.value = false;
+    }
+  };
+
+  const resetForgotPassword = async () => {
+    if (!forgotMatKhauMoi.value || forgotMatKhauMoi.value.length < 6) {
+      forgotError.value = "Mật khẩu mới phải có ít nhất 6 ký tự";
+      return;
+    }
+    forgotLoading.value = true;
+    forgotError.value = "";
+    try {
+      const res = await api.post("/quen-mat-khau/reset-password", {
+        email: forgotEmail.value,
+        otp: forgotOtp.value,
+        matKhauMoi: forgotMatKhauMoi.value,
+      });
+      if (res.data.success) {
+        forgotSuccess.value = "Đặt lại mật khẩu thành công, vui lòng đăng nhập lại";
+        setTimeout(() => {
+          showForgot.value = false;
+          showLogin.value = false;
+          authTab.value = "login";
+        }, 1500);
+      } else {
+        forgotError.value = res.data.message;
+      }
+    } catch (e) {
+      forgotError.value = e.response?.data?.message || "Đặt lại mật khẩu thất bại";
+    } finally {
+      forgotLoading.value = false;
+    }
+  };
+
   // ===== Thanh toán QR (yêu cầu đăng nhập - Học viên) =====
   const khoiTaoThanhToan = async (madk) => {
     const res = await api.post("/thanh-toan/khoi-tao", { madk });
@@ -444,6 +573,8 @@ export function useSite() {
     khoaHocList, hangGPLXList, showRegister, registerLoading, registerError, registerSuccess, registerForm,
     authTab, goPortal, handleLogin, handleGoogleLogin, openRegister, submitRegister, loadKhoaHocPublic, loadHangGPLX,
     otpSent, otpVerified, otpCode, otpSending, otpVerifying, otpTimer, sendOtp, verifyOtp,
+    showForgot, forgotStep, forgotEmail, forgotOtp, forgotMatKhauMoi, forgotError, forgotSuccess,
+    forgotLoading, forgotOtpSent, forgotTimer, openForgot, closeForgot, sendForgotOtp, verifyForgotOtp, resetForgotPassword,
     loadGoogleScript, renderGoogleButton,
     khoiTaoThanhToan, kiemTraTrangThaiThanhToan, xacNhanThanhToan, layThongTinThanhToan,
     xemTruocNguoiNhan, guiThongBaoKyDong,

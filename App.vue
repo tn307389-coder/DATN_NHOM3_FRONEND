@@ -43,7 +43,7 @@
       </div>
 
       <!-- Login -->
-      <form v-if="authTab === 'login'" @submit.prevent="handleLogin">
+      <form v-if="authTab === 'login' && !showForgot" @submit.prevent="handleLogin">
         <div class="mb-3">
           <label class="form-label">Tên tài khoản</label>
           <input ref="userInput" v-model="username" type="text" class="form-control form-control-lg"
@@ -57,6 +57,9 @@
         <div class="form-check mb-3">
           <input v-model="remember" type="checkbox" class="form-check-input" id="remember" />
           <label class="form-check-label" for="remember" style="color:var(--text-secondary)">Ghi nhớ mật khẩu</label>
+        </div>
+        <div class="text-end mb-2">
+          <a href="#" class="small fw-semibold" style="color:var(--accent)" @click.prevent="openForgot">Quên mật khẩu?</a>
         </div>
         <div v-if="error" class="alert alert-danger py-2">{{ error }}</div>
         <button type="submit" class="btn btn-primary btn-lg w-100">Đăng nhập</button>
@@ -162,6 +165,84 @@
          </div>
        </form>
 
+       <!-- Quên mật khẩu -->
+       <form v-if="authTab === 'login' && showForgot" @submit.prevent="forgotStep === 1 ? sendForgotOtp() : resetForgotPassword()">
+         <div class="forgot-panel">
+           <div class="forgot-header">
+             <div class="forgot-icon"><i class="bi bi-shield-lock"></i></div>
+             <div>
+               <h6 class="fw-bold mb-1">Quên mật khẩu?</h6>
+               <p class="forgot-subtitle mb-0">Nhập email đăng ký để nhận mã xác thực</p>
+             </div>
+           </div>
+
+           <!-- Bước 1: nhập email -->
+           <template v-if="forgotStep === 1">
+             <div class="mb-3">
+               <label class="form-label">Email đăng ký</label>
+               <div class="input-group">
+                 <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                 <input v-model="forgotEmail" type="email" class="form-control form-control-lg"
+                   placeholder="user@gmail.com" :disabled="forgotOtpSent" />
+               </div>
+             </div>
+             <div v-if="forgotError" class="forgot-alert forgot-alert-error">
+               <i class="bi bi-exclamation-triangle me-1"></i>{{ forgotError }}
+             </div>
+             <div v-if="forgotSuccess" class="forgot-alert forgot-alert-success">
+               <i class="bi bi-check-circle me-1"></i>{{ forgotSuccess }}
+             </div>
+             <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="forgotLoading">
+               <span v-if="forgotLoading" class="spinner-border spinner-border-sm me-1"></span>
+               <span v-else><i class="bi bi-send me-1"></i></span>Gửi mã OTP
+             </button>
+             <div v-if="forgotOtpSent" class="d-flex align-items-center justify-content-between mt-3 forgot-sent-row">
+               <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                 <i class="bi bi-check-circle me-1"></i>Đã gửi{{ forgotTimer > 0 ? ` (${forgotTimer}s)` : "" }}
+               </span>
+               <a href="#" class="small fw-semibold" style="color:var(--accent)" @click.prevent="sendForgotOtp">Gửi lại</a>
+             </div>
+           </template>
+
+           <!-- Bước 2: OTP + mật khẩu mới -->
+           <template v-else>
+             <div class="mb-3">
+               <label class="form-label">Mã OTP</label>
+               <div class="input-group">
+                 <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                 <input v-model="forgotOtp" class="form-control form-control-lg" placeholder="Nhập mã 6 số" maxlength="6" />
+               </div>
+             </div>
+             <div class="mb-3">
+               <label class="form-label">Mật khẩu mới</label>
+               <div class="input-group">
+                 <span class="input-group-text"><i class="bi bi-key"></i></span>
+                 <input v-model="forgotMatKhauMoi" :type="forgotShowPass ? 'text' : 'password'"
+                   class="form-control form-control-lg" placeholder="Ít nhất 6 ký tự" />
+                 <button type="button" class="btn btn-outline-secondary forgot-eye-btn" @click="forgotShowPass = !forgotShowPass">
+                   <i :class="forgotShowPass ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                 </button>
+               </div>
+             </div>
+             <div v-if="forgotError" class="forgot-alert forgot-alert-error">
+               <i class="bi bi-exclamation-triangle me-1"></i>{{ forgotError }}
+             </div>
+             <div v-if="forgotSuccess" class="forgot-alert forgot-alert-success">
+               <i class="bi bi-check-circle me-1"></i>{{ forgotSuccess }}
+             </div>
+             <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="forgotLoading">
+               {{ forgotLoading ? "Đang xử lý..." : "Đặt lại mật khẩu" }}
+             </button>
+           </template>
+
+           <div class="text-center mt-3">
+             <a href="#" class="small fw-semibold" style="color:var(--text-muted)" @click.prevent="closeForgot">
+               <i class="bi bi-arrow-left me-1"></i>Quay lại đăng nhập
+             </a>
+           </div>
+         </div>
+       </form>
+
        <div class="text-center mt-3">
          <small style="color:var(--text-muted)">TK demo: admin / admin123 (quản trị) — hocvien1 / 123456 (học viên) — giaovien1 / 123456 (giáo viên)</small>
        </div>
@@ -224,7 +305,8 @@ import { useWebSocket } from "./composables/useWebSocket";
 const route = useRoute();
 const router = useRouter();
 const { role, authVersion, showLogin, loggedIn, displayName, authTab, registerForm, registerLoading, registerError, registerSuccess, khoaHocList, hangGPLXList, submitRegister, loadKhoaHocPublic, loadHangGPLX,
-  otpSent, otpVerified, otpCode, otpSending, otpVerifying, otpTimer, sendOtp, verifyOtp, handleGoogleLogin, renderGoogleButton } = useSite();
+  otpSent, otpVerified, otpCode, otpSending, otpVerifying, otpTimer, sendOtp, verifyOtp, handleGoogleLogin, renderGoogleButton,
+  showForgot, forgotStep, forgotEmail, forgotOtp, forgotMatKhauMoi, forgotError, forgotSuccess, forgotLoading, forgotOtpSent, forgotTimer, openForgot, closeForgot, sendForgotOtp, resetForgotPassword } = useSite();
 const { connect: wsConnect, disconnect: wsDisconnect } = useWebSocket();
 
 // Dark mode state
@@ -308,6 +390,7 @@ if (remember.value) {
 }
 
 const googleBtnRef = ref(null);
+const forgotShowPass = ref(false);
 
 const renderGoogleBtn = () => {
   renderGoogleButton(googleBtnRef, handleGoogleLogin);
@@ -334,6 +417,7 @@ const handleLogin = async () => {
     const res = await api.post("/login", { tendangnhap: username.value, matkhau: password.value });
     if (res.data.success) {
       localStorage.setItem("token", res.data.data.token);
+      localStorage.setItem("refreshToken", res.data.data.refreshToken || "");
       localStorage.setItem("user", JSON.stringify(res.data.data));
       showLogin.value = false;
       loggedIn.value = true;

@@ -34,7 +34,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(row, index) in filteredRows" :key="index" class="align-middle">
+              <tr v-for="(row, index) in pagedRows" :key="index" class="align-middle">
                 <td v-for="col in columns" :key="col.key">
                   <slot :name="'cell-' + col.key" :row="row" :value="row[col.key]">
                     {{ row[col.key] }}
@@ -87,10 +87,41 @@
           </slot>
         </div>
 
-        <div v-else class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+        <div v-else class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-2 border-top">
           <small class="text-muted">
-            <i class="bi bi-list-ul me-1"></i> Hiển thị {{ filteredRows.length }} dữ liệu
+            <i class="bi bi-list-ul me-1"></i> Hiển thị {{ pagedRows.length }} / {{ filteredRows.length }} dữ liệu
           </small>
+          <div class="d-flex align-items-center gap-2">
+            <label class="small text-muted mb-0">
+              <i class="bi bi-list-nums me-1"></i>
+              <select v-model="pageSize" class="form-select form-select-sm d-inline-block w-auto">
+                <option :value="10">10</option>
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+                <option :value="100">100</option>
+              </select>
+            </label>
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button class="page-link" @click="currentPage--">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              <li
+                v-for="p in totalPages"
+                :key="p"
+                class="page-item"
+                :class="{ active: p === currentPage }"
+              >
+                <button class="page-link" @click="currentPage = p">{{ p }}</button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <button class="page-link" @click="currentPage++">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -98,7 +129,7 @@
 </template>
 
 <script setup>
-import { computed, inject, ref } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { deleteData } from "../../services/crudService";
 
 const props = defineProps({
@@ -124,6 +155,8 @@ const canEdit = computed(() => !readOnly.value && props.editable);
 const canDelete = computed(() => !readOnly.value && props.deletable);
 
 const keyword = ref("");
+const currentPage = ref(1);
+const pageSize = ref(10);
 
 const filteredRows = computed(() => {
   if (!keyword.value) return props.rows;
@@ -131,6 +164,19 @@ const filteredRows = computed(() => {
   return props.rows.filter((row) =>
     Object.values(row).some((v) => String(v).toLowerCase().includes(k))
   );
+});
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredRows.value.length / pageSize.value))
+);
+
+const pagedRows = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredRows.value.slice(start, start + pageSize.value);
+});
+
+watch(keyword, () => {
+  currentPage.value = 1;
 });
 
 const handleDelete = async (row) => {

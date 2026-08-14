@@ -173,6 +173,49 @@
       </div>
     </template>
 
+    <!-- LỊCH SỬ ĐIỂM DANH -->
+    <div v-if="selectedLop && attendanceHistory.length" class="card border-0 shadow-sm rounded-4 mt-4">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-clock-history fs-4 text-primary"></i>
+          <h5 class="fw-bold mb-0">{{ isHV ? 'Lịch sử điểm danh của tôi' : 'Lịch sử điểm danh lớp' }}</h5>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead style="background:linear-gradient(135deg,#e8f0fe,#d2e3fc)">
+              <tr>
+                <th class="fw-semibold">Ngày</th>
+                <th class="fw-semibold">Ca</th>
+                <th class="fw-semibold">Môn</th>
+                <th class="fw-semibold text-center">Có mặt</th>
+                <th class="fw-semibold text-center">Vắng</th>
+                <th class="fw-semibold text-center">Tỷ lệ</th>
+                <th class="text-center" style="width:130px">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="h in attendanceHistory" :key="h.key">
+                <td>{{ h.ngay }}</td>
+                <td>{{ h.ca }}</td>
+                <td>{{ h.mon }}</td>
+                <td class="text-center text-success fw-semibold">{{ h.present }}</td>
+                <td class="text-center text-danger fw-semibold">{{ h.absent }}</td>
+                <td class="text-center">
+                  <span class="badge rounded-pill px-3 py-2" :class="h.percent >= 50 ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'">{{ h.percent }}%</span>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-primary rounded-pill px-3" @click="viewHistory(h)" :disabled="isHV">
+                    <i class="bi bi-eye me-1"></i> Xem chi tiết
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-if="isHV" class="text-muted small mt-2">Chỉ hiển thị các buổi bạn đã được điểm danh.</div>
+      </div>
+    </div>
+
     <!-- EMPTY -->
     <div v-else-if="loaded" class="card border-0 shadow-sm rounded-4">
       <div class="card-body text-center text-muted py-5">
@@ -200,9 +243,70 @@ const saving = ref(false);
 const loaded = ref(false);
 const search = ref("");
 const filter = ref("all");
+const diemDanhAll = ref([]);
+const myMahv = ref(null);
 
 const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 const isHV = computed(() => currentUser.maVaiTro === "HV");
+
+const loadMyMahv = async () => {
+  if (!isHV.value) return;
+  try {
+    const me = await api.get("/tai-khoan/me");
+    if (me.data.cccd) {
+      const hv = await api.get("/hoc-vien/me");
+      myMahv.value = hv.data.mahv;
+    }
+  } catch (e) { console.error(e); }
+};
+
+const loadDiemDanhAll = async () => {
+  try {
+    const res = await getAll("/diem-danh");
+    diemDanhAll.value = res.data || [];
+  } catch (e) { console.error(e); }
+};
+
+const attendanceHistory = computed(() => {
+  if (!selectedLop.value) return [];
+  const list = diemDanhAll.value.filter((dd) => {
+    if (!dd.lichHoc || dd.lichHoc.lopHoc === null) return false;
+    if (String(dd.lichHoc?.lopHoc?.malop) !== String(selectedLop.value)) return false;
+    if (isHV.value && myMahv.value && String(dd.hocVien?.mahv) !== String(myMahv.value)) return false;
+    return true;
+  });
+  const map = new Map();
+  list.forEach((dd) => {
+    const key = dd.lichHoc?.malich + "|" + dd.ngaydiemdanh;
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        malich: dd.lichHoc?.malich,
+        ngay: dd.ngaydiemdanh,
+        ca: dd.lichHoc?.caHoc?.tencahoc || "Ca " + dd.lichHoc?.malich,
+        mon: dd.lichHoc?.monHoc?.tenmonhoc || "—",
+        present: 0,
+        absent: 0,
+        total: 0,
+      });
+    }
+    const item = map.get(key);
+    item.total++;
+    if (String(dd.trangthai || "").trim().toLowerCase() === "có mặt") item.present++;
+    else item.absent++;
+  });
+  const result = Array.from(map.values()).map((it) => ({
+    ...it,
+    percent: it.total ? Math.round((it.present / it.total) * 100) : 0,
+  }));
+  return result.sort((a, b) => (a.ngay < b.ngay ? 1 : -1));
+});
+
+const viewHistory = (h) => {
+  selectedLich.value = h.malich;
+  selectedDate.value = h.ngay;
+  loadStudents();
+};
 
 const lichHocOptions = computed(() => {
   if (!selectedLop.value) return [];
@@ -276,6 +380,8 @@ const loadStudents = async () => {
     const ddMap = {};
     existing.forEach((dd) => { ddMap[dd.hocVien?.mahv] = dd.trangthai; });
 
+    const isCoMat = (s) => String(s || "").trim().toLowerCase() === "có mặt";
+
     const initials = (name) => {
       if (!name) return "?";
       return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -289,7 +395,7 @@ const loadStudents = async () => {
         cccd: hv.cccd || "",
         sodienthoai: hv.sodienthoai || "",
         initials: initials(hv.hoten),
-        present: ddMap[mahv] ? ddMap[mahv] === "Có mặt" : true,
+        present: ddMap[mahv] ? isCoMat(ddMap[mahv]) : false,
       };
     });
 
@@ -322,6 +428,7 @@ const saveAll = async () => {
       danhSach,
     });
     window.$toast?.add("Lưu điểm danh thành công", "success");
+    await Promise.all([loadDiemDanhAll(), loadStudents()]);
   } catch (e) {
     console.error(e);
     window.$toast?.add("Lưu điểm danh thất bại", "error");
@@ -331,7 +438,7 @@ const saveAll = async () => {
 };
 
 onMounted(async () => {
-  await Promise.all([loadLopHoc(), loadLichHoc()]);
+  await Promise.all([loadLopHoc(), loadLichHoc(), loadDiemDanhAll(), loadMyMahv()]);
 });
 </script>
 
