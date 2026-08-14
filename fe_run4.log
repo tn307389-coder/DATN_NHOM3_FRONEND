@@ -1,0 +1,13 @@
+
+  [32m[1mVITE[22m v8.1.0[39m  [2mready in [0m[1m347[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://100.117.196.80:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.1.23:[1m5173[22m/[39m
+[2m4:30:50 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/views/BangDiemThuongXuyenView.vue[22m
+[2m4:31:11 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/views/BangDiemThuongXuyenView.vue[22m
+[2m4:49:13 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/views/DiemDanhView.vue[22m
+[2m4:49:20 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/views/DiemDanhView.vue[22m
+[2m4:49:29 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/views/DiemDanhView.vue[22m
+[2m4:59:31 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mrouter/index.js[22m
+[2m5:02:19 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/views/DiemDanhView.vue[22m

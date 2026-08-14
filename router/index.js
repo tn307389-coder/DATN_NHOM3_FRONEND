@@ -127,51 +127,31 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
   const token = localStorage.getItem("token");
   const role = currentRole();
 
   // Trang có yêu cầu vai trò cụ thể (vd: /thanh-toan/:matt) — chưa login thì không vào được
   if (to.meta && to.meta.roles) {
-    if (!token) {
-      next("/login");
-      return;
-    }
-    if (!to.meta.roles.includes(role)) {
-      next(roleHome(role));
-      return;
-    }
-    next();
-    return;
+    if (!token) return "/login";
+    if (!to.meta.roles.includes(role)) return roleHome(role);
+    return true;
   }
 
   // Trang công khai: cho phép truy cập không cần đăng nhập
   if (publicPaths.includes(to.path)) {
-    // Nếu đã đăng nhập mà vào trang login thì về trang chủrole
-    if (to.path === "/login" && token) {
-      next(roleHome(currentRole()));
-    } else {
-      next();
-    }
-    return;
+    // Nếu đã đăng nhập mà vào trang login thì về trang chủ role
+    if (to.path === "/login" && token) return roleHome(currentRole());
+    return true;
   }
 
-  if (!token) {
-    next("/login");
-    return;
-  }
+  if (!token) return "/login";
 
-  if (to.path === "/") {
-    next(roleHome(role));
-    return;
-  }
+  if (to.path === "/") return roleHome(role);
 
-  if (!canAccess(role, to.path)) {
-    next(roleHome(role));
-    return;
-  }
+  if (!canAccess(role, to.path)) return roleHome(role);
 
-  next();
+  return true;
 });
 
 export default router;

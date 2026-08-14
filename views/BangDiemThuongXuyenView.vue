@@ -37,6 +37,43 @@
       </div>
     </div>
 
+    <!-- THỐNG KÊ -->
+    <div v-if="!loading && students.length" class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body d-flex align-items-center gap-3 p-3">
+            <div class="rounded-3 p-3" style="background:rgba(13,110,253,.1)"><i class="bi bi-people fs-4 text-primary"></i></div>
+            <div>
+              <div class="text-muted small">Sĩ số</div>
+              <h4 class="mb-0 fw-bold">{{ students.length }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body d-flex align-items-center gap-3 p-3">
+            <div class="rounded-3 p-3" style="background:rgba(25,135,84,.1)"><i class="bi bi-check2-circle fs-4 text-success"></i></div>
+            <div>
+              <div class="text-muted small">Đã chấm điểm</div>
+              <h4 class="mb-0 fw-bold">{{ daChamCount }} <small class="fs-6 text-muted">/ {{ students.length }}</small></h4>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body d-flex align-items-center gap-3 p-3">
+            <div class="rounded-3 p-3" style="background:rgba(255,193,7,.15)"><i class="bi bi-bar-chart fs-4 text-warning"></i></div>
+            <div>
+              <div class="text-muted small">Điểm trung bình {{ isHV ? 'của tôi' : 'lớp' }}</div>
+              <h4 class="mb-0 fw-bold">{{ avgDiem }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div v-if="loading" class="text-center py-5 text-muted">
       <div class="spinner-border text-primary"></div>
     </div>
@@ -67,7 +104,10 @@
               <tr v-for="(sv, idx) in students" :key="sv.mahv">
                 <td>{{ idx + 1 }}</td>
                 <td>
-                  <div class="fw-semibold">{{ sv.hoten }}</div>
+                  <div class="fw-semibold">
+                    {{ sv.hoten }}
+                    <span v-if="sv.diem !== null && sv.diem !== ''" class="badge bg-success bg-opacity-10 text-success ms-1">Đã chấm</span>
+                  </div>
                   <small class="text-muted" v-if="sv.cccd">CCCD: {{ sv.cccd }}</small>
                 </td>
                 <td>
@@ -156,6 +196,18 @@ const currentMonName = computed(() => {
   return mh ? mh.tenmonhoc : "";
 });
 
+const daChamCount = computed(() =>
+  students.value.filter((s) => s.diem !== null && s.diem !== "" && s.diem !== undefined).length
+);
+
+const avgDiem = computed(() => {
+  const vals = students.value
+    .map((s) => Number(s.diem))
+    .filter((v) => !isNaN(v) && v !== null && v !== "");
+  if (!vals.length) return "—";
+  return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
+});
+
 const loadLopHoc = async () => {
   const res = await getAll("/lop-hoc");
   lopHocList.value = res.data;
@@ -204,7 +256,7 @@ const loadStudents = async () => {
     const bdMap = {};
     bdRes.data.forEach((bd) => {
       if (
-        bd.malop === Number(selectedLop.value) &&
+        bd.lopHoc?.malop === Number(selectedLop.value) &&
         bd.monHoc?.mamh === Number(selectedMon.value)
       ) {
         bdMap[bd.hocVien?.mahv] = bd;
@@ -246,9 +298,9 @@ const saveAll = async () => {
       const data = {
         hocVien: { mahv: Number(sv.mahv) },
         monHoc: { mamh: Number(selectedMon.value) },
+        lopHoc: { malop: Number(selectedLop.value) },
         diem: sv.diem === "" || sv.diem === null ? null : Number(sv.diem),
         ghichu: sv.ghichu || "",
-        malop: Number(selectedLop.value),
         ngayCham: new Date().toISOString().slice(0, 10),
       };
       if (sv.mabd) {
