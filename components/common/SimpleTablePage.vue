@@ -145,6 +145,8 @@ const props = defineProps({
   addable: { type: Boolean, default: true },
   loading: { type: Boolean, default: false },
   error: { type: String, default: "" },
+  // Hàm bất đồng bộ (row) => Promise<string> trả về nội dung confirm khi xóa
+  deleteConfirmMessage: { type: Function, default: null },
 });
 
 const emit = defineEmits(["add", "edit", "reload"]);
@@ -189,7 +191,17 @@ const handleDelete = async (row) => {
     window.$toast?.add("Không tìm thấy ID để xóa", "error");
     return;
   }
-  if (!confirm("Bạn có chắc muốn xóa dữ liệu này không?")) return;
+  let message = "Bạn có chắc muốn xóa dữ liệu này không?";
+  if (typeof props.deleteConfirmMessage === "function") {
+    try {
+      const custom = await props.deleteConfirmMessage(row);
+      if (typeof custom === "string" && custom) message = custom;
+    } catch (e) {
+      console.log(e);
+      window.$toast?.add("Không thể kiểm tra dữ liệu liên quan", "warning");
+    }
+  }
+  if (!confirm(message)) return;
   try {
     await deleteData(props.endpoint, id);
     window.$toast?.add("Xóa thành công", "success");

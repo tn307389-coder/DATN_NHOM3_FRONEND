@@ -63,6 +63,7 @@
       id-key="mahv"
       :columns="columns"
       :rows="rows"
+      :delete-confirm-message="deleteConfirmMessage"
       @reload="loadData"
       @add="openAdd"
       @edit="openEdit"
@@ -178,6 +179,7 @@ import { computed, inject, onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
 import SimpleTablePage from "../components/common/SimpleTablePage.vue";
 import { getAll, createData, updateData } from "../services/crudService";
+import api from "../services/api";
 
 const readOnly = inject("readOnly", ref(false));
 const canAdd = computed(() => !readOnly.value);
@@ -237,6 +239,34 @@ const loadData = async () => {
   } catch (error) {
     console.log(error);
     window.$toast?.add("Không thể tải dữ liệu học viên", "error");
+  }
+};
+
+const deleteConfirmMessage = async (row) => {
+  try {
+    const res = await api.get(`/hoc-vien/${row.mahv}/so-du-lieu-lien-quan`);
+    const c = res.data || {};
+    const labels = {
+      dangKyKhoaHoc: "đăng ký khóa học",
+      thanhToan: "thanh toán",
+      hoSoHocVien: "hồ sơ",
+      diemDanh: "lần điểm danh",
+      phanCong: "phân công",
+      bangDiemThuongXuyen: "dòng điểm thường xuyên",
+      thiSatHach: "lần thi sát hạch",
+      ketQuaThi: "kết quả thi",
+      traGPLX: "trả GPLX",
+    };
+    const parts = Object.entries(c)
+      .filter(([, v]) => Number(v) > 0)
+      .map(([k, v]) => `${v} ${labels[k] || k}`);
+    if (parts.length === 0) {
+      return `Bạn có chắc muốn xóa học viên "${row.hoten || ""}" không?`;
+    }
+    return `Xóa sẽ xóa luôn: ${parts.join(", ")} của học viên "${row.hoten || ""}". Bạn có chắc không?`;
+  } catch (e) {
+    console.log(e);
+    return null;
   }
 };
 
