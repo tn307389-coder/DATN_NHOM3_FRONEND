@@ -113,6 +113,13 @@
         >
           <i class="bi bi-check-circle me-1"></i> Duyệt
         </button>
+        <button
+          v-if="row.trangthai === 'Chờ duyệt' && !readOnly"
+          class="btn btn-sm btn-danger me-2"
+          @click="reject(row)"
+        >
+          <i class="bi bi-x-circle me-1"></i> Từ chối
+        </button>
       </template>
     </SimpleTablePage>
 
@@ -436,6 +443,28 @@ const approve = async (row) => {
   } catch (error) {
     console.log(error);
     alert("Duyệt thất bại");
+  }
+};
+
+const reject = async (row) => {
+  if (!confirm(`Từ chối đăng ký của "${row.hocvien || ""}"?`)) {
+    return;
+  }
+
+  try {
+    await updateData("/dang-ky-khoa-hoc", row.madk, {
+      madk: row.madk,
+      hocVien: { mahv: Number(row.mahv) },
+      hangGPLX: row.maHang ? { id: Number(row.maHang) } : null,
+      khoaHoc: { makh: Number(row.makh) },
+      ngaydangky: row.ngaydangky,
+      trangthai: "Đã hủy",
+    });
+    alert("Đã từ chối đăng ký");
+    await loadData();
+  } catch (error) {
+    console.log(error);
+    alert("Từ chối thất bại");
   }
 };
 
