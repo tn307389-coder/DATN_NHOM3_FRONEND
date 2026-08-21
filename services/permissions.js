@@ -72,15 +72,10 @@ const nvPages = [
 
 const gvView = [
   "/gv-portal",
-  "/giao-vien",
-  "/chuong-trinh-hoc",
-  "/lop-hoc",
-  "/mon-hoc",
-  "/phong-hoc",
-  "/xe",
-  "/xe-tap-lai",
-  "/phan-cong",
   "/lich-cua-toi",
+  "/ket-qua-thi",
+  "/chuong-trinh-hoc",
+  "/thi-sat-hach",
 ];
 
 const gvEdit = [
@@ -93,22 +88,14 @@ const gvEdit = [
 
 const hvView = [
   "/hv-portal",
+  "/ho-so-cua-toi",
   "/dich-vu-hoc-vien",
+  "/lich-cua-toi",
+  "/ket-qua-thi",
+  "/bang-diem-thuong-xuyen",
   "/chuong-trinh-hoc",
   "/quan-ly-khoa-hoc",
-  "/lop-hoc",
-  "/mon-hoc",
-  "/phong-hoc",
-  "/ca-hoc",
-  "/lich-hoc",
-  "/lich-thi",
-  "/diem-danh",
-  "/phong-thi",
-  "/ca-thi",
-  "/ket-qua-thi",
   "/thi-sat-hach",
-  "/bang-diem-thuong-xuyen",
-  "/lich-cua-toi",
 ];
 
 // role -> { path: "view" | "edit" }

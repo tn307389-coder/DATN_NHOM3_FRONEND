@@ -1,8 +1,8 @@
-﻿<template>
+<template>
   <div>
     <div class="row g-3 mb-4">
       <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm rounded-4 bg-gradient-primary text-white h-100">
+        <div class="card border-0 shadow-sm rounded-4 bg-gradient-primary text-white h-100 stat-card">
           <div class="card-body d-flex align-items-center gap-3 p-3">
             <div class="rounded-3 bg-white bg-opacity-25 p-3">
               <i class="bi bi-person-workspace fs-3"></i>
@@ -15,7 +15,7 @@
         </div>
       </div>
       <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm rounded-4 bg-gradient-info text-white h-100">
+        <div class="card border-0 shadow-sm rounded-4 bg-gradient-info text-white h-100 stat-card">
           <div class="card-body d-flex align-items-center gap-3 p-3">
             <div class="rounded-3 bg-white bg-opacity-25 p-3">
               <i class="bi bi-mortarboard fs-3"></i>
@@ -28,7 +28,7 @@
         </div>
       </div>
       <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm rounded-4 bg-gradient-warning text-white h-100">
+        <div class="card border-0 shadow-sm rounded-4 bg-gradient-warning text-white h-100 stat-card">
           <div class="card-body d-flex align-items-center gap-3 p-3">
             <div class="rounded-3 bg-white bg-opacity-25 p-3">
               <i class="bi bi-gender-male fs-3"></i>
@@ -41,7 +41,7 @@
         </div>
       </div>
       <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm rounded-4 bg-gradient-pink text-white h-100">
+        <div class="card border-0 shadow-sm rounded-4 bg-gradient-pink text-white h-100 stat-card">
           <div class="card-body d-flex align-items-center gap-3 p-3">
             <div class="rounded-3 bg-white bg-opacity-25 p-3">
               <i class="bi bi-gender-female fs-3"></i>
@@ -62,11 +62,26 @@
       endpoint="/giao-vien"
       id-key="magv"
       :columns="columns"
-      :rows="rows"
+      :rows="displayRows"
+      :detail-enabled="true"
       @reload="loadData"
       @add="openAdd"
       @edit="openEdit"
     >
+      <template #filters>
+        <div class="d-flex gap-2">
+          <select v-model="hangdayFilter" class="form-select form-select-sm w-auto">
+            <option value="">Tất cả hạng dạy</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+          </select>
+        </div>
+      </template>
       <template #cell-hangday="{ value }">
         <span class="badge rounded-pill px-3 py-2" :class="hangDayBadge(value)">{{ value }}</span>
       </template>
@@ -89,6 +104,47 @@
         <button v-if="canAdd" class="btn btn-primary mt-3 rounded-pill" @click="openAdd">
           <i class="bi bi-plus-lg me-1"></i> Thêm giáo viên đầu tiên
         </button>
+      </template>
+      <template #detail-header>
+        <i class="bi bi-person-workspace me-2"></i> Hồ sơ giáo viên
+      </template>
+      <template #detail="{ row }">
+        <div class="text-center mb-4">
+          <div class="stp-avatar mx-auto">{{ initials(row.hoten) }}</div>
+          <h5 class="mt-3 mb-1">{{ row.hoten || "—" }}</h5>
+          <span
+            class="badge rounded-pill px-3 py-2"
+            :class="row.gioitinh === 'Nam' ? 'bg-primary bg-opacity-10 text-primary' : 'bg-danger bg-opacity-10 text-danger'"
+          >
+            <i class="bi" :class="row.gioitinh === 'Nam' ? 'bi-gender-male' : 'bi-gender-female'"></i>
+            {{ row.gioitinh || "—" }}
+          </span>
+          <span class="badge rounded-pill px-3 py-2 ms-1" :class="hangDayBadge(row.hangday)">
+            <i class="bi bi-mortarboard me-1"></i>{{ row.hangday || "—" }}
+          </span>
+        </div>
+        <ul class="list-group list-group-flush stp-detail-list">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-hash me-2"></i>Mã giáo viên</span>
+            <strong>{{ row.magv }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-calendar me-2"></i>Ngày sinh</span>
+            <strong>{{ formatDate(row.ngaysinh) || "—" }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-telephone me-2"></i>Số điện thoại</span>
+            <strong>{{ row.sodienthoai || "—" }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-envelope me-2"></i>Email</span>
+            <strong class="text-break">{{ row.email || "—" }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start gap-3">
+            <span class="text-muted mt-1"><i class="bi bi-geo-alt me-2"></i>Địa chỉ</span>
+            <strong class="text-end text-break">{{ row.diachi || "—" }}</strong>
+          </li>
+        </ul>
       </template>
     </SimpleTablePage>
 
@@ -295,17 +351,23 @@ const readOnly = inject("readOnly", ref(false));
 const canAdd = computed(() => !readOnly.value);
 
 const columns = [
-  { key: "magv", label: "Mã GV" },
-  { key: "hoten", label: "Họ tên" },
-  { key: "ngaysinh", label: "Ngày sinh" },
-  { key: "gioitinh", label: "Giới tính" },
+  { key: "magv", label: "Mã GV", sortable: true },
+  { key: "hoten", label: "Họ tên", sortable: true },
+  { key: "ngaysinh", label: "Ngày sinh", sortable: true },
+  { key: "gioitinh", label: "Giới tính", sortable: true },
   { key: "sodienthoai", label: "SĐT" },
   { key: "email", label: "Email" },
   { key: "diachi", label: "Địa chỉ" },
-  { key: "hangday", label: "Hạng dạy" },
+  { key: "hangday", label: "Hạng dạy", sortable: true },
 ];
 
 const rows = ref([]);
+const hangdayFilter = ref("");
+const displayRows = computed(() =>
+  hangdayFilter.value
+    ? rows.value.filter((r) => r.hangday === hangdayFilter.value)
+    : rows.value
+);
 const isEdit = ref(false);
 const saving = ref(false);
 
@@ -357,6 +419,19 @@ const hangDayBadge = (hang) => {
     E: "bg-danger bg-opacity-10 text-danger",
   };
   return map[hang] || "bg-light text-muted";
+};
+
+const initials = (name) => {
+  if (!name) return "?";
+  const parts = String(name).trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+const formatDate = (date) => {
+  if (!date) return "";
+  const d = new Date(date + "T00:00:00");
+  return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 };
 
 const loadData = async () => {
@@ -444,4 +519,22 @@ onMounted(loadData);
 .bg-gradient-warning { background: linear-gradient(135deg, #ffc107, #e0a800); }
 .bg-gradient-pink { background: linear-gradient(135deg, #d63384, #b82e72); }
 .bg-gradient-success { background: linear-gradient(135deg, #198754, #146c43); }
+
+.stat-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 0.75rem 1.5rem rgba(13, 110, 253, 0.12) !important; }
+
+.stp-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
+  box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.25);
+}
+.stp-detail-list .list-group-item { padding: 0.85rem 0.25rem; }
 </style>

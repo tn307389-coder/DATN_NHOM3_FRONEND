@@ -2,7 +2,7 @@
   <div>
     <div class="row g-3 mb-4">
       <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm rounded-4 bg-gradient-primary text-white h-100">
+        <div class="card border-0 shadow-sm rounded-4 bg-gradient-primary text-white h-100 stat-card">
           <div class="card-body d-flex align-items-center gap-3 p-3">
             <div class="rounded-3 bg-white bg-opacity-25 p-3">
               <i class="bi bi-people-fill fs-3"></i>
@@ -15,7 +15,7 @@
         </div>
       </div>
       <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm rounded-4 bg-gradient-info text-white h-100">
+        <div class="card border-0 shadow-sm rounded-4 bg-gradient-info text-white h-100 stat-card">
           <div class="card-body d-flex align-items-center gap-3 p-3">
             <div class="rounded-3 bg-white bg-opacity-25 p-3">
               <i class="bi bi-gender-male fs-3"></i>
@@ -28,7 +28,7 @@
         </div>
       </div>
       <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm rounded-4 bg-gradient-pink text-white h-100">
+        <div class="card border-0 shadow-sm rounded-4 bg-gradient-pink text-white h-100 stat-card">
           <div class="card-body d-flex align-items-center gap-3 p-3">
             <div class="rounded-3 bg-white bg-opacity-25 p-3">
               <i class="bi bi-gender-female fs-3"></i>
@@ -41,14 +41,14 @@
         </div>
       </div>
       <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm rounded-4 bg-gradient-success text-white h-100">
+        <div class="card border-0 shadow-sm rounded-4 bg-gradient-success text-white h-100 stat-card">
           <div class="card-body d-flex align-items-center gap-3 p-3">
             <div class="rounded-3 bg-white bg-opacity-25 p-3">
-              <i class="bi bi-calendar-plus fs-3"></i>
+              <i class="bi bi-calendar-check fs-3"></i>
             </div>
             <div>
-              <h3 class="mb-0 fw-bold">{{ todayCount }}</h3>
-              <small class="opacity-75">Hôm nay</small>
+              <h3 class="mb-0 fw-bold">{{ dangKyHomNay }}</h3>
+              <small class="opacity-75">Đăng ký hôm nay</small>
             </div>
           </div>
         </div>
@@ -62,12 +62,67 @@
       endpoint="/hoc-vien"
       id-key="mahv"
       :columns="columns"
-      :rows="rows"
+      :rows="displayRows"
+      :detail-enabled="true"
       :delete-confirm-message="deleteConfirmMessage"
       @reload="loadData"
       @add="openAdd"
       @edit="openEdit"
     >
+      <template #filters>
+        <div class="d-flex gap-2">
+          <select v-model="genderFilter" class="form-select form-select-sm w-auto">
+            <option value="">Tất cả giới tính</option>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+          </select>
+        </div>
+      </template>
+
+      <template #detail="{ row }">
+        <div class="text-center mb-4">
+          <div class="stp-avatar mx-auto">{{ initials(row.hoten) }}</div>
+          <h5 class="mt-3 mb-1">{{ row.hoten || "—" }}</h5>
+          <span
+            class="badge rounded-pill px-3 py-2"
+            :class="row.gioitinh === 'Nam' ? 'bg-primary bg-opacity-10 text-primary' : 'bg-danger bg-opacity-10 text-danger'"
+          >
+            <i class="bi" :class="row.gioitinh === 'Nam' ? 'bi-gender-male' : 'bi-gender-female'"></i>
+            {{ row.gioitinh || "—" }}
+          </span>
+        </div>
+        <ul class="list-group list-group-flush stp-detail-list">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-hash me-2"></i>Mã học viên</span>
+            <strong>{{ row.mahv }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-calendar me-2"></i>Ngày sinh</span>
+            <strong>{{ formatDate(row.ngaysinh) || "—" }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-card-text me-2"></i>CCCD</span>
+            <strong>{{ maskCccd(row.cccd) || "—" }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-telephone me-2"></i>Số điện thoại</span>
+            <strong>{{ row.sodienthoai || "—" }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-envelope me-2"></i>Email</span>
+            <strong class="text-break">{{ row.email || "—" }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start gap-3">
+            <span class="text-muted mt-1"><i class="bi bi-geo-alt me-2"></i>Địa chỉ</span>
+            <strong class="text-end text-break">{{ row.diachi || "—" }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-muted"><i class="bi bi-calendar-plus me-2"></i>Ngày đăng ký</span>
+            <strong>{{ formatDate(row.ngaydangky) || "—" }}</strong>
+          </li>
+        </ul>
+      </template>
+
       <template #cell-gioitinh="{ value }">
         <span v-if="value === 'Nam'" class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2">
           <i class="bi bi-gender-male me-1"></i>{{ value }}
@@ -101,7 +156,6 @@
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-
           <div class="modal-body p-4">
             <div class="row g-3">
               <div class="col-md-6">
@@ -133,7 +187,7 @@
                 <label class="form-label fw-semibold small">
                   <i class="bi bi-card-text me-1"></i> CCCD <span class="text-danger">*</span>
                 </label>
-                <input v-model="form.cccd" class="form-control" placeholder="Nhập số CCCD" :class="errors.cccd ? 'is-invalid' : ''" />
+                <input v-model="form.cccd" class="form-control" placeholder="Nhập CCCD" :class="errors.cccd ? 'is-invalid' : ''" />
                 <div v-if="errors.cccd" class="invalid-feedback">{{ errors.cccd }}</div>
               </div>
               <div class="col-md-6">
@@ -150,6 +204,13 @@
                 <input v-model="form.email" type="email" class="form-control" placeholder="Nhập email" :class="errors.email ? 'is-invalid' : ''" />
                 <div v-if="errors.email" class="invalid-feedback">{{ errors.email }}</div>
               </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">
+                  <i class="bi bi-calendar-plus me-1"></i> Ngày đăng ký <span class="text-danger">*</span>
+                </label>
+                <input v-model="form.ngaydangky" type="date" class="form-control" :class="errors.ngaydangky ? 'is-invalid' : ''" />
+                <div v-if="errors.ngaydangky" class="invalid-feedback">{{ errors.ngaydangky }}</div>
+              </div>
               <div class="col-12">
                 <label class="form-label fw-semibold small">
                   <i class="bi bi-geo-alt me-1"></i> Địa chỉ <span class="text-danger">*</span>
@@ -159,7 +220,6 @@
               </div>
             </div>
           </div>
-
           <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
             <button class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
             <button class="btn rounded-pill px-4" :class="isEdit ? 'btn-warning' : 'btn-primary'" @click="saveData" :disabled="saving">
@@ -185,10 +245,10 @@ const readOnly = inject("readOnly", ref(false));
 const canAdd = computed(() => !readOnly.value);
 
 const columns = [
-  { key: "mahv", label: "Mã HV" },
-  { key: "hoten", label: "Họ tên" },
-  { key: "ngaysinh", label: "Ngày sinh" },
-  { key: "gioitinh", label: "Giới tính" },
+  { key: "mahv", label: "Mã HV", sortable: true },
+  { key: "hoten", label: "Họ tên", sortable: true },
+  { key: "ngaysinh", label: "Ngày sinh", sortable: true },
+  { key: "gioitinh", label: "Giới tính", sortable: true },
   { key: "cccd", label: "CCCD" },
   { key: "sodienthoai", label: "SĐT" },
   { key: "email", label: "Email" },
@@ -196,12 +256,20 @@ const columns = [
 ];
 
 const rows = ref([]);
+const genderFilter = ref("");
+const displayRows = computed(() =>
+  genderFilter.value
+    ? rows.value.filter((r) => r.gioitinh === genderFilter.value)
+    : rows.value
+);
 const isEdit = ref(false);
 const saving = ref(false);
 
-const form = ref({ mahv: null, hoten: "", ngaysinh: "", gioitinh: "", cccd: "", sodienthoai: "", email: "", diachi: "" });
+const form = ref({
+  mahv: null, hoten: "", ngaysinh: "", gioitinh: "", cccd: "",
+  sodienthoai: "", email: "", diachi: "", ngaydangky: "",
+});
 const errors = ref({});
-
 const requiredFields = [
   { key: "hoten", label: "Họ tên" },
   { key: "ngaysinh", label: "Ngày sinh" },
@@ -209,21 +277,27 @@ const requiredFields = [
   { key: "cccd", label: "CCCD" },
   { key: "sodienthoai", label: "Số điện thoại" },
   { key: "email", label: "Email" },
+  { key: "ngaydangky", label: "Ngày đăng ký" },
   { key: "diachi", label: "Địa chỉ" },
 ];
 
 const tongHocVien = computed(() => rows.value.length);
 const maleCount = computed(() => rows.value.filter((r) => r.gioitinh === "Nam").length);
 const femaleCount = computed(() => rows.value.filter((r) => r.gioitinh === "Nữ").length);
-const todayCount = computed(() => {
-  const today = new Date().toISOString().slice(0, 10);
-  return rows.value.filter((r) => r.ngaydangky === today).length;
-});
+const today = new Date().toISOString().slice(0, 10);
+const dangKyHomNay = computed(() => rows.value.filter((r) => r.ngaydangky === today).length);
 
 const formatDate = (date) => {
   if (!date) return "";
   const d = new Date(date + "T00:00:00");
   return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+};
+
+const initials = (name) => {
+  if (!name) return "?";
+  const parts = String(name).trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
 const maskCccd = (cccd) => {
@@ -261,17 +335,17 @@ const deleteConfirmMessage = async (row) => {
       .filter(([, v]) => Number(v) > 0)
       .map(([k, v]) => `${v} ${labels[k] || k}`);
     if (parts.length === 0) {
-      return `Bạn có chắc muốn xóa học viên "${row.hoten || ""}" không?`;
+      return `Bạn có chắc muốn xóa học viên "${row.hoten}" không?`;
     }
-    return `Xóa sẽ xóa luôn: ${parts.join(", ")} của học viên "${row.hoten || ""}". Bạn có chắc không?`;
+    return `Học viên "${row.hoten}" đang liên kết với: ${parts.join(", ")}.\nBạn có chắc muốn xóa?`;
   } catch (e) {
     console.log(e);
-    return null;
+    return `Bạn có chắc muốn xóa học viên "${row.hoten}" không?`;
   }
 };
 
 const resetForm = () => {
-  form.value = { mahv: null, hoten: "", ngaysinh: "", gioitinh: "", cccd: "", sodienthoai: "", email: "", diachi: "" };
+  form.value = { mahv: null, hoten: "", ngaysinh: "", gioitinh: "", cccd: "", sodienthoai: "", email: "", diachi: "", ngaydangky: "" };
   errors.value = {};
 };
 
@@ -283,6 +357,8 @@ const validate = () => {
   if (form.value.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) errs.email = "Email không hợp lệ";
   if (form.value.sodienthoai && !/^[0-9]{10,11}$/.test(form.value.sodienthoai.replace(/\D/g, "")))
     errs.sodienthoai = "Số điện thoại không hợp lệ";
+  if (form.value.cccd && !/^[0-9]{9,12}$/.test(form.value.cccd.replace(/\D/g, "")))
+    errs.cccd = "CCCD không hợp lệ";
   errors.value = errs;
   return Object.keys(errs).length === 0;
 };
@@ -333,4 +409,22 @@ onMounted(loadData);
 .bg-gradient-info { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
 .bg-gradient-pink { background: linear-gradient(135deg, #d63384, #b82e72); }
 .bg-gradient-success { background: linear-gradient(135deg, #198754, #146c43); }
+
+.stat-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 0.75rem 1.5rem rgba(13, 110, 253, 0.12) !important; }
+
+.stp-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
+  box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.25);
+}
+.stp-detail-list .list-group-item { padding: 0.85rem 0.25rem; }
 </style>
